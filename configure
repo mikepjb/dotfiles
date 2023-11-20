@@ -1,0 +1,186 @@
+#!/bin/bash
+
+set +e
+
+# utility functions
+
+join_by() { local IFS="$1"; shift; echo "$*"; }
+
+# Configuration script for setting up your Linux work environment.
+# Aimed at Debian but should also be able to setup the bare minimal install elsewhere.
+
+# step 0. where are we?
+
+## are we on debian? check for apt
+## are we using bash? (should be because of bin/bash script start)
+
+# step 1. check available tools
+
+tools=( # core tools
+  # vim # vim.tiny on debian but we want full
+  gvim
+  neovim
+  tmux
+  bash
+  make
+  curl
+  wget # already available on debian
+)
+
+remove_tools=(
+  rustc # found on debian but we want to use rustup
+)
+
+sudo apt install $(join_by ' ' "${tools[@]}")
+
+# to build with meson:
+# `meson setup builddir`
+# `meson compile -C builddir`
+# `meson install -C builddir`
+
+build_tools=(
+  meson
+  pkg-config
+  cmake
+  python-is-python3 # just aliases python3 as python
+  python3-pip
+  libgmime-3.0-dev # fixing jhbuild
+  libecal2.0-dev # building gnome-shell
+  valac # to install gcr4, as dep of gnome-shell
+  gi-docgen # to install gcr4, as dep of gnome-shell
+)
+
+extra_system_tools=(
+  bash_completion
+  htop # more graphical cli for top
+  neofetch # standard way to inspect high level OS details
+)
+
+# tools for desktop systems
+extra_tools=(
+  telegram-desktop
+  piper # for configuring mice on linux
+  libvirt-clients # used by gnome-boxes to detect virtualisation extensions that are enabled, will complain otherwise that they are disabled.
+  apt-file # debian tool for listing files from package with `apt-file list package_name`
+  expect # has unbuffer command, useful for piping coloured input into `less -R`
+)
+
+external_tools=(
+  discord
+)
+
+# step 2. keyboard repeat rate
+#
+
+# step 3. configure cli tools
+
+# alias x='tmux attach -t vty || tmux new -s vty'
+
+vim_tools=(
+  tpope/vim-fugitive
+  tpope/vim-fireplace
+  leafgarland/typescript-vim
+  maxmellon/vim-jsx-pretty
+)
+
+vim_packages() {
+  # download fuzzy finder
+  if [ ! -f $HOME/.local/bin/selecta ]; then
+    mkdir -p $HOME/.local/bin
+    wget -O $HOME/.local/bin/selecta https://raw.githubusercontent.com/garybernhardt/selecta/master/selecta
+  fi
+
+  mkdir -p $HOME/.vim/pack/mikepjb/start
+  cd $HOME/.vim/pack/mikepjb/start
+  for p in $(join_by ' ' "${vim_tools[@]}"); do
+    n=$(basename -- $p)
+    # option to reinstall? otherwise skip if name matched
+    # rm -rf $n # remove older install if exists
+    if [ ! -d "$n" ]; then
+      wget -O $n.zip https://github.com/$p/zipball/master
+      unzip $n.zip
+      rm $n.zip
+      mv $(find . -type d -name "*$n*") $n
+    fi
+  done
+  cd -
+}
+
+vim_packages
+
+cat >$HOME/.vimrc <<EOL
+set nocompatible hidden history=10000 expandtab tabstop=2 shiftwidth=2 softtabstop=2
+set autoindent laststatus=2 showmatch incsearch hlsearch ignorecase smartcase cmdheight=1
+syntax on
+filetype indent on " try indenting bash file without it (check :verbose set indentexpr?)
+EOL
+
+mkdir -p $HOME/.config/tmux
+cat >$HOME/.config/tmux/tmux.conf <<EOL
+# Generated with mikepjb/configure
+set -g status-position bottom
+set -g history-limit 100000
+set -g base-index 1
+set -g renumber-windows on
+set -g visual-activity on
+set-window-option -g alternate-screen on
+set -g status on
+unbind C-b; set -g prefix M-\;
+unbind r ; bind r source-file ~/.tmux.conf \; display "Tmux Reloaded!"
+unbind v ; bind v split-window -c "#{pane_current_path}"
+# unbind = ; bind = command-prompt "new-window -c \"#{pane_current_path}\" -n '%%'"
+unbind = ; bind = new-window -c "#{pane_current_path}"
+unbind s ; bind s split-window -h -c "#{pane_current_path}"
+unbind x ; bind x kill-pane
+unbind X ; bind X confirm-before kill-session
+unbind ] ; bind ] command-prompt "rename-window '%%'"
+bind -n M-O last-window
+bind -n M-o select-pane -t :.+
+set -g status-left ""
+set -g status-right "#[fg=colour3]//#[fg=default] %d/%m/%y %I:%M"
+set -gq utf-8 on;
+set -g mouse on;
+set -g set-clipboard external;
+set -g status-style fg=default,bg=default;
+set -g pane-border-style fg=default,bg=default;
+set -g pane-active-border-style fg=default,bg=default;
+setw -g window-status-current-style fg=colour3,bg=default;
+set -g message-style "fg=colour5,bg=default"
+set -g terminal-overrides 'xterm*:smcup@:rmcup@' # fixes scrolling acting like C-n/p un tmux under MobaXterm
+EOL
+
+git_config() {
+  echo 'Configuring git..'
+  git config --global --replace-all core.editor 'vim'
+  git config --global --replace-all core.autocrlf false
+  git config --global --replace-all alias.aa 'add --all'
+  git config --global --replace-all alias.br 'branch --sort=committerdate'
+  git config --global --replace-all alias.st 'status'
+  git config --global --replace-all alias.count 'shortlog -sn'
+  git config --global --replace-all alias.ff 'pull --ff-only'
+  git config --global --replace-all alias.co 'checkout'
+  git config --global --replace-all alias.ci 'commit --verbose'
+  git config --global --replace-all alias.di 'diff'
+  git config --global --replace-all alias.dc 'diff --cached'
+  git config --global --replace-all alias.dd 'diff --stat origin/develop HEAD'
+  git config --global --replace-all alias.dn 'diff --name-status'
+  git config --global --replace-all alias.list 'config --global --list'
+  git config --global --replace-all alias.amend 'commit --amend'
+  git config --global --replace-all alias.ffa 'fetch --all && git rebase origin/master'
+  git config --global --replace-all alias.push-new 'push -u origin HEAD'
+  git config --global --replace-all alias.ra "log --abbrev-commit --pretty=format:'%<(7)%C(yellow)%h %Cgreen%<(15)%cr%C(bold cyan)%<(17)<%an>%C(red)%d %Creset %s'"
+  printf "${WARN}Don't forget to set your user.name and user.email with git config --global user.name = <etc>${NC}\n"
+}
+
+git_config
+
+# ?? how to in gnome/wayland?
+
+# step x. configure virtualisation
+# step xa. caps as control (gnome tweaks, cli?)
+# step xb. tap to click (regular settings mousepad)
+# step xc. disable power button (main settings, cli)
+# TODO issue, after disconnecting from thunderbolt closed lid, black screen persists on display when laptop opened.
+
+# EDITOR=vim virsh edit win11
+# under vram, double the 3 values and save - it seems like you don't have enough memory by default to go 1440p ultrawidescreen.
