@@ -140,10 +140,41 @@ vim_packages
 cat >$HOME/.vimrc <<EOL
 set nocompatible hidden history=10000 expandtab tabstop=2 shiftwidth=2 softtabstop=2
 set autoindent laststatus=2 showmatch incsearch hlsearch ignorecase smartcase cmdheight=1
+set mouse=a ignorecase smartcase switchbuf=useopen showtabline=2 scrolloff=3
+set nobackup nowritebackup backupdir=~/.local/vim-tmp,/tmp directory=~/.local/vim-tmp,/tmp
+set backspace=indent,eol,start showcmd
 syntax on
-filetype indent on " try indenting bash file without it (check :verbose set indentexpr?)
+filetype plugin indent on " try indenting bash file without it (check :verbose set indentexpr?)
+set wildmode=longest,list
+set wildmenu
+set completeopt=menu,preview
+set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
+set timeout timeoutlen=1000 ttimeoutlen=100
+set modeline modelines=3 foldmethod=manual nofoldenable nojoinspaces diffopt=vertical
+set signcolumn=no shm+=I
+set clipboard=unnamed,unnamedplus
 
+" Use persistent undo history.
+if !isdirectory("/tmp/.vim-undo-dir")
+    call mkdir("/tmp/.vim-undo-dir", "", 0700)
+endif
+set undodir=/tmp/.vim-undo-dir
+set undofile
+
+let g:sh_noisk=1 " stop vim messing with iskeyword in shell files.
+let g:omni_sql_no_default_maps = 1 " do not map C-c in SQL files please.
 let mapleader= ' '
+
+nnoremap <c-j> <c-w>j
+nnoremap <c-k> <c-w>k
+nnoremap <c-h> <c-w>h
+nnoremap <c-l> <c-w>l
+" Insert a hash rocket with <c-l>
+imap <c-l> <space>=><space>
+" Can't be bothered to understand ESC vs <c-c> in insert mode
+inoremap <c-c> <esc>
+" <leader><leader> is more convenient than <c-^>
+nnoremap <leader><leader> <c-^>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Selecta Mappings
@@ -203,9 +234,6 @@ export XDG_DATA_HOME=$HOME/.local/share
 export XDG_CACHE_HOME=$HOME/.local/cache
 export XDG_STATE_HOME=$HOME/.local/state
 export XDG_CONFIG_HOME=$HOME/.config
-export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
-export XINITRC="$XDG_CONFIG_HOME"/X11/xinitrc
-export XSERVERRC="$XDG_CONFIG_HOME"/X11/xserverrc
 export EDITOR=vim
 export PATH=$(join_by : "${path_dirs[@]}")
 export GOPATH=$HOME/go
@@ -214,6 +242,8 @@ export PAGER='less -S'
 export SSH_AUTH_SOCK=$HOME/.ssh/ssh-agent.socket
 export NPM_CONFIG_PREFIX=$HOME/.config/npm
 export N_PREFIX=$HOME/.config/n
+export LSCOLORS="ExGxBxDxCxEgEdxbxgxcxd"
+export TERM='xterm-color'
 
 alias vi='vim' # just incase
 alias x='tmux attach -t vty || tmux new -s vty'
@@ -248,6 +278,39 @@ PROMPT_COMMAND='PS1="\W(\$(git_state)) \$(jobs_marker) "'
 if [ -f "$HOME/.bashrc.local" ]; then
   source "$HOME/.bashrc.local"
 fi
+EOL
+
+mkdir -p $HOME/.config/tmux
+cat >$HOME/.config/tmux/tmux.conf <<EOL
+set -g status-position bottom
+set -g history-limit 100000
+set -g base-index 1
+set -g renumber-windows on
+set -g visual-activity on
+set-window-option -g alternate-screen on
+set -g status on
+unbind C-b; set -g prefix M-\;
+unbind r ; bind r source-file ~/.tmux.conf \; display "Tmux Reloaded!"
+unbind v ; bind v split-window -c "#{pane_current_path}"
+# unbind = ; bind = command-prompt "new-window -c \"#{pane_current_path}\" -n '%%'"
+unbind = ; bind = new-window -c "#{pane_current_path}"
+unbind s ; bind s split-window -h -c "#{pane_current_path}"
+unbind x ; bind x kill-pane
+unbind X ; bind X confirm-before kill-session
+unbind ] ; bind ] command-prompt "rename-window '%%'"
+bind -n M-O last-window
+bind -n M-o select-pane -t :.+
+set -g status-left ""
+set -g status-right "#[fg=colour3]//#[fg=default] %d/%m/%y %I:%M"
+set -gq utf-8 on;
+set -g mouse on;
+set -g set-clipboard external;
+set -g status-style fg=default,bg=default;
+set -g pane-border-style fg=default,bg=default;
+set -g pane-active-border-style fg=default,bg=default;
+setw -g window-status-current-style fg=colour3,bg=default;
+set -g message-style "fg=colour5,bg=default"
+set -g terminal-overrides 'xterm*:smcup@:rmcup@' # fixes scrolling acting like C-n/p un tmux under MobaXterm
 EOL
 
 git_config() {
