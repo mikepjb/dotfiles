@@ -1,24 +1,29 @@
 #!/bin/bash
+# Configuration script for setting up your Linux work environment.
+# Aimed at Debian but should also be able to setup the bare minimal install
+# elsewhere. Once you run this, the script should be available on your path
+# under `configure`, you can edit this with `viw configure` from anywhere.
 
 set +e
 
-# utility functions
+############################################
+# 1. setup data                            #
+############################################
 
-join_by() { local IFS="$1"; shift; echo "$*"; }
+package_manager="none"
 
-# Configuration script for setting up your Linux work environment.
-# Aimed at Debian but should also be able to setup the bare minimal install elsewhere.
-
-# step 0. where are we?
-
-## are we on debian? check for apt
-## are we using bash? (should be because of bin/bash script start)
-
-# step 1. check available tools
+path_dirs=(
+  $HOME/src/configure # configure repo home
+  $HOME/.cargo/bin # rust
+  $HOME/.local/bin # local scripts
+  $HOME/.config/npm/bin # nodejs
+  /usr/local/bin
+  /usr/bin
+  /bin
+)
 
 tools=( # core tools
-  # vim # vim.tiny on debian but we want full
-  gvim
+  vim-gtk3 # GUI vim, I use this in the terminal cli for the +clipboard integration.
   neovim
   tmux
   bash
@@ -31,23 +36,12 @@ remove_tools=(
   rustc # found on debian but we want to use rustup
 )
 
-sudo apt install $(join_by ' ' "${tools[@]}")
-
-# to build with meson:
-# `meson setup builddir`
-# `meson compile -C builddir`
-# `meson install -C builddir`
-
 build_tools=(
   meson
   pkg-config
   cmake
   python-is-python3 # just aliases python3 as python
   python3-pip
-  libgmime-3.0-dev # fixing jhbuild
-  libecal2.0-dev # building gnome-shell
-  valac # to install gcr4, as dep of gnome-shell
-  gi-docgen # to install gcr4, as dep of gnome-shell
 )
 
 extra_system_tools=(
@@ -63,18 +57,12 @@ extra_tools=(
   libvirt-clients # used by gnome-boxes to detect virtualisation extensions that are enabled, will complain otherwise that they are disabled.
   apt-file # debian tool for listing files from package with `apt-file list package_name`
   expect # has unbuffer command, useful for piping coloured input into `less -R`
+  yt-dlp # Youtube downloading tool
 )
 
 external_tools=(
   discord
 )
-
-# step 2. keyboard repeat rate
-#
-
-# step 3. configure cli tools
-
-# alias x='tmux attach -t vty || tmux new -s vty'
 
 vim_tools=(
   tpope/vim-fugitive
@@ -82,6 +70,38 @@ vim_tools=(
   leafgarland/typescript-vim
   maxmellon/vim-jsx-pretty
 )
+
+############################################
+# 2. utility functions                     #
+############################################
+
+join_by() { local IFS="$1"; shift; echo "$*"; }
+ 
+yes_or_no() {
+    while true; do
+        read -p "$* [y/n]: " yn
+        case $yn in
+            [Yy]*) return 0  ;;
+            [Nn]*) echo "skipping step, continuing script.." ; return  1 ;;
+        esac
+    done
+}
+
+set_package_manager() {
+  if [[ $(command -v apt) ]]; then
+    package_manager="apt" # debian based distro
+    return 0
+  elif [[ $(command -v dnf) ]]; then
+    package_manager="dnf" # redhat based distro
+    return 0
+  fi
+  return 1
+}
+
+install_packages() {
+  echo "sudo $package_manager install $(join_by ' ' $@)"
+  sudo $package_manager install $(join_by ' ' "$@")
+}
 
 vim_packages() {
   # download fuzzy finder
@@ -106,6 +126,14 @@ vim_packages() {
   done
   cd -
 }
+
+############################################
+# 3. configuration steps                   #
+############################################
+
+if set_package_manager; then
+  yes_or_no "Install packages?" && install_packages ${tools[@]}
+fi
 
 vim_packages
 
@@ -166,38 +194,60 @@ nnoremap <leader>v :call SelectaFile(expand('%:h'), "*", ":view")<cr>
 
 EOL
 
-mkdir -p $HOME/.config/tmux
-cat >$HOME/.config/tmux/tmux.conf <<EOL
-# Generated with mikepjb/configure
-set -g status-position bottom
-set -g history-limit 100000
-set -g base-index 1
-set -g renumber-windows on
-set -g visual-activity on
-set-window-option -g alternate-screen on
-set -g status on
-unbind C-b; set -g prefix M-\;
-unbind r ; bind r source-file ~/.tmux.conf \; display "Tmux Reloaded!"
-unbind v ; bind v split-window -c "#{pane_current_path}"
-# unbind = ; bind = command-prompt "new-window -c \"#{pane_current_path}\" -n '%%'"
-unbind = ; bind = new-window -c "#{pane_current_path}"
-unbind s ; bind s split-window -h -c "#{pane_current_path}"
-unbind x ; bind x kill-pane
-unbind X ; bind X confirm-before kill-session
-unbind ] ; bind ] command-prompt "rename-window '%%'"
-bind -n M-O last-window
-bind -n M-o select-pane -t :.+
-set -g status-left ""
-set -g status-right "#[fg=colour3]//#[fg=default] %d/%m/%y %I:%M"
-set -gq utf-8 on;
-set -g mouse on;
-set -g set-clipboard external;
-set -g status-style fg=default,bg=default;
-set -g pane-border-style fg=default,bg=default;
-set -g pane-active-border-style fg=default,bg=default;
-setw -g window-status-current-style fg=colour3,bg=default;
-set -g message-style "fg=colour5,bg=default"
-set -g terminal-overrides 'xterm*:smcup@:rmcup@' # fixes scrolling acting like C-n/p un tmux under MobaXterm
+cat >$HOME/.bashrc <<EOL
+[ -f /etc/bash_completion ] && . /etc/bash_completion
+[ -r /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
+[[ $- =~ i ]] && stty -ixoff -ixon # Disable CTRL-S and CTRL-Q
+ 
+export XDG_DATA_HOME=$HOME/.local/share
+export XDG_CACHE_HOME=$HOME/.local/cache
+export XDG_STATE_HOME=$HOME/.local/state
+export XDG_CONFIG_HOME=$HOME/.config
+export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
+export XINITRC="$XDG_CONFIG_HOME"/X11/xinitrc
+export XSERVERRC="$XDG_CONFIG_HOME"/X11/xserverrc
+export EDITOR=vim
+export PATH=$(join_by : "${path_dirs[@]}")
+export GOPATH=$HOME/go
+export CDPATH=".:$HOME/src"
+export PAGER='less -S'
+export SSH_AUTH_SOCK=$HOME/.ssh/ssh-agent.socket
+export NPM_CONFIG_PREFIX=$HOME/.config/npm
+export N_PREFIX=$HOME/.config/n
+
+alias vi='vim' # just incase
+alias x='tmux attach -t vty || tmux new -s vty'
+alias gr='cd $(git rev-parse --show-toplevel || echo ".")'
+alias ..='cd ..'
+alias xclip='xclip -sel clip'
+alias jv="jq -C | less -R"
+alias nr='npm run'
+
+viw() { vi \`which "\$1"\`; }
+git_branch() { echo -e "\$(git branch 2>/dev/null| sed -n '/^\*/s/^\* //p')"; }
+
+git_state() {
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+        echo -ne "\$(git_branch)"
+    else
+        echo -ne "!"
+    fi
+}
+
+jobs_marker() {
+  local n=$(jobs | wc -l)
+  ((n)) && echo -n '&' || echo -n '$'
+}
+
+inside_git_repo() {
+  git rev-parse --is-inside-work-tree > /dev/null 2>&1
+}
+
+PROMPT_COMMAND='PS1="\W(\$(git_state)) \$(jobs_marker) "'
+
+if [ -f "$HOME/.bashrc.local" ]; then
+  source "$HOME/.bashrc.local"
+fi
 EOL
 
 git_config() {
@@ -231,6 +281,8 @@ git_config
 # step xa. caps as control (gnome tweaks, cli?)
 # step xb. tap to click (regular settings mousepad)
 # step xc. disable power button (main settings, cli)
+# step xd. clean packages up:
+#   - remove gnome games
 # TODO issue, after disconnecting from thunderbolt closed lid, black screen persists on display when laptop opened.
 
 # EDITOR=vim virsh edit win11
