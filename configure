@@ -140,7 +140,8 @@ vim_packages
 cat >$HOME/.vimrc <<EOL
 set nocompatible hidden history=10000 expandtab tabstop=2 shiftwidth=2 softtabstop=2
 set autoindent laststatus=2 showmatch incsearch hlsearch ignorecase smartcase cmdheight=1
-set mouse=a ignorecase smartcase switchbuf=useopen showtabline=2 scrolloff=3
+set mouse=a ignorecase smartcase switchbuf=useopen showtabline=2 
+setglobal scrolloff=3 sidescrolloff=5 lazyredraw
 set nobackup nowritebackup backupdir=~/.local/vim-tmp,/tmp directory=~/.local/vim-tmp,/tmp
 set backspace=indent,eol,start showcmd
 syntax on
@@ -165,16 +166,16 @@ let g:sh_noisk=1 " stop vim messing with iskeyword in shell files.
 let g:omni_sql_no_default_maps = 1 " do not map C-c in SQL files please.
 let mapleader= ' '
 
-nnoremap <c-j> <c-w>j
-nnoremap <c-k> <c-w>k
-nnoremap <c-h> <c-w>h
-nnoremap <c-l> <c-w>l
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-h> <C-w>h
+nnoremap <C-l> <C-w>l
+nnoremap <C-g> :noh<CR><C-g>
 " Insert a hash rocket with <c-l>
-imap <c-l> <space>=><space>
+imap <C-l> <space>=><space>
 " Can't be bothered to understand ESC vs <c-c> in insert mode
-inoremap <c-c> <esc>
-" <leader><leader> is more convenient than <c-^>
-nnoremap <leader><leader> <c-^>
+inoremap <C-c> <esc>
+nnoremap <Tab> <C-^>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Selecta Mappings
