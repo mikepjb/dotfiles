@@ -166,6 +166,7 @@ let g:sh_noisk=1 " stop vim messing with iskeyword in shell files.
 let g:omni_sql_no_default_maps = 1 " do not map C-c in SQL files please.
 let mapleader= ' '
 
+nnoremap Y y$
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-h> <C-w>h
@@ -290,6 +291,7 @@ set -g renumber-windows on
 set -g visual-activity on
 set-window-option -g alternate-screen on
 set -g status on
+set -g lock-after-time 0
 unbind C-b; set -g prefix M-\;
 unbind r ; bind r source-file ~/.tmux.conf \; display "Tmux Reloaded!"
 unbind v ; bind v split-window -c "#{pane_current_path}"

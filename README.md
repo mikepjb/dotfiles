@@ -10,6 +10,8 @@ Download:
 
 ## Color Scheme
 
+_No script used for this, it's usually a one time setting change and each terminal stores this information quite differently._
+
 ### Hex
 ```
 foreground:     #ffffff
