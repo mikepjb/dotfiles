@@ -3,6 +3,12 @@
 # Aimed at Debian but should also be able to setup the bare minimal install
 # elsewhere. Once you run this, the script should be available on your path
 # under `configure`, you can edit this with `viw configure` from anywhere.
+#
+# This development configuration is aimed for single terminal development (e.g
+# avoiding using multiple splits/windows in tmux) in an effort forcing
+# optimisation of development workflow by avoiding switching lots and in
+# particular switching to viewing the entire output of a running development
+# server as incremental development (running single tests on issues) is faster.
 
 set +e
 
@@ -58,6 +64,7 @@ extra_tools=(
   apt-file # debian tool for listing files from package with `apt-file list package_name`
   expect # has unbuffer command, useful for piping coloured input into `less -R`
   yt-dlp # Youtube downloading tool
+  obs-studio # Streaming software
 )
 
 external_tools=(
@@ -69,6 +76,7 @@ vim_tools=(
   tpope/vim-fireplace
   leafgarland/typescript-vim
   maxmellon/vim-jsx-pretty
+  mikepjb/vim-lotus
 )
 
 ############################################
@@ -141,9 +149,9 @@ cat >$HOME/.vimrc <<EOL
 set nocompatible hidden history=10000 expandtab tabstop=2 shiftwidth=2 softtabstop=2
 set autoindent laststatus=2 showmatch incsearch hlsearch ignorecase smartcase cmdheight=1
 set mouse=a ignorecase smartcase switchbuf=useopen showtabline=2 
-setglobal scrolloff=3 sidescrolloff=5 lazyredraw
+setglobal scrolloff=3 sidescrolloff=5 lazyredraw gdefault
 set nobackup nowritebackup backupdir=~/.local/vim-tmp,/tmp directory=~/.local/vim-tmp,/tmp
-set backspace=indent,eol,start showcmd
+set backspace=indent,eol,start showcmd nu cul spell
 syntax on
 filetype plugin indent on " try indenting bash file without it (check :verbose set indentexpr?)
 set wildmode=longest,list
@@ -154,6 +162,7 @@ set timeout timeoutlen=1000 ttimeoutlen=100
 set modeline modelines=3 foldmethod=manual nofoldenable nojoinspaces diffopt=vertical
 set signcolumn=no shm+=I
 set clipboard=unnamed,unnamedplus
+set t_Co=256
 
 " Use persistent undo history.
 if !isdirectory("/tmp/.vim-undo-dir")
@@ -161,6 +170,13 @@ if !isdirectory("/tmp/.vim-undo-dir")
 endif
 set undodir=/tmp/.vim-undo-dir
 set undofile
+
+try
+  colorscheme lotus
+catch /^Vim\%((\a\+)\)\=:E185/
+  colorscheme default
+  set background=dark
+endtry
 
 let g:sh_noisk=1 " stop vim messing with iskeyword in shell files.
 let g:omni_sql_no_default_maps = 1 " do not map C-c in SQL files please.
@@ -177,6 +193,8 @@ imap <C-l> <space>=><space>
 " Can't be bothered to understand ESC vs <c-c> in insert mode
 inoremap <C-c> <esc>
 nnoremap <Tab> <C-^>
+nnoremap <leader>n :tabnew ~/.notes/index.md<cr>
+nnoremap <leader>i :tabnew ~/src/configure/configure<cr>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Selecta Mappings
@@ -245,7 +263,7 @@ export SSH_AUTH_SOCK=$HOME/.ssh/ssh-agent.socket
 export NPM_CONFIG_PREFIX=$HOME/.config/npm
 export N_PREFIX=$HOME/.config/n
 export LSCOLORS="ExGxBxDxCxEgEdxbxgxcxd"
-export TERM='xterm-color'
+export TERM='xterm-256color'
 
 alias vi='vim' # just incase
 alias x='tmux attach -t vty || tmux new -s vty'
@@ -290,10 +308,9 @@ set -g base-index 1
 set -g renumber-windows on
 set -g visual-activity on
 set-window-option -g alternate-screen on
-set -g status on
+set -g status off
 set -g lock-after-time 0
 unbind C-b; set -g prefix M-\;
-unbind r ; bind r source-file ~/.tmux.conf \; display "Tmux Reloaded!"
 unbind v ; bind v split-window -c "#{pane_current_path}"
 # unbind = ; bind = command-prompt "new-window -c \"#{pane_current_path}\" -n '%%'"
 unbind = ; bind = new-window -c "#{pane_current_path}"
@@ -320,6 +337,7 @@ git_config() {
   echo 'Configuring git..'
   git config --global --replace-all core.editor 'vim'
   git config --global --replace-all core.autocrlf false
+  git config --global --replace-all init.defaultBranch 'main'
   git config --global --replace-all alias.aa 'add --all'
   git config --global --replace-all alias.br 'branch --sort=committerdate'
   git config --global --replace-all alias.st 'status'
@@ -349,6 +367,9 @@ git_config
 # step xc. disable power button (main settings, cli)
 # step xd. clean packages up:
 #   - remove gnome games
+# step xe. install firmware-realtek firmware-misc-nonfree (and ucode?)
+#   - when compiling the kernel I had some warning pop up and it was just some nonfree software missing.
+#   - run `update-initramfs -u` to recompile the Initial RAM filesystem (startup process for linux)
 # TODO issue, after disconnecting from thunderbolt closed lid, black screen persists on display when laptop opened.
 
 # EDITOR=vim virsh edit win11
