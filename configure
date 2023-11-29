@@ -58,6 +58,8 @@ extra_system_tools=(
 
 # tools for desktop systems
 extra_tools=(
+  gimp
+  inkscape
   telegram-desktop
   piper # for configuring mice on linux
   libvirt-clients # used by gnome-boxes to detect virtualisation extensions that are enabled, will complain otherwise that they are disabled.
@@ -172,6 +174,7 @@ set undodir=/tmp/.vim-undo-dir
 set undofile
 
 try
+  set background=dark
   colorscheme lotus
 catch /^Vim\%((\a\+)\)\=:E185/
   colorscheme default
@@ -195,6 +198,7 @@ inoremap <C-c> <esc>
 nnoremap <Tab> <C-^>
 nnoremap <leader>n :tabnew ~/.notes/index.md<cr>
 nnoremap <leader>i :tabnew ~/src/configure/configure<cr>
+nnoremap <leader>v :ToggleBG<cr>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Selecta Mappings
@@ -241,7 +245,6 @@ endfunction
 nnoremap <leader>f :call SelectaFile(".", "*", ":edit")<cr>
 nnoremap <leader>F :call SelectaFileContents()<cr>
 nnoremap <leader>e :call SelectaFile(expand('%:h'), "*", ":edit")<cr>
-nnoremap <leader>v :call SelectaFile(expand('%:h'), "*", ":view")<cr>
 
 EOL
 
@@ -357,12 +360,22 @@ git_config() {
   printf "${WARN}Don't forget to set your user.name and user.email with git config --global user.name = <etc>${NC}\n"
 }
 
+gnome_config() {
+  echo 'Setting gnome configuration...'
+  # Set caps lock as control on Gnome Wayland
+  gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier']"
+}
+
 git_config
 
-# ?? how to in gnome/wayland?
+if [[ $(command -v gnome-shell) ]]; then
+  gnome_config()
+fi
 
-# step x. configure virtualisation
-# step xa. caps as control (gnome tweaks, cli?)
+# ?? How to in gnome/wayland?
+
+# step x. Configure virtualisation
+# step xa. Caps as control (gnome tweaks, cli?)
 # step xb. tap to click (regular settings mousepad)
 # step xc. disable power button (main settings, cli)
 # step xd. clean packages up:
