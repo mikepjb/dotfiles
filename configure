@@ -67,6 +67,7 @@ extra_tools=(
   expect # has unbuffer command, useful for piping coloured input into `less -R`
   yt-dlp # Youtube downloading tool
   obs-studio # Streaming software
+  libguestfs-tools # virt-resize etc
 )
 
 external_tools=(
@@ -76,6 +77,7 @@ external_tools=(
 vim_tools=(
   tpope/vim-fugitive
   tpope/vim-fireplace
+  dense-analysis/ale
   leafgarland/typescript-vim
   maxmellon/vim-jsx-pretty
   mikepjb/vim-lotus
@@ -153,7 +155,9 @@ set autoindent laststatus=2 showmatch incsearch hlsearch ignorecase smartcase cm
 set mouse=a ignorecase smartcase switchbuf=useopen showtabline=2 
 setglobal scrolloff=3 sidescrolloff=5 lazyredraw gdefault
 set nobackup nowritebackup backupdir=~/.local/vim-tmp,/tmp directory=~/.local/vim-tmp,/tmp
-set backspace=indent,eol,start showcmd nu cul spell
+set backspace=indent,eol,start showcmd nu cul spell spelllang=en_us
+set spellfile=~/.vim/spell/en.utf-8.add
+set vb autoread autowrite
 syntax on
 filetype plugin indent on " try indenting bash file without it (check :verbose set indentexpr?)
 set wildmode=longest,list
@@ -172,6 +176,13 @@ if !isdirectory("/tmp/.vim-undo-dir")
 endif
 set undodir=/tmp/.vim-undo-dir
 set undofile
+
+autocmd FileType gitcommit setlocal spell
+
+" Leave the return key alone when in command line windows, since it's used
+" to run commands there.
+autocmd! CmdwinEnter * :unmap <cr>
+autocmd! CmdwinLeave * :call MapCR()
 
 try
   set background=dark
@@ -227,7 +238,7 @@ endfunction
 
 function! SelectaFile(path, glob, command)
   " using fd is much simpler: call SelectaCommand("fd -t f . " . a:path, "", a:command) 
-  call SelectaCommand("find " . a:path . "/* -type f -and -not -path '*/node_modules/*' -and -not -path '*/_build/*' -and -not -path '*/build/*' -and -iname '" . a:glob . "' -and -not -iname '*.pyc' -and -not -ipath '*/tmp/*' -and -not -iname '*.png' -and -not -iname '*.jpg' -and -not -iname '*.eps' -and -not -iname '*.pdf' -and -not -iname '*.svg' -and -not -iname '*.ttf' -and -not -iname '*.mp4'", "", a:command)
+  call SelectaCommand("find " . a:path . "/* -type f -and -not -path '*/node_modules/*' -and -not -path '*/target/*' -and -not -path '*/_build/*' -and -not -path '*/build/*' -and -iname '" . a:glob . "' -and -not -iname '*.pyc' -and -not -ipath '*/tmp/*' -and -not -iname '*.png' -and -not -iname '*.jpg' -and -not -iname '*.eps' -and -not -iname '*.pdf' -and -not -iname '*.svg' -and -not -iname '*.ttf' -and -not -iname '*.mp4'", "", a:command)
 endfunction
 
 function! SelectaFileContents()
@@ -242,6 +253,27 @@ function! SelectaFileContents()
   exec substitute(selection, "^\\([^:]\\+\\):\\([0-9]\\+\\).*$", ":e +\\2 \\1", "")
 endfunction
 
+function! RunTests(filename)
+  if expand("%") != ""
+    :w
+  end
+
+  if executable(a:filename)
+    exec ":!./" . a:filename
+  elseif &filetype == "rust"
+    exec ":!cargo test"
+  else
+    echo 'Could not RunTests, no conditions were met'
+  end
+endfunction
+
+function! MapCR()
+  " originally: " nnoremap <cr> :call RunTestFile()<cr>
+  nnoremap <cr> :call RunTests('')<cr>
+endfunction
+call MapCR()
+
+nnoremap <leader>t :call RunTests('')<cr>
 nnoremap <leader>f :call SelectaFile(".", "*", ":edit")<cr>
 nnoremap <leader>F :call SelectaFileContents()<cr>
 nnoremap <leader>e :call SelectaFile(expand('%:h'), "*", ":edit")<cr>
@@ -368,9 +400,9 @@ gnome_config() {
 
 git_config
 
-if [[ $(command -v gnome-shell) ]]; then
-  gnome_config()
-fi
+# if [[ $(command -v gnome-shell) ]]; then
+#   gnome_config()
+# fi
 
 # ?? How to in gnome/wayland?
 
