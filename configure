@@ -277,6 +277,7 @@ nnoremap <leader>t :call RunTests('')<cr>
 nnoremap <leader>f :call SelectaFile(".", "*", ":edit")<cr>
 nnoremap <leader>F :call SelectaFileContents()<cr>
 nnoremap <leader>e :call SelectaFile(expand('%:h'), "*", ":edit")<cr>
+nnoremap <leader>E :E %:h<cr>
 
 EOL
 
