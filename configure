@@ -1,8 +1,8 @@
 #!/bin/bash
-# Configuration script for setting up your Linux work environment.
-# Aimed at Debian but should also be able to setup the bare minimal install
-# elsewhere. Once you run this, the script should be available on your path
-# under `configure`, you can edit this with `viw configure` from anywhere.
+# Configuration script for setting up your Linux work environment. Aimed at
+# Debian (see ./DEBIAN.md) but should also be able to setup the bare minimal
+# install elsewhere. Once you run this, the script should be available on your
+# path under `configure`, you can edit this with `viw configure` from anywhere.
 #
 # This development configuration is aimed for single terminal development (e.g
 # avoiding using multiple splits/windows in tmux) in an effort forcing
@@ -38,10 +38,6 @@ tools=( # core tools
   wget # already available on debian
 )
 
-remove_tools=(
-  rustc # found on debian but we want to use rustup
-)
-
 build_tools=(
   meson
   pkg-config
@@ -54,6 +50,7 @@ extra_system_tools=(
   bash_completion
   htop # more graphical cli for top
   neofetch # standard way to inspect high level OS details
+  systemd-boot
 )
 
 # tools for desktop systems
