@@ -57,3 +57,17 @@ bright-cyan:    141,255,240
 white:          205,205,205
 bright-white:   229,229,229
 ```
+
+## Why?
+
+_Some decisions may seem strange, some decisions are documented here_
+
+### Tmux C-q, unergonomic bindings & hidden status
+
+I used to have the tmux prefix bound to M-; with additional M-o+M-O bindings to
+quickly and comfortably move between panes and buffers. However I am trying to
+prevent myself doing that so easily. The reason for this is that I believe
+focusing on a single window leads to more streamlined development. If you find
+yourself opening multiple windows, especially one to look through long logs
+(perhaps from the entire output of your test suite/running server) then you are
+patching up a bad process.
