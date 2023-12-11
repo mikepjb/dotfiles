@@ -208,6 +208,23 @@ nnoremap <leader>n :tabnew ~/.notes/index.md<cr>
 nnoremap <leader>i :tabnew ~/src/configure/configure<cr>
 nnoremap <leader>v :ToggleBG<cr>
 
+" from rsi.vim
+inoremap        <C-A> <C-O>^
+inoremap   <C-X><C-A> <C-A>
+cnoremap        <C-A> <Home>
+cnoremap   <C-X><C-A> <C-A>
+
+inoremap <expr> <C-B> getline('.')=~'^\s*$'&&col('.')>strlen(getline('.'))?"0\<Lt>C-D>\<Lt>Esc>kJs":"\<Lt>Left>"
+cnoremap        <C-B> <Left>
+
+inoremap <expr> <C-D> col('.')>strlen(getline('.'))?"\<Lt>C-D>":"\<Lt>Del>"
+cnoremap <expr> <C-D> getcmdpos()>strlen(getcmdline())?"\<Lt>C-D>":"\<Lt>Del>"
+
+inoremap <expr> <C-E> col('.')>strlen(getline('.'))<bar><bar>pumvisible()?"\<Lt>C-E>":"\<Lt>End>"
+
+inoremap <expr> <C-F> col('.')>strlen(getline('.'))?"\<Lt>C-F>":"\<Lt>Right>"
+cnoremap <expr> <C-F> getcmdpos()>strlen(getcmdline())?&cedit:"\<Lt>Right>"
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Selecta Mappings
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -300,7 +317,7 @@ export TERM='xterm-256color'
 
 alias vi='vim' # just incase
 alias x='tmux attach -t vty || tmux new -s vty'
-alias gr='cd $(git rev-parse --show-toplevel || echo ".")'
+alias gr='cd \$(git rev-parse --show-toplevel || echo ".")'
 alias ..='cd ..'
 alias xclip='xclip -sel clip'
 alias jv="jq -C | less -R"
@@ -343,16 +360,16 @@ set -g visual-activity on
 set-window-option -g alternate-screen on
 set -g status off
 set -g lock-after-time 0
-unbind C-b; set -g prefix M-\;
+unbind C-b; set -g prefix C-q;
+unbind space ; bind space list-windows
 unbind v ; bind v split-window -c "#{pane_current_path}"
-# unbind = ; bind = command-prompt "new-window -c \"#{pane_current_path}\" -n '%%'"
 unbind = ; bind = new-window -c "#{pane_current_path}"
 unbind s ; bind s split-window -h -c "#{pane_current_path}"
 unbind x ; bind x kill-pane
 unbind X ; bind X confirm-before kill-session
 unbind ] ; bind ] command-prompt "rename-window '%%'"
-bind -n M-O last-window
-bind -n M-o select-pane -t :.+
+unbind , ; bind , select-pane -t :.+
+unbind . ; bind . last-window
 set -g status-left ""
 set -g status-right "#[fg=colour3]//#[fg=default] %d/%m/%y %I:%M"
 set -gq utf-8 on;
