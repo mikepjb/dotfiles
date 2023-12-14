@@ -136,6 +136,14 @@ vim_packages() {
   cd -
 }
 
+vim_setup() {
+  # include spell file
+  mkdir -p $HOME/.vim/spell
+  touch $HOME/.vim/spell/en.utf-8.add
+
+  vim_packages
+}
+
 ############################################
 # 3. configuration steps                   #
 ############################################
@@ -144,14 +152,14 @@ if set_package_manager; then
   yes_or_no "Install packages?" && install_packages ${tools[@]}
 fi
 
-vim_packages
+vim_spell
 
 cat >$HOME/.vimrc <<EOL
 set nocompatible hidden history=10000 expandtab tabstop=2 shiftwidth=2 softtabstop=2
 set autoindent laststatus=2 showmatch incsearch hlsearch ignorecase smartcase cmdheight=1
 set mouse=a ignorecase smartcase switchbuf=useopen showtabline=2 
 setglobal scrolloff=3 sidescrolloff=5 lazyredraw gdefault
-set nobackup nowritebackup backupdir=~/.local/vim-tmp,/tmp directory=~/.local/vim-tmp,/tmp
+set nobackup nowritebackup noswapfile " important files should be backed up already
 set backspace=indent,eol,start showcmd nu cul spell spelllang=en_us
 set spellfile=~/.vim/spell/en.utf-8.add
 set vb autoread autowrite
@@ -255,18 +263,6 @@ function! SelectaFile(path, glob, command)
   call SelectaCommand("find " . a:path . "/* -type f -and -not -path '*/node_modules/*' -and -not -path '*/target/*' -and -not -path '*/_build/*' -and -not -path '*/build/*' -and -iname '" . a:glob . "' -and -not -iname '*.pyc' -and -not -ipath '*/tmp/*' -and -not -iname '*.png' -and -not -iname '*.jpg' -and -not -iname '*.eps' -and -not -iname '*.pdf' -and -not -iname '*.svg' -and -not -iname '*.ttf' -and -not -iname '*.mp4'", "", a:command)
 endfunction
 
-function! SelectaFileContents()
-  try
-    let selection = SelectaOutput("ls src/**/*.ts* | while read fn; do nl -b a \"$fn\" | while read line; do echo \"$fn:$line\"; done; done", "| cut -d \"	\" -f 1")
-  catch /Vim:Interrupt/
-    " Swallow the ^C so that the redraw below happens; otherwise there will be
-    " leftovers from selecta on the screen
-    redraw!
-    return
-  endtry
-  exec substitute(selection, "^\\([^:]\\+\\):\\([0-9]\\+\\).*$", ":e +\\2 \\1", "")
-endfunction
-
 function! RunTests(filename)
   if expand("%") != ""
     :w
@@ -289,7 +285,6 @@ call MapCR()
 
 nnoremap <leader>t :call RunTests('')<cr>
 nnoremap <leader>f :call SelectaFile(".", "*", ":edit")<cr>
-nnoremap <leader>F :call SelectaFileContents()<cr>
 nnoremap <leader>e :call SelectaFile(expand('%:h'), "*", ":edit")<cr>
 nnoremap <leader>E :E %:h<cr>
 
