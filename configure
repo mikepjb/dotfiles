@@ -17,6 +17,8 @@ set +e
 ############################################
 
 package_manager="none"
+sudo="sudo"
+vim_pkg="vim-gtk3"
 
 path_dirs=(
   $HOME/src/configure # configure repo home
@@ -29,12 +31,12 @@ path_dirs=(
 )
 
 tools=( # core tools
-  vim-gtk3 # GUI vim, I use this in the terminal cli for the +clipboard integration.
   neovim
   tmux
   bash
   make
   curl
+  openssh # usually available except on termux
   wget # already available on debian
 )
 
@@ -97,7 +99,13 @@ yes_or_no() {
 }
 
 set_package_manager() {
-  if [[ $(command -v apt) ]]; then
+  if [[ $(command -v pkg) ]]; then
+    # android/termux, must come before debian/apt because apt is also available here but pkg is preferred.
+    sudo=""
+    vim_pkg="vim"
+    package_manager="pkg"
+    return 0
+  elif [[ $(command -v apt) ]]; then
     package_manager="apt" # debian based distro
     return 0
   elif [[ $(command -v dnf) ]]; then
@@ -108,8 +116,8 @@ set_package_manager() {
 }
 
 install_packages() {
-  echo "sudo $package_manager install $(join_by ' ' $@)"
-  sudo $package_manager install $(join_by ' ' "$@")
+  echo "$sudo $package_manager install $(join_by ' ' $@) $vim_pkg"
+  $sudo $package_manager install $(join_by ' ' "$@") $vim_pkg
 }
 
 vim_packages() {
@@ -152,7 +160,7 @@ if set_package_manager; then
   yes_or_no "Install packages?" && install_packages ${tools[@]}
 fi
 
-vim_spell
+vim_setup
 
 cat >$HOME/.vimrc <<EOL
 set nocompatible hidden history=10000 expandtab tabstop=2 shiftwidth=2 softtabstop=2
@@ -176,10 +184,10 @@ set clipboard=unnamed,unnamedplus
 set t_Co=256
 
 " Use persistent undo history.
-if !isdirectory("/tmp/.vim-undo-dir")
-    call mkdir("/tmp/.vim-undo-dir", "", 0700)
+if !isdirectory("$TMPDIR/.vim-undo-dir")
+    call mkdir("$TMPDIR/.vim-undo-dir", "", 0700)
 endif
-set undodir=/tmp/.vim-undo-dir
+set undodir=$TMPDIR/.vim-undo-dir
 set undofile
 
 autocmd FileType gitcommit setlocal spell
