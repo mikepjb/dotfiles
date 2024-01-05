@@ -19,6 +19,7 @@ set +e
 package_manager="none"
 sudo="sudo"
 vim_pkg="vim-gtk3"
+[[ -z "${TMPDIR+x}" ]] && TMPDIR=/tmp
 
 path_dirs=(
   $HOME/src/configure # configure repo home
@@ -67,6 +68,8 @@ extra_tools=(
   yt-dlp # Youtube downloading tool
   obs-studio # Streaming software
   libguestfs-tools # virt-resize etc
+  golang
+  rustc
 )
 
 external_tools=(
@@ -317,6 +320,7 @@ export NPM_CONFIG_PREFIX=$HOME/.config/npm
 export N_PREFIX=$HOME/.config/n
 export LSCOLORS="ExGxBxDxCxEgEdxbxgxcxd"
 export TERM='xterm-256color'
+export TMPDIR=$TMPDIR
 
 alias vi='vim' # just incase
 alias x='tmux attach -t vty || tmux new -s vty'
