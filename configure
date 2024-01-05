@@ -56,10 +56,17 @@ extra_system_tools=(
   systemd-boot
 )
 
-# tools for desktop systems
+# non-essential development tools
 extra_tools=(
   gimp
   inkscape
+  golang
+  rustc
+  chromium
+  docker
+)
+
+desktop_tools=(
   telegram-desktop
   piper # for configuring mice on linux
   libvirt-clients # used by gnome-boxes to detect virtualisation extensions that are enabled, will complain otherwise that they are disabled.
@@ -68,8 +75,6 @@ extra_tools=(
   yt-dlp # Youtube downloading tool
   obs-studio # Streaming software
   libguestfs-tools # virt-resize etc
-  golang
-  rustc
 )
 
 external_tools=(
@@ -155,15 +160,20 @@ vim_setup() {
   vim_packages
 }
 
+ensure_dirs() {
+  mkdir -p $HOME/src
+}
+
 ############################################
 # 3. configuration steps                   #
 ############################################
 
 if set_package_manager; then
-  yes_or_no "Install packages?" && install_packages ${tools[@]}
+  yes_or_no "Install packages?" && install_packages ${tools[@]} ${extra_tools[@]}
 fi
 
 vim_setup
+ensure_dirs
 
 cat >$HOME/.vimrc <<EOL
 set nocompatible hidden history=10000 expandtab tabstop=2 shiftwidth=2 softtabstop=2
