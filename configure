@@ -60,6 +60,7 @@ extra_system_tools=(
 extra_tools=(
   gimp
   inkscape
+  ruby
   golang
   rustc
   chromium
