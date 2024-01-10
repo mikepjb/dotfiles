@@ -5,6 +5,11 @@ Aimed at Debian but should also be able to setup the bare minimal install
 elsewhere. Once you run this, the script should be available on your path
 under `configure`, you can edit this with `viw configure` from anywhere.
 
+There is also a `server` setup script for configuring (again primarily Debian)
+Linux servers to be used for running applications with
+nginx/https(certbot/cron)/sqlite. (note golang/rust is preferable for single
+binary distribution)
+
 Download:  
 `wget -O ~/.local/bin/configure https://raw.githubusercontent.com/mikepjb/configure/main/configure`
 

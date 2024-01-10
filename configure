@@ -65,6 +65,8 @@ extra_tools=(
   rustc
   chromium
   docker
+  sqlite3
+  postgres
 )
 
 desktop_tools=(
