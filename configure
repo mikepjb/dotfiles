@@ -23,6 +23,7 @@ vim_pkg="vim-gtk3"
 
 path_dirs=(
   $HOME/src/configure # configure repo home
+  $HOME/bin # golang (GOPATH == HOME)
   $HOME/.cargo/bin # rust
   $HOME/.local/bin # local scripts
   $HOME/.config/npm/bin # nodejs
@@ -62,7 +63,6 @@ extra_tools=(
   inkscape
   ruby
   golang
-  rustc
   chromium
   docker
   sqlite3
@@ -433,7 +433,15 @@ gnome_config() {
   gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier']"
 }
 
+ensure_rust() {
+  if [[ ! $(command -v rustup) ]]; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  fi
+}
+
 git_config
+ensure_rust
+
 
 # if [[ $(command -v gnome-shell) ]]; then
 #   gnome_config()

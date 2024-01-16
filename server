@@ -36,6 +36,7 @@ join_by() { local IFS="$1"; shift; echo "$*"; }
 install_packages ${deps[@]}
 
 # TODO setup the nginx proxy for your site
+# TODO setup systemctl entry for your application to restart on failure
 
 ############################################
 # 4. test setup                            #
