@@ -23,7 +23,7 @@ vim_pkg="vim-gtk3"
 
 path_dirs=(
   $HOME/src/configure # configure repo home
-  $HOME/bin # golang (GOPATH == HOME)
+  $HOME/go/bin # golang (GOPATH == HOME)
   $HOME/.cargo/bin # rust
   $HOME/.local/bin # local scripts
   $HOME/.config/npm/bin # nodejs
@@ -88,6 +88,7 @@ vim_tools=(
   tpope/vim-fugitive
   tpope/vim-fireplace
   dense-analysis/ale
+  fatih/vim-go
   leafgarland/typescript-vim
   maxmellon/vim-jsx-pretty
   mikepjb/vim-lotus
@@ -439,8 +440,15 @@ ensure_rust() {
   fi
 }
 
+ensure_go_tools() {
+  if [[ ! $(command -v goimports) ]]; then
+    go install golang.org/x/tools/cmd/goimports@latest
+  fi
+}
+
 git_config
 ensure_rust
+ensure_go_tools
 
 
 # if [[ $(command -v gnome-shell) ]]; then
