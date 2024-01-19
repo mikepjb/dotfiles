@@ -52,6 +52,7 @@ build_tools=(
 
 extra_system_tools=(
   bash_completion
+  net-tools # includes ifconfig
   htop # more graphical cli for top
   neofetch # standard way to inspect high level OS details
   systemd-boot
@@ -207,6 +208,11 @@ endif
 set undodir=$TMPDIR/.vim-undo-dir
 set undofile
 
+" Load matchit.vim, but only if the user hasn't installed a newer version.
+if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
+  runtime! macros/matchit.vim
+endif
+
 autocmd FileType gitcommit setlocal spell
 
 " Leave the return key alone when in command line windows, since it's used
@@ -343,6 +349,7 @@ alias ..='cd ..'
 alias xclip='xclip -sel clip'
 alias jv="jq -C | less -R"
 alias nr='npm run'
+alias findon='lsof -ti' # e.g findon :8080
 
 viw() { vi \`which "\$1"\`; }
 git_branch() { echo -e "\$(git branch 2>/dev/null| sed -n '/^\*/s/^\* //p')"; }
