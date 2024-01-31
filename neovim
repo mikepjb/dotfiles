@@ -22,6 +22,8 @@ join_by() { local IFS="$1"; shift; echo "$*"; }
 [[ -z "${PLUGIN_URL_BASE+x}" ]] && PLUGIN_URL_BASE="https://github.com/"
 [[ -z "${PLUGIN_URL_MIDDLE+x}" ]] && PLUGIN_URL_MIDDLE="/zipball/"
 [[ -z "${PLUGIN_URL_END+x}" ]] && PLUGIN_URL_END=""
+[[ -z "${PLUGIN_EXT+x}" ]] && PLUGIN_EXT="zip"
+[[ -z "${PLUGIN_COMMIT+x}" ]] && PLUGIN_COMMIT="master"
 
 [[ -z "${CONFIG_TMPDIR+x}" ]] && CONFIG_TMPDIR=$(mktemp -d)
 NVIM_TARBALL=nvim-linux64.tar.gz
@@ -58,10 +60,13 @@ ensure_neovim_plugins() {
   for p in $(join_by ' ' "${PLUGINS[@]}"); do
     n=$(basename -- $p)
     if [ ! -d "$n" ]; then
-      [[ -z "${commit+x}" ]] && commit="master"
-      curl -L -o $n.zip $PLUGIN_URL_BASE$p$PLUGIN_URL_MIDDLE$commit
-      unzip $n.zip
-      rm $n.zip
+      curl -L -o $n.$PLUGIN_EXT $PLUGIN_URL_BASE$p$PLUGIN_URL_MIDDLE$PLUGIN_COMMIT
+      if [[ "$PLUGIN_EXT" -eq "zip" ]]; then
+        unzip $n.$PLUGIN_EXT
+      else
+        tar -zxf $n.$PLUGIN_EXT
+      fi
+      rm $n.$PLUGIN_EXT
       mv $(find . -type d -name "*$n*" | head -1) $n
     fi
   done
