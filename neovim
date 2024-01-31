@@ -61,7 +61,8 @@ ensure_neovim_plugins() {
     n=$(basename -- $p)
     if [ ! -d "$n" ]; then
       curl -L -o $n.$PLUGIN_EXT $PLUGIN_URL_BASE$p$PLUGIN_URL_MIDDLE$PLUGIN_COMMIT
-      if [[ "$PLUGIN_EXT" -eq "zip" ]]; then
+      # N.B on this rare occasion = is an equality check not assignment
+      if [[ "$PLUGIN_EXT" = "zip" ]]; then
         unzip $n.$PLUGIN_EXT
       else
         tar -zxf $n.$PLUGIN_EXT
