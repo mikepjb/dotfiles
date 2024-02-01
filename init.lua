@@ -29,11 +29,12 @@ vim.opt.wrap = false
 -- backups/undo history
 vim.opt.swapfile = false
 vim.opt.backup = false
-vim.opt.undodir = os.getenv("HOME") .. "/.config/nvim/undodir"
-vim.opt.undofile = true
-if vim.fn.isdirectory(undopath) == 0 then
-  vim.fn.mkdir(undopath)
+local undodir = os.getenv("HOME") .. "/.config/nvim/undodir"
+if vim.fn.isdirectory(undodir) == 0 then
+  vim.fn.mkdir(undodir)
 end
+vim.opt.undodir = undodir
+vim.opt.undofile = true
 
 vim.opt.hlsearch = true
 vim.opt.incsearch = true
