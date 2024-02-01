@@ -221,7 +221,7 @@ alias gr='cd \$(git rev-parse --show-toplevel || echo ".")'
 
 viw() { vi \`which "\$1"\`; }
 git_b() { echo -e "\$(git branch 2>/dev/null| sed -n '/^\*/s/^\* //p')"; }
-git_s() { git rev-parse --git-dir >/dev/null 2>&1 && echo -ne "(\$(git_br))"; }
+git_s() { git rev-parse --git-dir >/dev/null 2>&1 && echo -ne "(\$(git_b))"; }
 
 PROMPT_COMMAND='PS1="\W\$(git_s) $ "'
 EOL
