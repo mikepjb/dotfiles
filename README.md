@@ -13,7 +13,7 @@ binary distribution)
 Download (or copy/paste the single file):  
 `wget -O ~/.local/bin/configure https://raw.githubusercontent.com/mikepjb/configure/main/configure`
 
-## Neovim
+## Running in restricted environments
 
 The neovim script is designed to adapt to restricted environments where plugin repos are only available via internal mirrors, you can control this with environment variables like so:
 
@@ -21,7 +21,7 @@ The neovim script is designed to adapt to restricted environments where plugin r
 PLUGIN_URL_MIDDLE="/" \
 PLUGIN_URL_BASE="https://example-internal-repo.com/api/github" \
 PLUGIN_EXT="tar.gz" \
-./neovim
+./configure
 ```
 
 ## Color Scheme
@@ -87,3 +87,8 @@ focusing on a single window leads to more streamlined development. If you find
 yourself opening multiple windows, especially one to look through long logs
 (perhaps from the entire output of your test suite/running server) then you are
 patching up a bad process.
+
+## Useful Commands you might have forgotten
+
+
+- `lsof -ti :8080` looks for processes listening on the given port.

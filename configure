@@ -4,17 +4,44 @@
 # install elsewhere. Once you run this, the script should be available on your
 # path under `configure`, you can edit this with `viw configure` from anywhere.
 #
+# Usage:
 # This development configuration is aimed for single terminal development (e.g
 # avoiding using multiple splits/windows in tmux) in an effort forcing
 # optimisation of development workflow by avoiding switching lots and in
 # particular switching to viewing the entire output of a running development
 # server as incremental development (running single tests on issues) is faster.
+#
+# Tools:
+# This setup looks for a pretty bare minimum of tools required for development
+# using Golang & Javascript.
 
 set +e
 
 ############################################
-# 1. setup data                            #
+# 1. setup variables                      #
 ############################################
+
+[[ -z "${PLUGINS+x}" ]] && PLUGINS=(
+  tpope/vim-fugitive
+  tpope/vim-fireplace
+  nvim-lua/plenary.nvim
+  nvim-telescope/telescope.nvim
+  nvim-treesitter/nvim-treesitter
+  neovim/nvim-lspconfig
+  folke/trouble.nvim
+)
+
+# Override these by prefixing them e.g: `NEOVIM_REPO=internal-mirror.com/neovim ./build-neovim`
+[[ -z "${NEOVIM_REPO+x}" ]] && NEOVIM_REPO="https://github.com/neovim/neovim/releases/download/v0.9.5/nvim-linux64.tar.gz"
+[[ -z "${PLUGIN_URL_BASE+x}" ]] && PLUGIN_URL_BASE="https://github.com/"
+[[ -z "${PLUGIN_URL_MIDDLE+x}" ]] && PLUGIN_URL_MIDDLE="/zipball/"
+[[ -z "${PLUGIN_URL_END+x}" ]] && PLUGIN_URL_END=""
+[[ -z "${PLUGIN_EXT+x}" ]] && PLUGIN_EXT="zip"
+[[ -z "${PLUGIN_COMMIT+x}" ]] && PLUGIN_COMMIT="master"
+
+[[ -z "${CONFIG_TMPDIR+x}" ]] && CONFIG_TMPDIR=$(mktemp -d)
+NVIM_TARBALL=nvim-linux64.tar.gz
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 package_manager="none"
 sudo="sudo"
@@ -22,77 +49,55 @@ vim_pkg="vim-gtk3"
 [[ -z "${TMPDIR+x}" ]] && TMPDIR=/tmp
 
 path_dirs=(
-  $HOME/src/configure # configure repo home
-  $HOME/go/bin # golang (GOPATH == HOME)
-  $HOME/.cargo/bin # rust
-  $HOME/.local/bin # local scripts
-  $HOME/.config/npm/bin # nodejs
-  /usr/local/bin
-  /usr/bin
-  /bin
+    $HOME/src/configure # configure repo home
+    $HOME/go/bin # golang (GOPATH == HOME)
+    $HOME/.local/bin # local scripts
+    $HOME/.config/npm/bin # nodejs
+    /usr/local/bin
+    /usr/bin
+    /bin
 )
 
-tools=( # core tools
-  neovim
-  tmux
-  bash
-  make
-  curl
-  openssh # usually available except on termux
-  wget # already available on debian
+# essentials for working in a bash environment
+core_tools=(
+    vim # vim is essential, neovim is a luxury
+    tmux
+    bash
+    bash-completion
+    make # nice for making a 'table of contents' for projects
+    curl
+    openssh-client # usually available except on termux (maybe termux package is called openssh?)
+    wget # already available on debian
 )
 
-build_tools=(
-  meson
-  pkg-config
-  cmake
-  python-is-python3 # just aliases python3 as python
-  python3-pip
+# app tools (sqlite/golang/node)
+application_tools=(
+    golang
+    sqlite3
+    nodejs
+    postgresql
 )
 
-extra_system_tools=(
-  bash_completion
-  net-tools # includes ifconfig
-  htop # more graphical cli for top
-  neofetch # standard way to inspect high level OS details
-  systemd-boot
+# nice to have
+user_tools=(
+    gimp
+    inkscape
+    chromium
+    docker
+    htop # more graphical cli for top
+    neofetch # standard way to inspect high level OS details
+    systemd-boot # simpler system startup than grub
+    libvirt-clients # used by gnome-boxes to detect virtualisation extensions that are enabled, will complain otherwise that they are disabled.
+    apt-file # debian tool for listing files from package with `apt-file list package_name`
+    yt-dlp # Youtube downloading tool
+    obs-studio # Streaming software
+    libguestfs-tools # virt-resize etc
 )
 
-# non-essential development tools
-extra_tools=(
-  gimp
-  inkscape
-  ruby
-  golang
-  chromium
-  docker
-  sqlite3
-  postgres
-)
-
-desktop_tools=(
-  telegram-desktop
-  piper # for configuring mice on linux
-  libvirt-clients # used by gnome-boxes to detect virtualisation extensions that are enabled, will complain otherwise that they are disabled.
-  apt-file # debian tool for listing files from package with `apt-file list package_name`
-  expect # has unbuffer command, useful for piping coloured input into `less -R`
-  yt-dlp # Youtube downloading tool
-  obs-studio # Streaming software
-  libguestfs-tools # virt-resize etc
-)
-
+# not used, just a reference - installed via flatpak
 external_tools=(
-  discord
-)
-
-vim_tools=(
-  tpope/vim-fugitive
-  tpope/vim-fireplace
-  dense-analysis/ale
-  fatih/vim-go
-  leafgarland/typescript-vim
-  maxmellon/vim-jsx-pretty
-  mikepjb/vim-lotus
+    discord
+    telegram-desktop
 )
 
 ############################################
@@ -112,20 +117,20 @@ yes_or_no() {
 }
 
 set_package_manager() {
-  if [[ $(command -v pkg) ]]; then
-    # android/termux, must come before debian/apt because apt is also available here but pkg is preferred.
-    sudo=""
-    vim_pkg="vim"
-    package_manager="pkg"
-    return 0
-  elif [[ $(command -v apt) ]]; then
-    package_manager="apt" # debian based distro
-    return 0
-  elif [[ $(command -v dnf) ]]; then
-    package_manager="dnf" # redhat based distro
-    return 0
-  fi
-  return 1
+    if [[ $(command -v pkg) ]]; then
+        # android/termux, must come before debian/apt because apt is also available here but pkg is preferred.
+        sudo=""
+        vim_pkg="vim"
+        package_manager="pkg"
+        return 0
+    elif [[ $(command -v apt) ]]; then
+        package_manager="apt" # debian based distro
+        return 0
+    elif [[ $(command -v dnf) ]]; then
+        package_manager="dnf" # redhat based distro
+        return 0
+    fi
+    return 1
 }
 
 install_packages() {
@@ -133,204 +138,72 @@ install_packages() {
   $sudo $package_manager install $(join_by ' ' "$@") $vim_pkg
 }
 
-vim_packages() {
-  # download fuzzy finder
-  if [ ! -f $HOME/.local/bin/selecta ]; then
-    mkdir -p $HOME/.local/bin
-    wget -O $HOME/.local/bin/selecta https://raw.githubusercontent.com/garybernhardt/selecta/master/selecta
-    chmod +x $HOME/.local/bin/selecta
-  fi
+ensure_neovim() {
+  echo 'nvim not found, downloading'
+  # N.B for now we just go for the compiled linux binary
+  curl -L -o $NVIM_TARBALL $NEOVIM_REPO
+  tar -zxf $NVIM_TARBALL 
+  mkdir -p $HOME/.local
+  # here it's best to cp > mv because mv doesn't merge with existing directories
+  # (e.g bin/lib folders that already exist), rsync is another option but cp is
+  # always available.
+  cp -r ./nvim-linux64/* $HOME/.local
+}
 
-  mkdir -p $HOME/.vim/pack/mikepjb/start
-  cd $HOME/.vim/pack/mikepjb/start
-  for p in $(join_by ' ' "${vim_tools[@]}"); do
+ensure_neovim_config() {
+    mkdir -p $HOME/.config/nvim
+    if [[ -f $SCRIPT_DIR/init.lua ]]; then
+        ln -sfv $SCRIPT_DIR/init.lua $HOME/.config/nvim/init.lua
+    else
+        echo 'could not find init.lua, download this seperately'
+    fi
+}
+
+ensure_neovim_plugins() {
+  echo 'downloading missing plugins'
+  optional_deps_dir="$HOME/.config/nvim/pack/base/opt"
+  mkdir -p $optional_deps_dir
+  cd $optional_deps_dir
+  for p in $(join_by ' ' "${PLUGINS[@]}"); do
     n=$(basename -- $p)
-    # option to reinstall? otherwise skip if name matched
-    # rm -rf $n # remove older install if exists
     if [ ! -d "$n" ]; then
-      wget -O $n.zip https://github.com/$p/zipball/master
-      unzip $n.zip
-      rm $n.zip
-      mv $(find . -type d -name "*$n*") $n
+      curl -L -o $n.$PLUGIN_EXT $PLUGIN_URL_BASE$p$PLUGIN_URL_MIDDLE$PLUGIN_COMMIT
+      # N.B on this rare occasion = is an equality check not assignment
+      if [[ "$PLUGIN_EXT" = "zip" ]]; then
+        unzip $n.$PLUGIN_EXT
+      else
+        tar -zxf $n.$PLUGIN_EXT
+      fi
+      rm $n.$PLUGIN_EXT
+      mv $(find . -type d -name "*$n*" | head -1) $n
     fi
   done
   cd -
 }
 
-vim_setup() {
-  # include spell file
-  mkdir -p $HOME/.vim/spell
-  touch $HOME/.vim/spell/en.utf-8.add
-
-  vim_packages
-}
-
 ensure_dirs() {
   mkdir -p $HOME/src
+  mkdir -p $HOME/.config
+  mkdir -p $HOME/.local/bin
 }
 
 ############################################
 # 3. configuration steps                   #
 ############################################
 
-if set_package_manager; then
-  yes_or_no "Install packages?" && install_packages ${tools[@]} ${extra_tools[@]}
-fi
+cd $CONFIG_TMPDIR
+pwd
 
-vim_setup
 ensure_dirs
 
-cat >$HOME/.vimrc <<EOL
-set nocompatible hidden history=10000 expandtab tabstop=2 shiftwidth=2 softtabstop=2
-set autoindent laststatus=2 showmatch incsearch hlsearch ignorecase smartcase cmdheight=1
-set mouse=a ignorecase smartcase switchbuf=useopen showtabline=2 
-setglobal scrolloff=3 sidescrolloff=5 lazyredraw gdefault
-set nobackup nowritebackup noswapfile " important files should be backed up already
-set backspace=indent,eol,start showcmd nu cul spell spelllang=en_us
-set spellfile=~/.vim/spell/en.utf-8.add
-set vb autoread autowrite
-syntax on
-filetype plugin indent on " try indenting bash file without it (check :verbose set indentexpr?)
-set wildmode=longest,list
-set wildmenu
-set completeopt=menu,preview
-set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
-set timeout timeoutlen=1000 ttimeoutlen=100
-set modeline modelines=3 foldmethod=manual nofoldenable nojoinspaces diffopt=vertical
-set signcolumn=no shm+=I
-set clipboard=unnamed,unnamedplus
-set t_Co=256
-
-" Use persistent undo history.
-if !isdirectory("$TMPDIR/.vim-undo-dir")
-    call mkdir("$TMPDIR/.vim-undo-dir", "", 0700)
-endif
-set undodir=$TMPDIR/.vim-undo-dir
-set undofile
-
-" Load matchit.vim, but only if the user hasn't installed a newer version.
-if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
-  runtime! macros/matchit.vim
-endif
-
-autocmd FileType gitcommit setlocal spell
-
-" Leave the return key alone when in command line windows, since it's used
-" to run commands there.
-autocmd! CmdwinEnter * :unmap <cr>
-autocmd! CmdwinLeave * :call MapCR()
-
-try
-  set background=dark
-  colorscheme lotus
-catch /^Vim\%((\a\+)\)\=:E185/
-  colorscheme default
-  set background=dark
-endtry
-
-let g:sh_noisk=1 " stop vim messing with iskeyword in shell files.
-let g:omni_sql_no_default_maps = 1 " do not map C-c in SQL files please.
-let mapleader= ' '
-
-nnoremap Y y$
-nnoremap <C-j> <C-w>j
-nnoremap <C-k> <C-w>k
-nnoremap <C-h> <C-w>h
-nnoremap <C-l> <C-w>l
-nnoremap <C-g> :noh<CR><C-g>
-" Insert a hash rocket with <c-l>
-imap <C-l> <space>=><space>
-" Can't be bothered to understand ESC vs <c-c> in insert mode
-inoremap <C-c> <esc>
-nnoremap <Tab> <C-^>
-nnoremap <leader>n :tabnew ~/.notes/index.md<cr>
-nnoremap <leader>i :tabnew ~/src/configure/configure<cr>
-nnoremap <leader>v :ToggleBG<cr>
-
-" from rsi.vim
-inoremap        <C-A> <C-O>^
-inoremap   <C-X><C-A> <C-A>
-cnoremap        <C-A> <Home>
-cnoremap   <C-X><C-A> <C-A>
-
-inoremap <expr> <C-B> getline('.')=~'^\s*$'&&col('.')>strlen(getline('.'))?"0\<Lt>C-D>\<Lt>Esc>kJs":"\<Lt>Left>"
-cnoremap        <C-B> <Left>
-
-inoremap <expr> <C-D> col('.')>strlen(getline('.'))?"\<Lt>C-D>":"\<Lt>Del>"
-cnoremap <expr> <C-D> getcmdpos()>strlen(getcmdline())?"\<Lt>C-D>":"\<Lt>Del>"
-
-inoremap <expr> <C-E> col('.')>strlen(getline('.'))<bar><bar>pumvisible()?"\<Lt>C-E>":"\<Lt>End>"
-
-inoremap <expr> <C-F> col('.')>strlen(getline('.'))?"\<Lt>C-F>":"\<Lt>Right>"
-cnoremap <expr> <C-F> getcmdpos()>strlen(getcmdline())?&cedit:"\<Lt>Right>"
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Selecta Mappings
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Run a given vim command on the results of fuzzy selecting from a given shell
-" command. See usage below.
-function! SelectaCommand(choice_command, selecta_args, vim_command)
-  try
-    exec a:vim_command . " " . SelectaOutput(a:choice_command, a:selecta_args)
-  catch /Vim:Interrupt/
-    " Swallow the ^C so that the redraw below happens; otherwise there will be
-    " leftovers from selecta on the screen
-    redraw!
-    return
-  endtry
-endfunction
-
-function! SelectaOutput(choice_command, selecta_args)
-  let selection = system(a:choice_command . " | selecta " . a:selecta_args)
-  " Escape spaces in the file name. That ensures that it's a single argument
-  " when concatenated with vim_command and run with exec.
-  let selection = substitute(selection, ' ', '\\ ', "g")
-  redraw!
-  return selection
-endfunction
-
-function! SelectaFile(path, glob, command)
-  " using fd is much simpler: call SelectaCommand("fd -t f . " . a:path, "", a:command) 
-  call SelectaCommand("find " . a:path . "/* -type f -and -not -path '*/node_modules/*' -and -not -path '*/target/*' -and -not -path '*/_build/*' -and -not -path '*/build/*' -and -iname '" . a:glob . "' -and -not -iname '*.pyc' -and -not -ipath '*/tmp/*' -and -not -iname '*.png' -and -not -iname '*.jpg' -and -not -iname '*.eps' -and -not -iname '*.pdf' -and -not -iname '*.svg' -and -not -iname '*.ttf' -and -not -iname '*.mp4'", "", a:command)
-endfunction
-
-function! RunTests(filename)
-  if expand("%") != ""
-    :w
-  end
-
-  if executable(a:filename)
-    exec ":!./" . a:filename
-  elseif &filetype == "rust"
-    exec ":!cargo test"
-  else
-    echo 'Could not RunTests, no conditions were met'
-  end
-endfunction
-
-function! MapCR()
-  " originally: " nnoremap <cr> :call RunTestFile()<cr>
-  nnoremap <cr> :call RunTests('')<cr>
-endfunction
-call MapCR()
-
-nnoremap <leader>t :call RunTests('')<cr>
-nnoremap <leader>f :call SelectaFile(".", "*", ":edit")<cr>
-nnoremap <leader>e :call SelectaFile(expand('%:h'), "*", ":edit")<cr>
-nnoremap <leader>E :E %:h<cr>
-
-EOL
-
 cat >$HOME/.bashrc <<EOL
-[ -f /etc/bash_completion ] && . /etc/bash_completion
-[ -r /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
 [[ $- =~ i ]] && stty -ixoff -ixon # Disable CTRL-S and CTRL-Q
  
 export XDG_DATA_HOME=$HOME/.local/share
 export XDG_CACHE_HOME=$HOME/.local/cache
 export XDG_STATE_HOME=$HOME/.local/state
 export XDG_CONFIG_HOME=$HOME/.config
-export EDITOR=vim
+export EDITOR=nvim
 export PATH=$(join_by : "${path_dirs[@]}")
 export GOPATH=$HOME/go
 export CDPATH=".:$HOME/src"
@@ -342,141 +215,87 @@ export LSCOLORS="ExGxBxDxCxEgEdxbxgxcxd"
 export TERM='xterm-256color'
 export TMPDIR=$TMPDIR
 
-alias vi='vim' # just incase
+alias vi='nvim'
 alias x='tmux attach -t vty || tmux new -s vty'
 alias gr='cd \$(git rev-parse --show-toplevel || echo ".")'
-alias ..='cd ..'
-alias xclip='xclip -sel clip'
-alias jv="jq -C | less -R"
-alias nr='npm run'
-alias findon='lsof -ti' # e.g findon :8080
 
 viw() { vi \`which "\$1"\`; }
-git_branch() { echo -e "\$(git branch 2>/dev/null| sed -n '/^\*/s/^\* //p')"; }
+git_b() { echo -e "\$(git branch 2>/dev/null| sed -n '/^\*/s/^\* //p')"; }
+git_s() { git rev-parse --git-dir >/dev/null 2>&1 && echo -ne "(\$(git_br))"; }
 
-git_state() {
-    if git rev-parse --git-dir >/dev/null 2>&1; then
-        echo -ne "\$(git_branch)"
-    else
-        echo -ne "!"
-    fi
-}
-
-jobs_marker() {
-  local n=$(jobs | wc -l)
-  ((n)) && echo -n '&' || echo -n '$'
-}
-
-inside_git_repo() {
-  git rev-parse --is-inside-work-tree > /dev/null 2>&1
-}
-
-PROMPT_COMMAND='PS1="\W(\$(git_state)) \$(jobs_marker) "'
-
-if [ -f "$HOME/.bashrc.local" ]; then
-  source "$HOME/.bashrc.local"
-fi
+PROMPT_COMMAND='PS1="\W\$(git_s) $ "'
 EOL
 
 mkdir -p $HOME/.config/tmux
 cat >$HOME/.config/tmux/tmux.conf <<EOL
-set -g status-position bottom
 set -g history-limit 100000
-set -g base-index 1
-set -g renumber-windows on
-set -g visual-activity on
 set-window-option -g alternate-screen on
 set -g status off
 set -g lock-after-time 0
 unbind C-b; set -g prefix C-q;
 unbind space ; bind space list-windows
 unbind v ; bind v split-window -c "#{pane_current_path}"
-unbind = ; bind = new-window -c "#{pane_current_path}"
 unbind s ; bind s split-window -h -c "#{pane_current_path}"
 unbind x ; bind x kill-pane
-unbind X ; bind X confirm-before kill-session
-unbind ] ; bind ] command-prompt "rename-window '%%'"
-unbind , ; bind , select-pane -t :.+
-unbind . ; bind . last-window
-set -g status-left ""
-set -g status-right "#[fg=colour3]//#[fg=default] %d/%m/%y %I:%M"
 set -gq utf-8 on;
 set -g mouse on;
 set -g set-clipboard external;
-set -g status-style fg=default,bg=default;
 set -g pane-border-style fg=default,bg=default;
 set -g pane-active-border-style fg=default,bg=default;
-setw -g window-status-current-style fg=colour3,bg=default;
 set -g message-style "fg=colour5,bg=default"
-set -g terminal-overrides 'xterm*:smcup@:rmcup@' # fixes scrolling acting like C-n/p un tmux under MobaXterm
 EOL
 
 git_config() {
-  echo 'Configuring git..'
-  git config --global --replace-all core.editor 'vim'
-  git config --global --replace-all core.autocrlf false
-  git config --global --replace-all init.defaultBranch 'main'
-  git config --global --replace-all alias.aa 'add --all'
-  git config --global --replace-all alias.br 'branch --sort=committerdate'
-  git config --global --replace-all alias.st 'status'
-  git config --global --replace-all alias.count 'shortlog -sn'
-  git config --global --replace-all alias.ff 'pull --ff-only'
-  git config --global --replace-all alias.co 'checkout'
-  git config --global --replace-all alias.ci 'commit --verbose'
-  git config --global --replace-all alias.di 'diff'
-  git config --global --replace-all alias.dc 'diff --cached'
-  git config --global --replace-all alias.dd 'diff --stat origin/develop HEAD'
-  git config --global --replace-all alias.dn 'diff --name-status'
-  git config --global --replace-all alias.list 'config --global --list'
-  git config --global --replace-all alias.amend 'commit --amend'
-  git config --global --replace-all alias.ffa 'fetch --all && git rebase origin/master'
-  git config --global --replace-all alias.push-new 'push -u origin HEAD'
-  git config --global --replace-all alias.ra "log --abbrev-commit --pretty=format:'%<(7)%C(yellow)%h %Cgreen%<(15)%cr%C(bold cyan)%<(17)<%an>%C(red)%d %Creset %s'"
-  printf "${WARN}Don't forget to set your user.name and user.email with git config --global user.name = <etc>${NC}\n"
+    echo 'Configuring git..'
+    git config --global --replace-all core.editor 'nvim'
+    git config --global --replace-all core.autocrlf false
+    git config --global --replace-all init.defaultBranch 'main'
+    git config --global --replace-all alias.aa 'add --all'
+    git config --global --replace-all alias.br 'branch --sort=committerdate'
+    git config --global --replace-all alias.st 'status'
+    git config --global --replace-all alias.count 'shortlog -sn'
+    git config --global --replace-all alias.ff 'pull --ff-only'
+    git config --global --replace-all alias.co 'checkout'
+    git config --global --replace-all alias.ci 'commit --verbose'
+    git config --global --replace-all alias.di 'diff'
+    git config --global --replace-all alias.dc 'diff --cached'
+    git config --global --replace-all alias.amend 'commit --amend'
+    git config --global --replace-all alias.ffa 'fetch --all && git rebase origin/master'
+    git config --global --replace-all alias.push-new 'push -u origin HEAD'
+    git config --global --replace-all alias.ra "log --abbrev-commit --pretty=format:'%<(7)%C(yellow)%h %Cgreen%<(15)%cr%C(bold cyan)%<(17)<%an>%C(red)%d %Creset %s'"
+    printf "${WARN}Don't forget to set your user.name and user.email with git config --global user.name = <etc>${NC}\n"
 }
 
 gnome_config() {
-  echo 'Setting gnome configuration...'
-  # Set caps lock as control on Gnome Wayland
-  gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier']"
-}
-
-ensure_rust() {
-  if [[ ! $(command -v rustup) ]]; then
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-  fi
+    echo 'Setting gnome configuration...'
+    # Set caps lock as control on Gnome Wayland
+    gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier']"
+    # step xb. tap to click (regular settings mousepad)
+    # step xc. disable power button (main settings, cli)
 }
 
 ensure_go_tools() {
-  if [[ ! $(command -v goimports) ]]; then
-    go install golang.org/x/tools/cmd/goimports@latest
-  fi
-  if [[ ! $(command -v gopls) ]]; then
-    go install golang.org/x/tools/gopls@latest
-  fi
+    command -v goimports || go install golang.org/x/tools/cmd/goimports@latest
+    command -v gopls || go install golang.org/x/tools/cmd/gopls@latest
 }
 
+if set_package_manager; then
+    yes_or_no "Install packages?" && install_packages ${core_tools[@]} ${application_tools[@]}
+    if [[ "$DESKTOP_SESSION" = 'gnome' ]]; then
+        gnome_config
+        yes_or_no "Install user/GUI packages?" && install_packages ${user_tools[@]}
+    fi
+fi
+
 git_config
-ensure_rust
+command -v nvim || ensure_neovim # install neovim if not found on PATH
+ensure_neovim_config && ensure_neovim_plugins
 ensure_go_tools
 
 
-# if [[ $(command -v gnome-shell) ]]; then
-#   gnome_config()
-# fi
-
-# ?? How to in gnome/wayland?
-
-# step x. Configure virtualisation
-# step xa. Caps as control (gnome tweaks, cli?)
-# step xb. tap to click (regular settings mousepad)
-# step xc. disable power button (main settings, cli)
-# step xd. clean packages up:
-#   - remove gnome games
 # step xe. install firmware-realtek firmware-misc-nonfree (and ucode?)
 #   - when compiling the kernel I had some warning pop up and it was just some nonfree software missing.
 #   - run `update-initramfs -u` to recompile the Initial RAM filesystem (startup process for linux)
-# TODO issue, after disconnecting from thunderbolt closed lid, black screen persists on display when laptop opened.
 
 # EDITOR=vim virsh edit win11
 # under vram, double the 3 values and save - it seems like you don't have enough memory by default to go 1440p ultrawidescreen.
