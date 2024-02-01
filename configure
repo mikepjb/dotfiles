@@ -28,7 +28,7 @@ set +e
   nvim-telescope/telescope.nvim
   nvim-treesitter/nvim-treesitter
   neovim/nvim-lspconfig
-  folke/trouble.nvim
+  mikepjb/lotus.nvim
 )
 
 # Override these by prefixing them e.g: `NEOVIM_REPO=internal-mirror.com/neovim ./build-neovim`

@@ -3,6 +3,7 @@
 -- visual/editor behaviour
 vim.opt.termguicolors = true -- enable 24-bit RGB color
 vim.opt.guicursor = "" -- always block cursor, as nature intended
+vim.opt.showtabline = 2 -- always show tabline
 vim.opt.nu = true
 vim.opt.mouse = "a"
 vim.opt.scrolloff = 8
@@ -113,70 +114,73 @@ local languageGroup = vim.api.nvim_create_augroup("language", { clear = true })
 vim.api.nvim_create_autocmd("CmdwinEnter", { command = ":unmap <CR>", group = languageGroup })
 vim.api.nvim_create_autocmd("CmdwinLeave", { command = ":lua mapRunFile<CR>", group = languageGroup })
 vim.api.nvim_create_autocmd("BufReadPost", {
-  command = "nnoremap <buffer> <CR> <CR>",
-  pattern = "quickfix",
-  group = languageGroup
+    command = "nnoremap <buffer> <CR> <CR>",
+    pattern = "quickfix",
+    group = languageGroup
 })
 
 if vim.fn.isdirectory(vim.fn.expand('~/.config/nvim/pack/base')) ~= 0 then
-  vim.cmd.packadd("plenary.nvim")
-  vim.cmd.packadd("telescope.nvim")
-  vim.cmd.packadd("nvim-treesitter")
-  vim.cmd.packadd("trouble.nvim")
-  vim.cmd.packadd("nvim-lspconfig")
-  vim.cmd.packadd("vim-fugitive")
+    vim.cmd.packadd("plenary.nvim")
+    vim.cmd.packadd("telescope.nvim")
+    vim.cmd.packadd("nvim-treesitter")
+    vim.cmd.packadd("trouble.nvim")
+    vim.cmd.packadd("nvim-lspconfig")
+    vim.cmd.packadd("vim-fugitive")
+    vim.cmd.packadd("lotus.nvim")
 
-  require('telescope').setup({
-      defaults = { file_ignore_patterns = {"node_modules", ".git"} }
-  })
+    vim.cmd[[colorscheme lotus]]
 
-  require('trouble').setup {
-    icons = false
-  }
+    require('telescope').setup({
+        defaults = { file_ignore_patterns = {"node_modules", ".git"} }
+    })
 
-  require('nvim-treesitter.configs').setup({
-      highlight = { enable = true },
-      indent = { enable = true },
-      ensure_installed = {
-          "typescript", "javascript", "lua", "sql", "tsx", "go"
-      }
-  })
+    require('trouble').setup {
+        icons = false
+    }
 
-  -- Use an on_attach function to only map the following keys
-  -- after the language server attaches to the current buffer
-  local on_attach = function(client, bufnr)
-      -- Enable completion triggered by <c-x><c-o>
-      vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+    require('nvim-treesitter.configs').setup({
+        highlight = { enable = true },
+        indent = { enable = true },
+        ensure_installed = {
+            "typescript", "javascript", "lua", "sql", "tsx", "go"
+        }
+    })
 
-      -- Mappings.
-      -- See `:help vim.lsp.*` for documentation on any of the below functions
-      local bufopts = { noremap=true, silent=true, buffer=bufnr }
-      vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
-      vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
-      vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
-      vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
-      vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
-      vim.keymap.set('n', 'gj', vim.diagnostic.goto_next, bufopts)
-      vim.keymap.set('n', 'gk', vim.diagnostic.goto_prev, bufopts)
-      vim.keymap.set('n', '<space>q', vim.diagnostic.setqflist, bufopts)
-      vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
-      vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
-      vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
-  end
- 
-  require('lspconfig')['gopls'].setup({
-  on_attach = on_attach,
-  flags = flags,
-  settings = {
-    gopls = {
-      analyses = {
-        unusedparams = true,
-      },
-      staticcheck = true,
-      gofumpt = true,
-    },
-  },
-})
+    -- Use an on_attach function to only map the following keys
+    -- after the language server attaches to the current buffer
+    local on_attach = function(client, bufnr)
+        -- Enable completion triggered by <c-x><c-o>
+        vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+        -- Mappings.
+        -- See `:help vim.lsp.*` for documentation on any of the below functions
+        local bufopts = { noremap=true, silent=true, buffer=bufnr }
+        vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
+        vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
+        vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
+        vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
+        vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
+        vim.keymap.set('n', 'gj', vim.diagnostic.goto_next, bufopts)
+        vim.keymap.set('n', 'gk', vim.diagnostic.goto_prev, bufopts)
+        vim.keymap.set('n', '<space>q', vim.diagnostic.setqflist, bufopts)
+        vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
+        vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
+        vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
+    end
+
+    require('lspconfig')['gopls'].setup({
+        on_attach = on_attach,
+        flags = flags,
+        settings = {
+            gopls = {
+                analyses = {
+                    unusedparams = true,
+                },
+                staticcheck = true,
+                gofumpt = true,
+            },
+        },
+    })
 
 -- run goimports (from gopls) on save
 vim.api.nvim_create_autocmd("BufWritePre", {
