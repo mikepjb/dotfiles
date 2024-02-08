@@ -76,10 +76,12 @@ application_tools=(
     sqlite3
     nodejs
     postgresql
+    hugo
 )
 
 # nice to have
 user_tools=(
+    handbrake
     gimp
     inkscape
     chromium
@@ -196,7 +198,10 @@ pwd
 
 ensure_dirs
 
+echo '. ~/.bashrc' > $HOME/.bash_profile
+
 cat >$HOME/.bashrc <<EOL
+[[ -f /etc/bash_completion ]] && . /etc/bash_completion
 [[ $- =~ i ]] && stty -ixoff -ixon # Disable CTRL-S and CTRL-Q
  
 export XDG_DATA_HOME=$HOME/.local/share
