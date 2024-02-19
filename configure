@@ -49,6 +49,7 @@ vim_pkg="vim-gtk3"
 [[ -z "${TMPDIR+x}" ]] && TMPDIR=/tmp
 
 path_dirs=(
+    /usr/local/go/bin # golang default install via go.dev/doc/install
     $HOME/src/configure # configure repo home
     $HOME/go/bin # golang (GOPATH == HOME)
     $HOME/.local/bin # local scripts
