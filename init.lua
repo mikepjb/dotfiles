@@ -59,7 +59,7 @@ vim.keymap.set('i', '<C-l>', ' => ')
 vim.keymap.set('n', '<C-q>', ':q<CR>')
 vim.keymap.set('n', 'Q', '@q')
 vim.keymap.set('n', '<Leader>i', ':e ~/.config/nvim/init.lua<CR>')
-vim.keymap.set('n', '<Leader>n', ':e ~/.notes/index.md<CR>')
+vim.keymap.set('n', '<Leader>n', ':e ~/.notes/content/_index.md<CR>')
 vim.keymap.set('n', '<Leader>c', ':copen<CR>') -- current list
 vim.keymap.set('n', '<Leader>e', ':Explore<CR>')
 vim.keymap.set('n', '<BS>', '<C-w><C-h>', { noremap = true }) -- compatability
