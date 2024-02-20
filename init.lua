@@ -16,6 +16,7 @@ vim.opt.errorbells = false
 vim.opt.foldenable = false
 vim.opt.gdefault = true
 vim.opt.clipboard = "unnamedplus"
+vim.opt.completeopt = "menu" -- no 'preview' in the scratch buffer please.
 vim.g.sh_noisk = 1 -- stop vim messing with iskeyword when opening a shell file
 vim.g.ftplugin_sql_omni_key = "<Nop>" -- stop sql filetype stealing <C-c>
 
@@ -39,7 +40,8 @@ vim.opt.undofile = true
 
 vim.opt.hlsearch = true
 vim.opt.incsearch = true
--- vim.opt.smartcase = true -- does not seem to apply
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
 
 vim.g.mapleader = " "
 vim.keymap.set("n", "<Tab>", "<C-^>")
