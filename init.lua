@@ -60,8 +60,8 @@ vim.keymap.set('i', '<C-e>', '<End>')
 vim.keymap.set('i', '<C-l>', ' => ')
 vim.keymap.set('n', '<C-q>', ':q<CR>')
 vim.keymap.set('n', 'Q', '@q')
-vim.keymap.set('n', '<Leader>i', ':e ~/.config/nvim/init.lua<CR>')
-vim.keymap.set('n', '<Leader>n', ':e ~/.notes/content/_index.md<CR>')
+vim.keymap.set('n', '<Leader>i', ':tabnew ~/.config/nvim/init.lua<CR>')
+vim.keymap.set('n', '<Leader>n', ':tabnew ~/.notes/content/_index.md<CR>')
 vim.keymap.set('n', '<Leader>c', ':copen<CR>') -- current list
 vim.keymap.set('n', '<Leader>e', ':Explore<CR>')
 vim.keymap.set('n', '<BS>', '<C-w><C-h>', { noremap = true }) -- compatability
@@ -133,7 +133,7 @@ if vim.fn.isdirectory(vim.fn.expand('~/.config/nvim/pack/base')) ~= 0 then
     vim.cmd[[colorscheme lotus]]
 
     require('telescope').setup({
-        defaults = { file_ignore_patterns = {"node_modules", ".git"} }
+        defaults = { file_ignore_patterns = {"node_modules", ".git", "public"} }
     })
 
     require('trouble').setup {
@@ -170,7 +170,8 @@ if vim.fn.isdirectory(vim.fn.expand('~/.config/nvim/pack/base')) ~= 0 then
         vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
     end
 
-    require('lspconfig')['gopls'].setup({
+    local lspconfig = require('lspconfig')
+    lspconfig['gopls'].setup({
         on_attach = on_attach,
         flags = flags,
         settings = {
@@ -183,6 +184,9 @@ if vim.fn.isdirectory(vim.fn.expand('~/.config/nvim/pack/base')) ~= 0 then
             },
         },
     })
+    lspconfig['clojure_lsp'].setup({ on_attach = on_attach })
+    lspconfig['tsserver'].setup({ on_attach = on_attach })
+    lspconfig['rust_analyzer'].setup({ on_attach = on_attach })
 
 -- run goimports (from gopls) on save
 vim.api.nvim_create_autocmd("BufWritePre", {
