@@ -111,6 +111,36 @@ function mapRunFile()
 end
 mapRunFile()
 
+local html5Content = [[
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- <link rel="stylesheet" href="/css/style.css" type="text/css" media="all" />  -->
+        <meta property="og:title" content="My New Page" />
+        <meta property="og:description" content="A brand new page" />
+        <meta property="og:image" content="https://example.com/preview-image.png" />
+        <title>New Page</title>
+    </head>
+    <body>
+    </body>
+</html>
+]]
+
+function html5()
+    local splitContent = {}
+    for i in string.gmatch(html5Content, "[^\r\n]+") do
+        table.insert(splitContent, i)
+    end
+
+    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    vim.api.nvim_buf_set_lines(0, row - 1, row, true, splitContent)
+end
+
+vim.api.nvim_create_user_command('HTML', html5, { desc = 'Insert html5 template' })
+
+
 
 local languageGroup = vim.api.nvim_create_augroup("language", { clear = true })
 vim.api.nvim_create_autocmd("CmdwinEnter", { command = ":unmap <CR>", group = languageGroup })
@@ -185,7 +215,7 @@ if vim.fn.isdirectory(vim.fn.expand('~/.config/nvim/pack/base')) ~= 0 then
         },
     })
     lspconfig['clojure_lsp'].setup({ on_attach = on_attach })
-    lspconfig['tsserver'].setup({ on_attach = on_attach })
+    -- lspconfig['tsserver'].setup({ on_attach = on_attach })
     lspconfig['rust_analyzer'].setup({ on_attach = on_attach })
 
 -- run goimports (from gopls) on save
