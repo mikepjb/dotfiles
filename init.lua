@@ -111,26 +111,19 @@ function mapRunFile()
 end
 mapRunFile()
 
-local html5Content = [[
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- <link rel="stylesheet" href="/css/style.css" type="text/css" media="all" />  -->
-        <meta property="og:title" content="My New Page" />
-        <meta property="og:description" content="A brand new page" />
-        <meta property="og:image" content="https://example.com/preview-image.png" />
-        <title>New Page</title>
-    </head>
-    <body>
-    </body>
-</html>
+local tags = [[
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- <link rel="stylesheet" href="/css/style.css" type="text/css" media="all" />  -->
+<meta property="og:title" content="My New Page" />
+<meta property="og:description" content="A brand new page" />
+<meta property="og:image" content="https://example.com/preview-image.png" />
+<title>New Page</title>
 ]]
 
-function html5()
+function htmlTags()
     local splitContent = {}
-    for i in string.gmatch(html5Content, "[^\r\n]+") do
+    for i in string.gmatch(tags, "[^\r\n]+") do
         table.insert(splitContent, i)
     end
 
@@ -138,7 +131,7 @@ function html5()
     vim.api.nvim_buf_set_lines(0, row - 1, row, true, splitContent)
 end
 
-vim.api.nvim_create_user_command('HTML', html5, { desc = 'Insert html5 template' })
+vim.api.nvim_create_user_command('Tags', htmlTags, { desc = 'Insert default webpage head tags' })
 
 
 
