@@ -29,6 +29,7 @@ set +e
   nvim-treesitter/nvim-treesitter
   neovim/nvim-lspconfig
   mikepjb/lotus.nvim
+  folke/trouble.nvim
 )
 
 # Override these by prefixing them e.g: `NEOVIM_REPO=internal-mirror.com/neovim ./build-neovim`
@@ -49,6 +50,7 @@ vim_pkg="vim-gtk3"
 [[ -z "${TMPDIR+x}" ]] && TMPDIR=/tmp
 
 path_dirs=(
+    $HOME/.cargo/bin # rustup install
     /usr/local/go/bin # golang default install via go.dev/doc/install
     $HOME/src/configure # configure repo home
     $HOME/go/bin # golang (GOPATH == HOME)
