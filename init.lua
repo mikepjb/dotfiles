@@ -58,6 +58,7 @@ vim.keymap.set('i', '<C-f>', '<Right>')
 vim.keymap.set('i', '<C-a>', '<Home>')
 vim.keymap.set('i', '<C-e>', '<End>')
 vim.keymap.set('i', '<C-l>', ' => ')
+vim.keymap.set('i', '<C-u>', ' -> ')
 vim.keymap.set('n', '<C-q>', ':q<CR>')
 vim.keymap.set('n', 'Q', '@q')
 vim.keymap.set('n', '<Leader>i', ':tabnew ~/.config/nvim/init.lua<CR>')
@@ -151,9 +152,10 @@ if vim.fn.isdirectory(vim.fn.expand('~/.config/nvim/pack/base')) ~= 0 then
     vim.cmd.packadd("trouble.nvim")
     vim.cmd.packadd("nvim-lspconfig")
     vim.cmd.packadd("vim-fugitive")
-    vim.cmd.packadd("lotus.nvim")
+    -- vim.cmd.packadd("lotus.nvim")
+    vim.cmd.packadd("tokyonight.nvim")
 
-    vim.cmd[[colorscheme lotus]]
+    vim.cmd[[colorscheme tokyonight]]
 
     require('telescope').setup({
         defaults = { file_ignore_patterns = {"node_modules", ".git", "public"} }
@@ -210,6 +212,7 @@ if vim.fn.isdirectory(vim.fn.expand('~/.config/nvim/pack/base')) ~= 0 then
     lspconfig['clojure_lsp'].setup({ on_attach = on_attach })
     -- lspconfig['tsserver'].setup({ on_attach = on_attach })
     lspconfig['rust_analyzer'].setup({ on_attach = on_attach })
+    lspconfig['hls'].setup({ on_attach = on_attach })
 
 -- run goimports (from gopls) on save
 vim.api.nvim_create_autocmd("BufWritePre", {
