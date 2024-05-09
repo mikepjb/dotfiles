@@ -223,7 +223,7 @@ export LSCOLORS="ExGxBxDxCxEgEdxbxgxcxd"
 export TERM='xterm-256color'
 export TMPDIR=$TMPDIR
 
-alias vi='nvim'
+alias vi='nvim || vim'
 alias x='tmux attach -t vty || tmux new -s vty'
 alias gr='cd \$(git rev-parse --show-toplevel || echo ".")'
 
@@ -287,6 +287,11 @@ gnome_config() {
 ensure_go_tools() {
     command -v goimports || go install golang.org/x/tools/cmd/goimports@latest
     command -v gopls || go install golang.org/x/tools/cmd/gopls@latest
+}
+
+ensure_rust_tools() {
+    # not done yet
+    rustup component add rust-analyzer # lsp
 }
 
 if set_package_manager; then

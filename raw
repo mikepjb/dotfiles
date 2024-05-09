@@ -1,0 +1,38 @@
+# raw configure
+# even more basic
+
+# .vimrc (vim > neovim, no plugins)
+# .bashrc (again minimal)
+# .tmux.conf (maybe created from bashrc?)
+# bashrc should set the defaults for the rest of the experience with the exception of vimrc
+# so we just need to copy 2 files
+# - vimrc for the editor
+# - bashrc for the entire environment
+
+# check for cli tools (e.g rustc? grep?)
+
+# default colorschemes in vim
+# although vim 9? and later provide retrobox which is superawesome, we don't have that on more legacy setups
+# so vim 7 is the oldest we support which has
+# desert (..pretty good but hate blue comments, kinda gruvbox-esque)
+# evening
+# industry (yeah.. this is pretty neat.)
+# pablo (dark blue usage too much, similar to industry but worse)
+# peachpuff
+# slate (too muted)
+# HOWEVER ---
+# vim colorschemes aren't consistent
+# ideally have something that works regardless of background (pure black/dark grey)
+# COLORTERM, TERM settings, termguicolors, t_Co
+# optional nuclear option, set colorscheme and then:
+# highlight Normal ctermbg=NONE
+# highlight nonText ctermbg=NONE
+# it seems Windows Terminal/Powershell SSH
+
+# termguicolors seems _pretty_ compatible
+
+
+
+
+
+# LSCOLORS & GREPCOLORS
