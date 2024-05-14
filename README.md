@@ -1,5 +1,60 @@
 # Configure
 
+A minimal, optimised configuration for working on Linux.
+
+This runs without any vim plugins.
+
+## Getting Started
+
+Either:
+1. git clone this repo and run `./configure` which will set everything up
+2. just copy the vimrc across (useful in instances where you are working in a more secure environment).
+
+vim is the main part, can we include the rest as vim functions e.g:
+    - setting bash?
+    - setting git aliases?
+    - check tools? e.g node/rustc/sqlite3
+    - check subtools e.g rust analyzer
+
+## Components
+
+- vim (a.k.a configured editor)
+- git (requires? Some nice aliases e.g git ra)
+- bash (requires minimal config)
+- tmux!
+- runtimes (e.g rustc/cargo via rustup & npm/node) ???
+    `rustup component add rust-analyzer # lsp`
+
+## Manual Steps
+
+You will need to:
+- setup your name/email on git as this can change via work/home/different environments.
+- Run these only if you are using Gnome:
+```bash
+# Set caps lock as control on Gnome Wayland
+gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier']"
+# prefer dark/light mode as you like
+gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+```
+
+## Philosophy a.k.a Why?
+
+This selection of tools are chosen to keep the common case fast (text editing &
+compiling software) whilst keeping anything extra to a minimum. This is
+because, like a software system, the more lines of code or in this case the
+more tools you have, the more bugs will occur and there is a limit before you
+start spending more time fixing your tooling and less on building your current
+target.
+
+Extra consideration has been given to making sure this configuration is usable
+in any environment (within reason), in the past I've built my own versions of
+vim/neovim and installed lists of packages but sometimes neither of these
+things are available to you (and they still cost time to maintain), ANY
+environment can be like this if you lose access to the internet, whether by
+design (travelling on a plane) or otherwise.
+
+(old text)
+
 Configuration script for setting up your Linux work environment.
 Aimed at Debian but should also be able to setup the bare minimal install
 elsewhere. Once you run this, the script should be available on your path
