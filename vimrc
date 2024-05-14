@@ -64,7 +64,7 @@ let s:bashrc = "[[ -f /etc/bash_completion ]] && . /etc/bash_completion"
 	\ . "\nexport PATH=$HOME/.cargo/bin:$HOME/.config/npm/bin:/usr/local/bin:/usr/bin:/bin"
 	\ . "\nalias vi='vim' x='tmux attach -t x || tmux new -s x'"
 	\ . "\nalias gr='cd $(git rev-parse --shot-toplevel || echo \".\")'"
-	\ . "\nPS1='\W($(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo \"!\")) \$ '"
+	\ . "\nPS1='\\W($(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo \"!\")) \\$ '"
 
 let s:tmux = "set -g history-limit 100000; set -g status off; set -g lock-after-time 0"
 	\ . "\nset-window-option -g alternate-screen on"
