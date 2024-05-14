@@ -58,19 +58,19 @@ inoremap <C-c> <Esc>|nnoremap <CR> :make<CR>|nnoremap Q @q
 inoremap <C-l> <Space>=><Space>|inoremap <C-u> <Space>-><Space>
 
 let s:bashrc = "[[ -f /etc/bash_completion ]] && . /etc/bash_completion"
-	\ .. "\n[[ hB =~ i ]] && stty -ixoff -ixon # Disable CTRL-S and CTRL-Q"
-	\ .. "\nexport EDITOR=vim CDPATH=\".:$HOME/src\" PAGER='less -S'"
-	\ .. "\nexport TERM='xterm-256color' NPM_CONFIG_PREFIX=$HOME/.config/npm"
-	\ .. "\nexport PATH=$HOME/.cargo/bin:$HOME/.config/npm/bin:/usr/local/bin:/usr/bin:/bin"
-	\ .. "\nalias vi='vim' x='tmux attach -t x || tmux new -s x'"
-	\ .. "\nalias gr='cd $(git rev-parse --shot-toplevel || echo \".\")'"
-	\ .. "\nPS1='\W($(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo \"!\")) \$ '"
+	\ . "\n[[ hB =~ i ]] && stty -ixoff -ixon # Disable CTRL-S and CTRL-Q"
+	\ . "\nexport EDITOR=vim CDPATH=\".:$HOME/src\" PAGER='less -S'"
+	\ . "\nexport TERM='xterm-256color' NPM_CONFIG_PREFIX=$HOME/.config/npm"
+	\ . "\nexport PATH=$HOME/.cargo/bin:$HOME/.config/npm/bin:/usr/local/bin:/usr/bin:/bin"
+	\ . "\nalias vi='vim' x='tmux attach -t x || tmux new -s x'"
+	\ . "\nalias gr='cd $(git rev-parse --shot-toplevel || echo \".\")'"
+	\ . "\nPS1='\W($(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo \"!\")) \$ '"
 
 let s:tmux = "set -g history-limit 100000; set -g status off; set -g lock-after-time 0"
-	\ .. "\nset-window-option -g alternate-screen on"
-	\ .. "\nunbind C-b; set -g prefix C-q; unbind x; bind x kill-pane"
-	\ .. "\nset -gq utf-8 on; set -g mouse on; set -g set-clipboard external;"
-	\ .. "\nset -g default-terminal \"tmux-256color\"; set -ag terminal-overrides \",$TERM:RGB\""
+	\ . "\nset-window-option -g alternate-screen on"
+	\ . "\nunbind C-b; set -g prefix C-q; unbind x; bind x kill-pane"
+	\ . "\nset -gq utf-8 on; set -g mouse on; set -g set-clipboard external;"
+	\ . "\nset -g default-terminal \"tmux-256color\"; set -ag terminal-overrides \",$TERM:RGB\""
 
 fun! Dots() abort " create basic dotfiles
 	call writefile(split(s:bashrc, '\n'), expand('$HOME/.bashrc'))
