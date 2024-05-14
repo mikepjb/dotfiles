@@ -17,7 +17,7 @@ let g:omni_sql_no_default_maps = 1 | let g:sh_noisk = 1 " prevent remaps
 let g:netrw_banner = 0 | let g:netrw_liststyle = 3 " netrw config
 
 fun! BaseTheme() abort " mini theme inside a function
-	colorscheme default | set notermguicolors t_Co=256 background=dark
+	hi! clear | colorscheme default | set notgc t_Co=256 background=dark
 	hi! Normal ctermfg=253 ctermbg=234 cterm=NONE
 	hi! NonText ctermfg=253 ctermbg=234 cterm=NONE
 	hi! StatusLine ctermfg=253 ctermbg=235 cterm=bold
@@ -84,7 +84,7 @@ fun! Dots() abort " create basic dotfiles
 			\"alias.co 'checkout'",  "alias.ci 'commit --verbose'",
 			\"alias.di 'diff'",      "alias.amend 'commit --amend'",
 			\"alias.push-new 'push -u origin HEAD'",
-			\"alias.ra \"log --pretty=format:'%C(yellow)%h" .. s:f .. "'\""]
-		let s:git = s:git .. s:gPre .. s
+			\"alias.ra \"log --pretty=format:'%C(yellow)%h" . s:f . "'\""]
+		let s:git = s:git . s:gPre . s
 	endfor | call system(s:git[1:]) " remove the first ; before calling
 endfun
