@@ -17,8 +17,7 @@ let g:omni_sql_no_default_maps = 1 | let g:sh_noisk = 1 " prevent remaps
 let g:netrw_banner = 0 | let g:netrw_liststyle = 3 " netrw config
 
 fun! BaseTheme() abort " mini theme inside a function
-	hi clear | colorscheme default
-	set notermguicolors t_Co=256 background=dark
+	colorscheme default | set notermguicolors t_Co=256 background=dark
 	hi! Normal ctermfg=253 ctermbg=234 cterm=NONE
 	hi! NonText ctermfg=253 ctermbg=234 cterm=NONE
 	hi! StatusLine ctermfg=253 ctermbg=235 cterm=bold
@@ -36,7 +35,7 @@ fun! BaseTheme() abort " mini theme inside a function
 	hi! Comment ctermfg=245 | hi! link Number Keyword
 	hi! link String Keyword | hi! link markdownH2 Keyword
 	hi! link markdownH3 Function | hi! link markdownH4 Type
-endfun
+endfun | call BaseTheme()
 
 augroup Base " theme + <CR> mappings + :make filetype configs
 	autocmd! | autocmd ColorScheme default call BaseTheme()
@@ -46,8 +45,6 @@ augroup Base " theme + <CR> mappings + :make filetype configs
 	autocmd QuickFixCmdPost    l* nested lwindow
 	autocmd FileType rust setlocal makeprg=cargo\ build
 augroup END
-
-colorscheme default
 
 let mapleader = " " " -- keybindings
 nnoremap <leader>e :E<CR>|nnoremap <leader>r :E %:h<CR>
