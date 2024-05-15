@@ -24,6 +24,8 @@ vim is the main part, can we include the rest as vim functions e.g:
 - tmux!
 - runtimes (e.g rustc/cargo via rustup & npm/node) ???
     `rustup component add rust-analyzer # lsp`
+    - things like `npm` require a registry to be set for internal stuff
+    - TODO ^^^
 
 ## Manual Steps
 
@@ -53,7 +55,16 @@ things are available to you (and they still cost time to maintain), ANY
 environment can be like this if you lose access to the internet, whether by
 design (travelling on a plane) or otherwise.
 
-(old text)
+## Minor Detail
+
+- You shouldn't set your own `TERM` value, unless you are logging into a remote
+  system where the local and remote machines have different terminal databases.
+- Vim can use `COLORFGBG` or `t_BG` to determine whether background should be
+  light or dark. This can be important as changing the background value
+  retriggers loading the current theme and `default` calls `bg&` which will set
+  background to light when left to it's own devices.
+
+#### (old text)
 
 Configuration script for setting up your Linux work environment.
 Aimed at Debian but should also be able to setup the bare minimal install

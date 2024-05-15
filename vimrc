@@ -1,6 +1,6 @@
 " Editor Configuration for both Vim & Neovim
 
-autocmd! | set nocompatible encoding=UTF-8
+autocmd! | set nocompatible encoding=UTF-8 notgc t_Co=256
 syntax on | filetype plugin indent on " see `:help filetype-overview`
 set path+=** wildmenu wildignore=*.jpg,*.png,*.gif,*.pdf " -- behaviour settings
 set mouse=a clipboard=unnamed,unnamedplus nobackup gdefault autoindent
@@ -15,9 +15,20 @@ set cursorline number showmatch laststatus=2 showtabline=2 " -- visual settings
 set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 let g:omni_sql_no_default_maps = 1 | let g:sh_noisk = 1 " prevent remaps
 let g:netrw_banner = 0 | let g:netrw_liststyle = 3 " netrw config
+let $COLORFGBG='7;0' " ensure terminal vim defaults to dark background with bg&
 
+augroup Base " theme + <CR> mappings + :make filetype configs
+	autocmd! | autocmd ColorScheme default call BaseTheme()
+	autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
+	autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
+	autocmd QuickFixCmdPost [^l]* nested cwindow
+	autocmd QuickFixCmdPost    l* nested lwindow
+	autocmd FileType rust setlocal makeprg=cargo\ build
+augroup END
+
+" how does t_RB affect background&
+" also, t_BG?
 fun! BaseTheme() abort " mini theme inside a function
-	hi! clear | colorscheme default | set notgc t_Co=256 background=dark
 	hi! Normal ctermfg=253 ctermbg=234 cterm=NONE
 	hi! NonText ctermfg=253 ctermbg=234 cterm=NONE
 	hi! StatusLine ctermfg=253 ctermbg=235 cterm=bold
@@ -35,16 +46,7 @@ fun! BaseTheme() abort " mini theme inside a function
 	hi! Comment ctermfg=245 | hi! link Number Keyword
 	hi! link String Keyword | hi! link markdownH2 Keyword
 	hi! link markdownH3 Function | hi! link markdownH4 Type
-endfun | call BaseTheme()
-
-augroup Base " theme + <CR> mappings + :make filetype configs
-	autocmd! | autocmd ColorScheme default call BaseTheme()
-	autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
-	autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
-	autocmd QuickFixCmdPost [^l]* nested cwindow
-	autocmd QuickFixCmdPost    l* nested lwindow
-	autocmd FileType rust setlocal makeprg=cargo\ build
-augroup END
+endfun | colorscheme default
 
 let mapleader = " " " -- keybindings
 nnoremap <leader>e :E<CR>|nnoremap <leader>r :E %:h<CR>
@@ -58,21 +60,22 @@ inoremap <C-c> <Esc>|nnoremap <CR> :make<CR>|nnoremap Q @q
 inoremap <C-l> <Space>=><Space>|inoremap <C-u> <Space>-><Space>
 
 let s:bashrc = "[[ -f /etc/bash_completion ]] && . /etc/bash_completion"
-	\ . "\n[[ hB =~ i ]] && stty -ixoff -ixon # Disable CTRL-S and CTRL-Q"
-	\ . "\nexport EDITOR=vim CDPATH=\".:$HOME/src\" PAGER='less -S'"
-	\ . "\nexport TERM='xterm-256color' NPM_CONFIG_PREFIX=$HOME/.config/npm"
-	\ . "\nexport PATH=$HOME/.cargo/bin:$HOME/.config/npm/bin:/usr/local/bin:/usr/bin:/bin"
-	\ . "\nalias vi='vim' x='tmux attach -t x || tmux new -s x'"
-	\ . "\nalias gr='cd $(git rev-parse --shot-toplevel || echo \".\")'"
-	\ . "\nPS1='\\W($(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo \"!\")) \\$ '"
+	\."\n[[ hB =~ i ]] && stty -ixoff -ixon # Disable CTRL-S and CTRL-Q"
+	\."\nexport EDITOR=vim CDPATH=\".:$HOME/src\" PAGER='less -S' COLORFGBG='7;0'"
+	\."\nexport TERM='xterm-256color' NPM_CONFIG_PREFIX=$HOME/.npm"
+	\."\nexport PATH=$HOME/.cargo/bin:$HOME/.npm/bin:/usr/local/bin:/usr/bin:/bin"
+	\."\nalias vi='vim' x='tmux attach -t x || tmux new -s x'"
+	\."\nalias gr='cd $(git rev-parse --shot-toplevel || echo \".\")'"
+	\."\nPS1='\\W($(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo \"!\")) \\$ '"
 
 let s:tmux = "set -g history-limit 100000; set -g status off; set -g lock-after-time 0"
-	\ . "\nset-window-option -g alternate-screen on"
-	\ . "\nunbind C-b; set -g prefix C-q; unbind x; bind x kill-pane"
-	\ . "\nset -gq utf-8 on; set -g mouse on; set -g set-clipboard external;"
-	\ . "\nset -g default-terminal \"tmux-256color\"; set -ag terminal-overrides \",$TERM:RGB\""
+	\."\nset-window-option -g alternate-screen on"
+	\."\nunbind C-b; set -g prefix C-q; unbind x; bind x kill-pane"
+	\."\nset -gq utf-8 on; set -g mouse on; set -g set-clipboard external;"
+	\."\nset -g default-terminal \"tmux-256color\"; set -ag terminal-overrides \",$TERM:RGB\""
 
 fun! Dots() abort " create basic dotfiles
+	call writefile([". ~/.bashrc"], expand('$HOME/.bash_profile'))
 	call writefile(split(s:bashrc, '\n'), expand('$HOME/.bashrc'))
 	call writefile(split(s:tmux, '\n'), expand('$HOME/.tmux.conf'))
 	let s:gPre = ";git config --global --replace-all " | let s:git = ""
