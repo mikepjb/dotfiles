@@ -18,7 +18,8 @@ let g:netrw_banner = 0 | let g:netrw_liststyle = 3 " netrw config
 let $COLORFGBG='7;0' " ensure terminal vim defaults to dark background with bg&
 
 augroup Base " theme + <CR> mappings + :make filetype configs
-	autocmd! | autocmd ColorScheme default call BaseTheme()
+	autocmd!
+	autocmd ColorScheme default call BaseTheme()
 	autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
 	autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
 	autocmd QuickFixCmdPost [^l]* nested cwindow
