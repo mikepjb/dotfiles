@@ -27,8 +27,6 @@ augroup Base " theme + <CR> mappings + :make filetype configs
 	autocmd FileType rust setlocal makeprg=cargo\ build
 augroup END
 
-" how does t_RB affect background&
-" also, t_BG?
 fun! BaseTheme() abort " mini theme inside a function
 	hi! Normal ctermfg=253 ctermbg=234 cterm=NONE
 	hi! NonText ctermfg=253 ctermbg=234 cterm=NONE
