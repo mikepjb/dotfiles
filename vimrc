@@ -65,7 +65,7 @@ let s:bashrc = "[[ -f /etc/bash_completion ]] && . /etc/bash_completion"
 	\."\nexport PATH=$HOME/.cargo/bin:$HOME/.npm/bin:/usr/local/bin:/usr/bin:/bin"
 	\."\nalias vi='vim' x='tmux attach -t x || tmux new -s x'"
 	\."\nalias gr='cd $(git rev-parse --shot-toplevel || echo \".\")'"
-	\."\nPS1='\\W($(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo \"!\")) \\$ '"
+	\."\nPS1='\W($(git branch --show-current 2>/dev/null || echo \"!\")) \\$ '"
 
 let s:tmux = "set -g history-limit 100000; set -g status off; set -g lock-after-time 0"
 	\."\nset-window-option -g alternate-screen on"
@@ -79,6 +79,7 @@ fun! Dots() abort " create basic dotfiles
 	call writefile(split(s:tmux, '\n'), expand('$HOME/.tmux.conf'))
 	let s:gPre = ";git config --global --replace-all " | let s:git = ""
 	let s:f = " %C(cyan)%<(12)%cr %Cgreen%<(14,trunc)%aN%C(auto)%d %Creset%s"
+
 	for s in ["core.editor 'vim'",
 			\"core.autocrlf false",  "init.defaultBranch 'main'",
 			\"alias.aa 'add --all'", "alias.br 'branch --sort=committerdate'",
@@ -88,5 +89,5 @@ fun! Dots() abort " create basic dotfiles
 			\"alias.push-new 'push -u origin HEAD'",
 			\"alias.ra \"log --pretty=format:'%C(yellow)%h" . s:f . "'\""]
 		let s:git = s:git . s:gPre . s
-	endfor | call system(s:git[1:]) " remove the first ; before calling
+	endfor | call system("command -v git && $(" . s:git[1:] . ")")
 endfun
