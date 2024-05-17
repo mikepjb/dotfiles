@@ -45,6 +45,7 @@ fun! BaseTheme() abort " mini theme inside a function
 	hi! Comment ctermfg=245 | hi! link Number Keyword
 	hi! link String Keyword | hi! link markdownH2 Keyword
 	hi! link markdownH3 Function | hi! link markdownH4 Type
+	hi! link Constant PreProc
 endfun | colorscheme default
 
 let mapleader = " " " -- keybindings
