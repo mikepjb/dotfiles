@@ -2,37 +2,50 @@
 
 A minimal, optimised configuration for working on Linux.
 
-This runs without any vim plugins.
+This runs without any vim plugins, and assumes a minimal set of tools namely:
+
+- `vim` (anything 8+ but 9.1+ is preferred and quite easy to compile)
+- `bash`
+- `git`
+- rust runtime e.g `rustc`/`rustup`/`cargo`
+- javascript runtime e.g `npm`/`node`
+- `sqlite3`
+- `docker`? `postgres`?
 
 ## Getting Started
 
-Either:
-1. git clone this repo and run `./configure` which will set everything up
-2. just copy the vimrc across (useful in instances where you are working in a more secure environment).
 
-vim is the main part, can we include the rest as vim functions e.g:
-    - setting bash?
-    - setting git aliases?
-    - check tools? e.g node/rustc/sqlite3
-    - check subtools e.g rust analyzer
+1. Download (or copy/paste the vimrc file):  
+`wget -O ~/.vimrc https://raw.githubusercontent.com/mikepjb/configure/main/vimrc`
+or
+`git clone` and `ln -sfv`
+2. `vim +Dots +qall` or just run the `Dots` command when you open vim.
 
-## Components
+## How to use
 
-- vim (a.k.a configured editor)
-- git (requires? Some nice aliases e.g git ra)
-- bash (requires minimal config)
-- tmux!
-- runtimes (e.g rustc/cargo via rustup & npm/node) ???
-    `rustup component add rust-analyzer # lsp`
-    - things like `npm` require a registry to be set for internal stuff
-    - TODO ^^^
+- `vim` for text editing
+- `nohup ./a_script.sh &` for running a background process during development.
 
 ## Manual Steps
 
 You will need to:
-- setup your name/email on git as this can change via work/home/different environments.
-- Run these only if you are using Gnome:
+1. setup your name/email on git as this can change via work/home/different environments.
+2. add rust tools:
+```
+rustup component add rust-src # include rust source code for jumping
+```
+3. add javascript tools
+4. compile vim if your OS package manager doesn't include 9.1+:
 ```bash
+# git clone/source the vim source code a cd into the directory
+./configure --with-features=huge --prefix=$HOME/.local
+make VMRUNTIMEDIR=$HOME/.local/share/vim/vim9
+make install
+```
+8. Run these only if you are using Gnome:
+```bash
+# Set your npm registry if need be (e.g Artifactory/in protected environment)
+npm config set registry <registry-url>
 # Set caps lock as control on Gnome Wayland
 gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier']"
 # prefer dark/light mode as you like
@@ -55,7 +68,28 @@ things are available to you (and they still cost time to maintain), ANY
 environment can be like this if you lose access to the internet, whether by
 design (travelling on a plane) or otherwise.
 
-## Minor Detail
+## Why?
+
+_Some decisions may seem strange, some decisions are documented here_
+
+### Not included
+
+- `tmux` - I used to use tmux frequently with splits and windows and 'live
+  inside' the multiplexer but actually this great power just grew the mess I
+  could create, I would have multiple tabs for different strands of work
+  because I didn't have to close down anything. Instead I find it better to be
+  forced into a singular workflow running something like a local server + text
+  editor at max with the ability to drop into bash for some quick interactive
+  work.
+- a color scheme - Do not bother modifying the colorscheme, most terminals
+  support 256+/truecolor. This means that you can just use a basic black
+  terminal with a theme in Vim without extra config.
+
+## Useful Commands you might have forgotten
+
+- `lsof -ti :8080` looks for processes listening on the given port.
+
+## Reference / Minor Detail
 
 - You shouldn't set your own `TERM` value, unless you are logging into a remote
   system where the local and remote machines have different terminal databases.
@@ -63,98 +97,3 @@ design (travelling on a plane) or otherwise.
   light or dark. This can be important as changing the background value
   retriggers loading the current theme and `default` calls `bg&` which will set
   background to light when left to it's own devices.
-
-#### (old text)
-
-Configuration script for setting up your Linux work environment.
-Aimed at Debian but should also be able to setup the bare minimal install
-elsewhere. Once you run this, the script should be available on your path
-under `configure`, you can edit this with `viw configure` from anywhere.
-
-There is also a `server` setup script for configuring (again primarily Debian)
-Linux servers to be used for running applications with
-nginx/https(certbot/cron)/sqlite. (note golang/rust is preferable for single
-binary distribution)
-
-Download (or copy/paste the single file):  
-`wget -O ~/.local/bin/configure https://raw.githubusercontent.com/mikepjb/configure/main/configure`
-
-## Running in restricted environments
-
-The neovim script is designed to adapt to restricted environments where plugin repos are only available via internal mirrors, you can control this with environment variables like so:
-
-```
-PLUGIN_URL_MIDDLE="/" \
-PLUGIN_URL_BASE="https://example-internal-repo.com/api/github" \
-PLUGIN_EXT="tar.gz" \
-./configure
-```
-
-## Color Scheme
-
-_No script used for this, it's usually a one time setting change and each terminal stores this information quite differently._
-
-### Hex
-```
-foreground:     #ffffff
-background:     #2c2c2c
-cursorColor:    #ffffff
-black:          #444444
-bright-black:   #5e5e5e
-red:            #ffb2b2
-bright-red:     #ff8c8c
-green:          #cbffb2
-bright-green:   #8bff95
-yellow:         #ffdfb2
-bright-yellow:  #ffd08d
-blue:           #b3ccff
-bright-blue:    #4fa7ff
-magenta:        #ffb3ff
-bright-magenta: #ff8dff
-cyan:           #b2fff5
-bright-cyan:    #8dfff0
-white:          #cdcdcd
-bright-white:   #e5e5e5
-```
-
-### RGB
-```
-foreground:     255,255,255
-background:     44,44,44
-cursorColor:    255,255,255
-black:          68,68,68
-bright-black:   94,94,94
-red:            255,178,178
-bright-red:     255,140,140
-green:          203,255,178
-bright-green:   139,255,149
-yellow:         255,223,178
-bright-yellow:  255,208,141
-blue:           179,204,255
-bright-blue:    79,167,255
-magenta:        255,179,255
-bright-magenta: 255,141,255
-cyan:           178,255,245
-bright-cyan:    141,255,240
-white:          205,205,205
-bright-white:   229,229,229
-```
-
-## Why?
-
-_Some decisions may seem strange, some decisions are documented here_
-
-### Tmux C-q, unergonomic bindings & hidden status
-
-I used to have the tmux prefix bound to M-; with additional M-o+M-O bindings to
-quickly and comfortably move between panes and buffers. However I am trying to
-prevent myself doing that so easily. The reason for this is that I believe
-focusing on a single window leads to more streamlined development. If you find
-yourself opening multiple windows, especially one to look through long logs
-(perhaps from the entire output of your test suite/running server) then you are
-patching up a bad process.
-
-## Useful Commands you might have forgotten
-
-
-- `lsof -ti :8080` looks for processes listening on the given port.
