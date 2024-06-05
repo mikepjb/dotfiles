@@ -30,6 +30,7 @@ nnoremap <leader>e :E<CR>|nnoremap <leader>r :E %:h<CR>
 nnoremap <leader>f :find<space>
 nnoremap <leader>t :!ctags -R .<space>
 nnoremap <Leader>n :tabnew ~/.notes/content/_index.md<CR>
+nnoremap gp :silent %!prettier --stdin-filepath %<CR>
 nnoremap <C-j> <C-w><C-j>|nnoremap <C-k> <C-w><C-k>
 nnoremap <C-h> <C-w><C-h>|nnoremap <C-l> <C-w><C-l>
 nnoremap <Tab> <C-^>|nnoremap <C-g> :noh<CR><C-g>|nnoremap <C-q> :q<CR>
