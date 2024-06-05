@@ -44,7 +44,7 @@ colorscheme retrobox
 let s:bashrc =<<EOD
 [[ -f /etc/bash_completion ]] && . /etc/bash_completion
 [[ hB =~ i ]] && stty -ixoff -ixon # Disable CTRL-S and CTRL-Q
-export EDITOR=vim CDPATH=\".:$HOME/src\" PAGER='less -S'
+export EDITOR=vim CDPATH=".:$HOME/src" PAGER='less -S'
 export TERM='xterm-256color' NPM_CONFIG_PREFIX=$HOME/.npm
 export PATH=$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
 export RUST_SRC=$(rustc --print sysroot)/lib/rustlib/src/rust/library/
