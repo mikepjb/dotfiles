@@ -2,10 +2,10 @@
 
 autocmd! | set nocompatible encoding=UTF-8 notgc t_Co=256
 syntax on | filetype plugin indent on " see `:help filetype-overview`
+runtime macros/matchit.vim
 set path+=** wildmenu wildignore=*.jpg,*.png,*.gif,*.pdf " -- behaviour settings
 set mouse=a clipboard=unnamed,unnamedplus nobackup noswapfile gdefault
 set shiftwidth=4 tabstop=4 softtabstop=4 smarttab autoindent
-
 set wrap hidden visualbell autowrite textwidth=79 colorcolumn=80 scrolloff=3
 set incsearch hlsearch ignorecase " search preferences
 set spell showmode showcmd history=1000 undodir=~/.vim/backup undofile ur=10000
