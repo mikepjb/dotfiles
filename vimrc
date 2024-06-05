@@ -15,13 +15,13 @@ set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 let g:omni_sql_no_default_maps = 1 | let g:sh_noisk = 1 " prevent remaps
 let g:netrw_banner = 0 | let g:netrw_liststyle = 3 " netrw config
 
-augroup Base " theme + <CR> mappings + :make filetype configs
+augroup Base " <CR> mappings + :make filetype configs
 	autocmd!
 	autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
 	autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
 	autocmd QuickFixCmdPost [^l]* nested cwindow
 	autocmd QuickFixCmdPost    l* nested lwindow
-	autocmd BufRead *.rs :setlocal tags=./rusty-tags.vi;/,$RUST_SRC_PATH/rusty-tags.vi
+	autocmd BufRead *.rs :setlocal tags=./rusty-tags.vi;/,$RUST_SRC/rusty-tags.vi
 	autocmd FileType rust setlocal makeprg=cargo\ build
 augroup END
 
@@ -47,9 +47,10 @@ let s:bashrc =<<EOD
 export EDITOR=vim CDPATH=\".:$HOME/src\" PAGER='less -S'
 export TERM='xterm-256color' NPM_CONFIG_PREFIX=$HOME/.npm
 export PATH=$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
+export RUST_SRC=$(rustc --print sysroot)/lib/rustlib/src/rust/library/
 alias vi='vim' x='tmux attach -t x || tmux new -s x'
 alias gr='cd $(git rev-parse --shot-toplevel || echo \".\")'
-PS1='\\W($(git branch --show-current 2>/dev/null || echo \"!\")) \\$ '
+PS1='\W($(git branch --show-current 2>/dev/null || echo "!")) \$ '
 EOD
 
 fun! Dots() abort " create basic dotfiles
