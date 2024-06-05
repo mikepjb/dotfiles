@@ -50,6 +50,8 @@ npm config set registry <registry-url>
 gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier']"
 # prefer dark/light mode as you like
 gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+# Remap Ctrl+Alt+Delete logout binding that is easy to press when switching spaces.
+gsettings set org.gnome.settings-daemon.plugins.media-keys logout "['<Control><Alt><Shift>Delete']"
 ```
 
 ## Philosophy a.k.a Why?
