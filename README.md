@@ -25,6 +25,7 @@ or
 
 - `vim` for text editing
 - `nohup ./a_script.sh &` for running a background process during development.
+- Inside vim `:grep <search-term> <location/*>`
 
 ## Manual Steps
 
