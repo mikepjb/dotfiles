@@ -2,7 +2,7 @@
 
 autocmd! | setglobal nocp enc=UTF-8 tgc path=.,,**
 syntax on | filetype plugin indent on | runtime macros/matchit.vim
-set sb spr vb aw so=3 wmnu wig=*.jpg,*.png,*.gif,*.pdf " -- behaviour settings
+set sb spr vb aw so=3 wmnu wig=*.class,*.jpg,*.png,*.gif,*.pdf
 set hid mouse=a clipboard=unnamedplus nobk noswapfile gd is hls scs
 set wrap tw=79 cc=80 sw=4 ts=4 sts=4 sta ai " -- indentation/line width settings
 set spell smd sc history=1000 undodir=~/.vim/backup undofile ur=10000
