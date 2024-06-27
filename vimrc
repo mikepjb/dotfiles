@@ -1,9 +1,9 @@
 " Editor Configuration for both Vim (pref. 9.1+) & Neovim (pref. 0.10+)
 
-autocmd! | setglobal nocp enc=UTF-8 tgc path=.,,**
+autocmd! | setglobal nocp enc=UTF-8 tgc path=.,,** clipboard=unnamedplus
 syntax on | filetype plugin indent on | runtime macros/matchit.vim
 set sb spr vb aw so=3 wmnu wig=*.class,*.jpg,*.png,*.gif,*.pdf
-set hid mouse=a clipboard=unnamedplus nobk noswapfile gd is hls scs
+set hid mouse=a bs=indent,eol,start nobk noswapfile gd is hls scs ic
 set wrap tw=79 cc=80 sw=4 ts=4 sts=4 sta ai " -- indentation/line width settings
 set spell smd sc history=1000 undodir=~/.vim/backup undofile ur=10000
 set sm cul nu ls=2 stal=2 statusline=%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
@@ -56,3 +56,13 @@ fun! Dots() abort " create basic dotfiles
 		let s:git = s:git . s:gPre . s
 	endfor | call system("command -v git && $(" . s:git[1:] . ")")
 endfun | command! Dots :call Dots()
+
+let s:css_reset =<<EOD
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0;}
+body { line-height: 1.5; font-size: 100%; -webkit-font-smoothing: antialiased; }
+img, picture, video, canvas, svg { display: block; max-width: 100%; }
+input, button, textarea, select { font: inherit; }
+p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
+html { -moz-text-size-adjust: none; -webkit-text-size-adjust: none; text-size-adjust: none; }
+EOD
+call setreg("r", s:css_reset)
