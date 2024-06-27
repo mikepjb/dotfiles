@@ -31,7 +31,7 @@ inoremap <C-l> <Space>=><Space>|inoremap <C-u> <Space>-><Space>
 
 if v:version < 901 | finish | endif
 
-colorscheme retrobox
+set background=dark | colorscheme retrobox
 
 let s:bashrc =<<EOD
 export EDITOR=vim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
@@ -66,3 +66,23 @@ p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
 html { -moz-text-size-adjust: none; -webkit-text-size-adjust: none; text-size-adjust: none; }
 EOD
 call setreg("r", s:css_reset)
+
+let s:html =<<EOD
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="/style.css" type="text/css" media="all" />  
+	</head>
+</html>
+EOD
+call setreg("h", s:html)
+
+" install plugins if you need them in ~/.vim/pack/x/start
+" For lsps, include dense-analysis/ale and install tsserver/rust_analyzer
+let g:ale_completion_enabled = 1 " must be done before loading ale.
+packloadall | silent! helptags ALL
+if exists('g:loaded_ale')
+	set omnifunc=ale#completion#OmniFunc
+endif

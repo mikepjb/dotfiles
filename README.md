@@ -20,6 +20,7 @@ This runs without any vim plugins, and assumes a minimal set of tools namely:
 or
 `git clone` and `ln -sfv`
 2. `vim +Dots +qall` or just run the `Dots` command when you open vim.
+3. `mkdir -p ~/.vim/pack/x/start && git clone --depth 1 https://github.com/dense-analysis/ale.git !$/ale`
 
 ## How to use
 
