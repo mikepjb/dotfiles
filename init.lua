@@ -32,6 +32,11 @@ vim.opt.gdefault = true        -- d. search/replacment
 vim.opt.hlsearch = false
 vim.opt.incsearch = true
 
+local ok, _ = pcall(vim.cmd, 'colorscheme retrobox')
+if not ok then
+  vim.cmd 'colorscheme default' -- if the above fails, then use default
+end
+
 -- keybindings ----------------------------------------------------------------
 vim.keymap.set("n", "gn", ":tabnew ~/.notes/src/SUMMARY.md<CR>")
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>")
@@ -78,16 +83,10 @@ end
 
 register_lsp({'rust-analyzer'}, 'rust', {'Cargo.toml'})
 register_lsp({'typescript-language-server', '--stdio'},
-             'javascript,typescript,javascriptreact, typescriptreact',
+             'javascript,typescript,javascriptreact,typescriptreact',
              {'package.json'})
 
--- the rest? ------------------------------------------------------------------
-local ok, _ = pcall(vim.cmd, 'colorscheme retrobox')
-if not ok then
-  vim.cmd 'colorscheme default' -- if the above fails, then use default
-end
-
--- TODO include tmux too!
+-- external config ------------------------------------------------------------
 local bashrc = [[
 export EDITOR=nvim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
 export PATH=$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
@@ -124,6 +123,7 @@ end
 
 vim.api.nvim_create_user_command('Dots', dots, {})
 
+-- snippets -------------------------------------------------------------------
 local css_reset = [[
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0;}
 body { line-height: 1.5; font-size: 100%; -webkit-font-smoothing: antialiased; }
