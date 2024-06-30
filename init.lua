@@ -54,7 +54,7 @@ end, { expr = true })
 
 vim.keymap.set("n", "<space>", function ()
     if vim.g.loaded_telescope == 1 then
-        return "Telescope find_files"
+        return ":Telescope find_files<CR>"
     else
         return ":find "
     end
@@ -89,10 +89,10 @@ end
 
 -- TODO include tmux too!
 local bashrc = [[
-export EDITOR=vim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
+export EDITOR=nvim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
 export PATH=$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
 export RUST_SRC=$(rustc --print sysroot)/lib/rustlib/src/rust/library/
-alias vi='vim' gr='cd $(git rev-parse --shot-toplevel || echo \".\")'
+alias vi='nvim' gr='cd $(git rev-parse --shot-toplevel || echo \".\")'
 PS1='\W($(git branch --show-current 2>/dev/null || echo "!")) \$ '
 ]]
 
