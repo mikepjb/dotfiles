@@ -1,9 +1,9 @@
 -- Editor Configuration
--- optional plugins: plenary + nvim-telescope/telescope.nvim
+-- optional plugins: plenary + nvim-telescope/telescope.nvim ------------------
 
 local base = vim.api.nvim_create_augroup('Base', {})
 
--- editor config goes here
+-- basic configuration --------------------------------------------------------
 vim.opt.guicursor = ""
 
 vim.opt.nu = true
@@ -35,7 +35,7 @@ vim.opt.signcolumn = "yes"
 
 vim.opt.updatetime = 50
 
--- keybindings go here
+-- keybindings ----------------------------------------------------------------
 vim.keymap.set("n", "gn", ":tabnew ~/.notes/src/SUMMARY.md<CR>")
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>")
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>")
@@ -47,10 +47,22 @@ vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("i", "<C-l>", " => ")
 vim.keymap.set("i", "<C-u>", " -> ")
 
--- LSP setup goes here
+-- TODO include inside nvim grepping function?
+
+vim.keymap.set("n", "<space>", function ()
+    -- if nvim-telescope/telescope.nvim & plenary.nvim are installed
+    -- clone the plugins here: ~/.config/nvim/pack/base/start/
+    if vim.g.loaded_telescope == 1 then
+        vim.cmd('Telescope find_files')
+        -- TODO can we do this directly without .cmd?
+    else
+        print('no telescope')
+        -- we want :find
+    end
+end)
 
 
--- optional plugin stuff goes here
+-- LSP ------------------------------------------------------------------------
 function register_lsp(cmd, pattern, root_files)
     vim.api.nvim_create_autocmd("FileType", {
         pattern = pattern,
@@ -71,23 +83,11 @@ register_lsp({'typescript-language-server', '--stdio'},
              'javascript,typescript,javascriptreact, typescriptreact',
              {'package.json'})
 
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "go",
-    callback = function()
-        local root_dir = vim.fs.dirname(
-            vim.fs.find({ 'go.mod', 'go.work', '.git' }, { upward = true })[1]
-        )
-        local client = vim.lsp.start({
-            name = 'gopls',
-            cmd = { 'gopls' },
-            root_dir = root_dir,
-        })
-        vim.lsp.buf_attach_client(0, client)
-    end
-})
+-- LspAttach!
 
 -- vim.fn.colorscheme('retrobox')
 
+-- TODO include tmux too!
 local bashrc = [[
 export EDITOR=vim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
 export PATH=$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
@@ -96,9 +96,29 @@ alias vi='vim' gr='cd $(git rev-parse --shot-toplevel || echo \".\")'
 PS1='\W($(git branch --show-current 2>/dev/null || echo "!")) \$ '
 ]]
 
+local git_config = {
+    ["core.editor"] = "nvim",
+    ["core.autocrlf"] = "false",
+}
+
 function dots()
-	vim.fn.writefile({". ~/.bashrc"}, vim.fn.expand("$HOME/.bash_profile"))
-	vim.fn.writefile(vim.fn.split(bashrc, "\n"), vim.fn.expand("$HOME/.bashrc"))
+    vim.fn.writefile({". ~/.bashrc"}, vim.fn.expand("$HOME/.bash_profile"))
+    vim.fn.writefile(vim.fn.split(bashrc, "\n"), vim.fn.expand("$HOME/.bashrc"))
+    if vim.fn.executable("git") == 1 then
+        for k, v in pairs(git_config) do
+            print("git config --global --replace-all " .. k .. " '" .. v .. "'")
+        end
+    end
 end
 
 vim.api.nvim_create_user_command('Dots', dots, {})
+
+local css_reset = [[
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0;}
+body { line-height: 1.5; font-size: 100%; -webkit-font-smoothing: antialiased; }
+img, picture, video, canvas, svg { display: block; max-width: 100%; }
+input, button, textarea, select { font: inherit; }
+p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
+html { -moz-text-size-adjust: none; -webkit-text-size-adjust: none; text-size-adjust: none; }
+]]
+vim.fn.setreg("r", css_reset)
