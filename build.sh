@@ -10,8 +10,8 @@ echo 'Building new neovim'
 
 # if you want to build neovim without direct internet access.. good luck!
 
-# 1. download neovim
-# 2. make sure branch is correct (v0.10?)
+# 1. download neovim and https://github.com/neovim/deps
+# 2. make sure branch is correct (v0.10? stable?)
 # 3. configure..
 
 export nvim_src="$HOME/src/neovim"
@@ -36,11 +36,6 @@ if [[ -d "$nvim_src/.deps/build" ]]; then
 fi
 
 
-# N.B on RHEL, needed lua, lua-luv, lua-luv-devel installed
-# still doesn't work! lol
-# luarocks
-
-# https://github.com/neovim/deps
 
 cd $nvim_src
 
@@ -51,7 +46,14 @@ cp -r $nvim_deps/* "$nvim_src/.deps/build"
 
 git checkout stable
 
+# maybe we have to ensure man folder exists for CMAKE_INSTALL_MANDIR to work?
+mkdir -p $HOME/.local/man
+
+
+# N.B Did have an issue where copying the binary/manpages file would still try
+# to copy to /usr/local/bin and not the CMAKE_INSTALL_PREFIX but including this
+# in the make <here> install command seemed to fix that!
 export CMAKE_BUILD_TYPE=Release
 export CMAKE_INSTALL_PREFIX="$HOME/.local"
-export DEPS_CMAKE_FLAGS="-DUSE_EXISTING_SRC_DIR=ON -DUSE_BUNDLED_LUAROCKS=OFF -DUSE_BUNDLED_LUAJIT=OFF -DUSE_BUNDLED_LUV=OFF"
-make && make install
+export DEPS_CMAKE_FLAGS="-DUSE_EXISTING_SRC_DIR=ON -DUSE_BUNDLED_LUAROCKS=ON -DUSE_BUNDLED_LUAJIT=ON -DUSE_BUNDLED_LUV=ON"
+make && make CMAKE_INSTALL_PREFIX="HOME/.local" install
