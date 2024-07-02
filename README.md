@@ -1,5 +1,7 @@
 # Configure
 
+_A barebones, productive working environment._
+
 ## Getting Started
 
 Either clone this repo and:
