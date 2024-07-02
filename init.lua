@@ -1,6 +1,5 @@
 -- Editor Configuration
--- optional plugins: plenary + nvim-telescope/telescope.nvim ------------------
--- clone the plugins here: ~/.config/nvim/pack/base/start/ --------------------
+-- (plenary + telescope) clone plugins here: ~/.config/nvim/pack/base/start/ --
 
 local base = vim.api.nvim_create_augroup('Base', {})
 
@@ -15,6 +14,10 @@ vim.opt.termguicolors = true
 vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
 vim.opt.updatetime = 50
+vim.opt.wildmode = "list:longest,list:full"
+vim.opt.wildignore:append({"node_modules"})
+vim.opt.suffixesadd:append({".rs"}) -- search for suffixes using gf
+vim.opt.completeopt:remove("preview") -- no preview buffer during completion
 
 vim.opt.tabstop = 4            -- b. indentation
 vim.opt.softtabstop = 4
@@ -31,6 +34,9 @@ vim.opt.undofile = true
 vim.opt.gdefault = true        -- d. search/replacment
 vim.opt.hlsearch = false
 vim.opt.incsearch = true
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+vim.opt.inccommand = "split"
 
 local ok, _ = pcall(vim.cmd, 'colorscheme retrobox')
 if not ok then
@@ -111,12 +117,20 @@ local git_config = {
     "\"%C(yellow)%h%Creset %<(7,trunc)%ae%C(auto)%d %Creset%s %Cgreen(%cr)\""
 }
 
+local utilities = { "rg", "htop", "tmux", "rustc", "node" }
+
 function dots()
     vim.fn.writefile({". ~/.bashrc"}, vim.fn.expand("$HOME/.bash_profile"))
     vim.fn.writefile(vim.fn.split(bashrc, "\n"), vim.fn.expand("$HOME/.bashrc"))
     if vim.fn.executable("git") == 1 then
         for k, v in pairs(git_config) do
             vim.fn.system("git config --global --replace-all " .. k .. " '" .. v .. "'")
+        end
+    end
+
+    for _, u in ipairs(utilities) do
+        if vim.fn.executable(u) == 0 then
+            print("missing " .. u)
         end
     end
 end

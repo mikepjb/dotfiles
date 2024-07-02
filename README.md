@@ -1,5 +1,26 @@
 # Configure
 
+## Getting Started
+
+Either clone this repo and:
+```
+mkdir -p ~/.configu/nvim/init.lua
+ln -sv $PWD/init.lua ~/.config/nvim/init.lua
+```
+
+Or, if you are in a working environment where this is difficult copy the
+`init.lua` -> `~/.config/nvim/init.lua` directly.
+
+Finally run `nvim +Dots +qall` or just run the `Dots` command when you open neovim.
+
+## Tools Used
+
+- neovim
+
+[this readme is in progress]
+
+## old readme below
+
 A minimal, optimised configuration for working on Linux.
 
 This runs without any vim plugins, and assumes a minimal set of tools namely:
