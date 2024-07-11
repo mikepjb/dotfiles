@@ -99,6 +99,7 @@ export EDITOR=nvim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/
 export PATH=$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
 export RUST_SRC=$(rustc --print sysroot)/lib/rustlib/src/rust/library/
 alias vi='nvim' gr='cd $(git rev-parse --shot-toplevel || echo \".\")'
+alias x='tmux attach -t x || tmux new -s x'
 PS1='\W($(git branch --show-current 2>/dev/null || echo "!")) \$ '
 ]]
 
