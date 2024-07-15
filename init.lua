@@ -51,7 +51,7 @@ vim.keymap.set("n", "<C-k>", "<C-w><C-k>")
 vim.keymap.set("n", "<C-l>", "<C-w><C-l>")
 vim.keymap.set("n", "<C-g>", ":noh<CR><C-g>")
 vim.keymap.set("n", "<Tab>", "<C-^>")
-vim.keymap.set("n", "L", function () vim.lsp.diagnostic.open_float(0, {scope="line"}) end)
+vim.keymap.set("n", "L", function () vim.diagnostic.open_float(0, {scope="line"}) end)
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("i", "<C-l>", " => ")
 vim.keymap.set("i", "<C-u>", " -> ")
@@ -98,7 +98,7 @@ local bashrc = [[
 export EDITOR=nvim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
 export PATH=$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
 export RUST_SRC=$(rustc --print sysroot)/lib/rustlib/src/rust/library/
-alias vi='nvim' gr='cd $(git rev-parse --shot-toplevel || echo \".\")'
+alias vi='nvim' gr='cd $(git rev-parse --show-toplevel || echo \".\")'
 alias x='tmux attach -t x || tmux new -s x'
 PS1='\W($(git branch --show-current 2>/dev/null || echo "!")) \$ '
 ]]
