@@ -6,8 +6,8 @@ local base = vim.api.nvim_create_augroup('Base', {})
 -- basic configuration --------------------------------------------------------
 vim.opt.guicursor = ""        -- a. visual config
 vim.opt.cursorline = true
-vim.opt.textwidth = 79
-vim.opt.colorcolumn = '80'
+vim.opt.textwidth = 99
+vim.opt.colorcolumn = '100'
 vim.opt.nu = true
 vim.opt.showtabline = 2
 vim.opt.termguicolors = true
@@ -18,6 +18,7 @@ vim.opt.wildmode = "list:longest,list:full"
 vim.opt.wildignore:append({"node_modules"})
 vim.opt.suffixesadd:append({".rs"}) -- search for suffixes using gf
 vim.opt.completeopt:remove("preview") -- no preview buffer during completion
+vim.opt.clipboard:append({"unnamedplus"}) -- integrate with system clipboard
 
 vim.opt.tabstop = 4            -- b. indentation
 vim.opt.softtabstop = 4
