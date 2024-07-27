@@ -46,6 +46,7 @@ end
 
 -- keybindings ----------------------------------------------------------------
 vim.keymap.set("n", "gn", ":tabnew ~/.notes/src/SUMMARY.md<CR>")
+vim.keymap.set("n", "g0", function () vim.lsp.stop_client(vim.lsp.get_active_clients()) end)
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>")
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>")
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>")
