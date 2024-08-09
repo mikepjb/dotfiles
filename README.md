@@ -18,6 +18,16 @@ Finally run `nvim +Dots +qall` or just run the `Dots` command when you open neov
 ## Tools Used
 
 - neovim
+    - Very few plugins (just telescope and it's dep, plenary)
+    - Uses in-built LSP
+- ssh-agent
+    - `sa` will kill all ssh-agents and create a new one, including your main key.
+    - `sk` will kill the current ssh-agent
+    - The reasoning here is that you will work in a single terminal most of the time and we don't
+      want multiple ssh-agents to hang around, so at the start of a session you just type `sa`,
+      enter your password once and do your work.
+    - There is a default lifetime for keys of 8 hours, so if for some reason your computer is
+      compromised the agent will expire around the end of a working day.
 
 [this readme is in progress]
 
