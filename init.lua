@@ -39,6 +39,8 @@ vim.opt.ignorecase = true
 vim.opt.smartcase = true
 vim.opt.inccommand = "split"
 
+vim.g.markdown_fenced_languages = {'typescript', 'javascript', 'bash', 'go'}
+
 local ok, _ = pcall(vim.cmd, 'colorscheme retrobox')
 if not ok then
   vim.cmd 'colorscheme default' -- if the above fails, then use default
@@ -122,12 +124,13 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 -- external config ------------------------------------------------------------
 local bashrc = [[
 export EDITOR=nvim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
-export PATH=$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
-export RUST_SRC=$(rustc --print sysroot)/lib/rustlib/src/rust/library/
+export PATH=:$HOME/go/bin:$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
+export HISTSIZE=10000 HISTCONTROL=erasedups
+shopt -s histappend
 alias vi='nvim' gr='cd $(git rev-parse --show-toplevel || echo \".\")'
 alias x='tmux attach -t x || tmux new -s x' sk='eval $(ssh-agent -k)'
 alias sa='pkill ssh-agent; eval $(ssh-agent -t 28800); ssh-add ~/.ssh/id_rsa'
-PS1='\W($(git branch --show-current 2>/dev/null || echo "!")) \$ '
+PS1='\h:\W($(git branch --show-current 2>/dev/null || echo "!")) \$ '
 ]]
 
 local git_config = {
@@ -146,7 +149,7 @@ local git_config = {
     "\"%C(yellow)%h%Creset %<(7,trunc)%ae%C(auto)%d %Creset%s %Cgreen(%cr)\""
 }
 
-local utilities = { "rg", "htop", "tmux", "rustc", "node" }
+local utilities = { "rg", "htop", "tmux", "go", "node" }
 
 function dots()
     vim.fn.writefile({". ~/.bashrc"}, vim.fn.expand("$HOME/.bash_profile"))

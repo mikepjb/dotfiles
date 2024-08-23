@@ -15,6 +15,14 @@ Or, if you are in a working environment where this is difficult copy the
 
 Finally run `nvim +Dots +qall` or just run the `Dots` command when you open neovim.
 
+## Getting Started (Docker edition)
+
+This project also has a small docker image ready to go, again for working environments (e.g
+ephemeral ones where your changes get reset).
+
+- Get the latest version: `docker pull hypalynx/box:latest`
+- Try out the box with: `docker run --rm -it hypalynx/box /bin/bash`
+
 ## Tools Used
 
 - neovim

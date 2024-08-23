@@ -1,0 +1,11 @@
+tzdata
+bash
+bash-completion
+curl
+openssl
+ca-certificates
+dumb-init
+jq
+neovim
+go
+htop
