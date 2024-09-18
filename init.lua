@@ -1,5 +1,5 @@
 -- Editor Configuration
--- (plenary + telescope) clone plugins here: ~/.config/nvim/pack/base/start/ --
+-- (plenary, telescope + nvim-lint) clone plugins here: ~/.config/nvim/pack/base/start/ --
 
 local base = vim.api.nvim_create_augroup('Base', {})
 
@@ -97,6 +97,14 @@ register_lsp({'typescript-language-server', '--stdio'},
              'javascript,typescript,javascriptreact,typescriptreact',
              {'package.json'})
 register_lsp({"gopls"}, "go", {"go.mod"})
+-- register_lsp({"golangci-lint"}, "go", {"go.mod"})
+--
+vim.api.nvim_create_autocmd('LspAttach', {
+    group = base,
+    callback = function()
+        vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+    end
+})
 
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = "*.go",
@@ -124,7 +132,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 -- external config ------------------------------------------------------------
 local bashrc = [[
 export EDITOR=nvim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
-export PATH=:$HOME/go/bin:$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
+export PATH=$HOME/go/bin:$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
 export HISTSIZE=10000 HISTCONTROL=erasedups
 shopt -s histappend
 alias vi='nvim' gr='cd $(git rev-parse --show-toplevel || echo \".\")'
