@@ -160,9 +160,16 @@ end
 
 -- TODO if available, register it
 register_lsp({'rust-analyzer'}, 'rust', {'Cargo.toml'})
-register_lsp({'typescript-language-server', '--stdio'},
-             'javascript,typescript,javascriptreact,typescriptreact',
-             {'package.json'})
+
+if vim.fn.executable("typescript-language-server") == 1 and
+    vim.fn.isdirectory("./node_modules/typescript") == 1 then
+    register_lsp(
+        {'typescript-language-server', '--stdio'},
+        'javascript,typescript,javascriptreact,typescriptreact',
+        {'package.json'}
+    )
+end
+
 register_lsp({"gopls"}, "go", {"go.mod"})
 -- register_lsp({"golangci-lint"}, "go", {"go.mod"})
 --
