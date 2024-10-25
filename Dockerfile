@@ -6,12 +6,22 @@ ENV USER=developer \
     TZ=UTC \
     LANG=en_US.utf8
 
-COPY packages.list /tmp/
-
 RUN set -eux; \
     apk -U upgrade; \
     apk -v add util-linux alpine-conf; \
-    xargs -r apk -v add < /tmp/packages.list; \
+    apk -v add \
+        tzdata \
+        bash \
+        bash-completion \
+        curl \
+        openssl \
+        ca-certificates \
+        dumb-init \
+        jq \
+        neovim \
+        go \
+        git \
+        htop; \
     addgroup --system --gid $UID $GROUP; \
     adduser --system --disabled-password --uid $UID $USER -G $GROUP -s /bin/bash; \
     setup-timezone -z $TZ; \
