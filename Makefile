@@ -11,3 +11,12 @@ security:
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		aquasec/trivy:latest \
 		image hypalynx/box:latest
+
+upload:
+	docker tag hypalynx/box registry.hub.docker.com/hypalynx/box
+	docker push registry.hub.docker.com/hypalynx/box
+
+# Homelab
+
+homelab:
+	minikube start

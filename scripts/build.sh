@@ -1,8 +1,7 @@
 #!/bin/bash
-# This file is included to make it possible to compile neovim minimal
-# dependencies. If you follow the instructions on the project, there is an
-# assumption that you have an internet connection and in some cases, we don't
-# have a direct line to the outside world.
+# This file is included to make it possible to compile neovim with minimal dependencies. If you
+# follow the instructions on the project, there is an assumption that you have an internet
+# connection and in some cases, we don't have a direct line to the outside world.
 
 set +e
 

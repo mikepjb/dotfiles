@@ -2,40 +2,35 @@
 
 _A barebones, productive working environment._
 
-## Getting Started
+## Getting Started (or getting up to date!)
 
-Either clone this repo and:
+Easy as:
+
+1. Install Neovim
+
+2. Download and run the config:
+```bash
+mkdir -p ~/.config/nvim
+wget https://raw.githubusercontent.com/mikepjb/configure/refs/heads/main/init.lua
+nvim +Dots +qall
 ```
-mkdir -p ~/.configu/nvim/init.lua
-ln -sv $PWD/init.lua ~/.config/nvim/init.lua
-```
 
-Or, if you are in a working environment where this is difficult copy the
-`init.lua` -> `~/.config/nvim/init.lua` directly.
+3. Install the external dependencies (things like `ripgrep`) you can check what's missing using the
+   `:Dots` command inside Neovim. If you are unsure how to do this then try using your built-in
+   package manager (if using Linux that'll be either pacman/dnf/apt), [homebrew](brew.sh) on Mac OS
+   or [winget](https://winstall.app/) on Windows. Some dependencies aren't provided by these
+   general package managers and you'll have to get them seperately (e.g `air` is provided by go
+   get). Check the `utilities` variable in `init.lua` for more information on where to source them.
 
-Finally run `nvim +Dots +qall` or just run the `Dots` command when you open neovim.
-
-## Getting Started (Docker edition)
+### Development environment inside Docker.
 
 This project also has a small docker image ready to go, again for working environments (e.g
 ephemeral ones where your changes get reset).
 
-- Get the latest version: `docker pull hypalynx/box:latest`
-- Try out the box with: `docker run --rm -it hypalynx/box /bin/bash`
-
-## Tools Used
-
-- neovim
-    - Very few plugins (just telescope and it's dep, plenary)
-    - Uses in-built LSP
-- ssh-agent
-    - `sa` will kill all ssh-agents and create a new one, including your main key.
-    - `sk` will kill the current ssh-agent
-    - The reasoning here is that you will work in a single terminal most of the time and we don't
-      want multiple ssh-agents to hang around, so at the start of a session you just type `sa`,
-      enter your password once and do your work.
-    - There is a default lifetime for keys of 8 hours, so if for some reason your computer is
-      compromised the agent will expire around the end of a working day.
+```bash
+docker pull hypalynx/box:latest # Get the latest version:
+docker run --rm -it hypalynx/box /bin/bash # Try out the box with:
+```
 
 ## How to use these tools
 
@@ -45,6 +40,14 @@ While we can't list _everything_ you can do, it's worth pointing out a few highl
     - This is a great built-in diff resolution with 4 panes, the top 3 are local (your changes),
       base (the original commonality version between the conflicts) & remote (their changes). The
       bottom pane is where you manually resolve the conflicts yourself.
+- ssh-agent
+    - `sa` will kill all ssh-agents and create a new one, including your main key.
+    - `sk` will kill the current ssh-agent
+    - The reasoning here is that you will work in a single terminal most of the time and we don't
+      want multiple ssh-agents to hang around, so at the start of a session you just type `sa`,
+      enter your password once and do your work.
+    - There is a default lifetime for keys of 8 hours, so if for some reason your computer is
+      compromised the agent will expire around the end of a working day.
 
 ```bash
 # Set your npm registry if need be (e.g Artifactory/in protected environment)
@@ -104,7 +107,7 @@ _Some decisions may seem strange, some decisions are documented here_
   versions/tools (e.g revert neovim version or even use regular vim as a backup) without affecting
   the rest of the system.
 
-## Useful Commands you might have forgotten
+## Useful Commands you might have forgotten (and may only be available on Linux)
 
 - `lsof -ti :8080` looks for processes listening on the given port.
 

@@ -14,20 +14,11 @@
 --  - print? print list of dependencies/check? how to have a common set of utils you rely on work
 --  between linux distros + mac os (but not windows, ssh/wsl instead)
 --  - ideally alt + ret
---
---  ansible to update neovim? to update other stuff?
-
 -- editor config
 -- keybindings (for built-in)
 -- environment config (writing rc files, checking for external programs)
 -- language config (in-built?)
 -- external packages (if available) with package config
---
---
--- https://github.com/arrowtype/recursive/releases/download/v1.085/ArrowType-Recursive-1.085.zip
--- how about running on save? air for go does this seperately, maybe we can do this for java?
--- same for.. syntax/colors? default? because usually it's super dark and default terminals are
--- like.. 24bit?
 
 local base = vim.api.nvim_create_augroup('Base', {})
 
@@ -82,6 +73,7 @@ vim.keymap.set("n", "gn", ":tabnew<CR>")
 vim.keymap.set("n", "gs", ":tabnew ~/.notes/src/SUMMARY.md<CR>")
 vim.keymap.set("n", "g0", function () vim.lsp.stop_client(vim.lsp.get_active_clients()) end)
 vim.keymap.set("n", "gl", ":set rnu!<CR>") -- toggle relative line number
+vim.keymap.set("n", "g?", ":Dots<CR>")
 vim.keymap.set("n", "<C-q>", ":q<CR>")
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>")
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>")
@@ -259,7 +251,12 @@ local git_config = {
     "\"%C(yellow)%h%Creset %<(7,trunc)%ae%C(auto)%d %Creset%s %Cgreen(%cr)\""
 }
 
-local utilities = { "rg", "htop", "tmux", "go", "node" }
+local utilities = {
+    -- main utils provided
+    "git", "rg", "htop", "tmux", "psql", "wget", "ssh", "go", "node", "rustc", "java", "ruby", "python",
+    -- sourced via go get
+    "gopls", "golangci-lint", "air"
+}
 
 function dots()
     vim.fn.writefile({". ~/.bashrc"}, vim.fn.expand("$HOME/.bash_profile"))
