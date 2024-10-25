@@ -1,14 +1,44 @@
 -- Editor Configuration
 -- (plenary, telescope + nvim-lint) clone plugins here: ~/.config/nvim/pack/base/start/ --
+--
+-- Commentary:
+-- Can we truly be plugin free? use fzf for now but replace if really needed?
+-- Should we be plugin free? Can we gracefully include/exclude these extensions?
+-- Vim is very reliable! (although tree-sitter... man!)
+--
+--  tmux > neovim terminal - learn how to copy from tmux to the clipboard that can paste into
+--  neovim!!!!!
+--
+--  can you configure your font and/or terminal config? on mac os? on linux?
+--  - alternatively just use the default for the OS on the default terminal? e.g terminal/monaco
+--  - print? print list of dependencies/check? how to have a common set of utils you rely on work
+--  between linux distros + mac os (but not windows, ssh/wsl instead)
+--  - ideally alt + ret
+--
+--  ansible to update neovim? to update other stuff?
+
+-- editor config
+-- keybindings (for built-in)
+-- environment config (writing rc files, checking for external programs)
+-- language config (in-built?)
+-- external packages (if available) with package config
+--
+--
+-- https://github.com/arrowtype/recursive/releases/download/v1.085/ArrowType-Recursive-1.085.zip
+-- how about running on save? air for go does this seperately, maybe we can do this for java?
+-- same for.. syntax/colors? default? because usually it's super dark and default terminals are
+-- like.. 24bit?
 
 local base = vim.api.nvim_create_augroup('Base', {})
 
--- basic configuration --------------------------------------------------------
+-- editor configuration ---------------------------------------------------------------------------
 vim.opt.guicursor = ""        -- a. visual config
 vim.opt.cursorline = true
 vim.opt.textwidth = 99
 vim.opt.colorcolumn = '100'
+vim.opt.spell = false -- no spell, can we enable for just markdown + comments?
 vim.opt.nu = true
+vim.opt.rnu = false -- maybe default true in future?
 vim.opt.showtabline = 2
 vim.opt.termguicolors = true
 vim.opt.scrolloff = 8
@@ -46,9 +76,13 @@ if not ok then
   vim.cmd 'colorscheme default' -- if the above fails, then use default
 end
 
--- keybindings ----------------------------------------------------------------
-vim.keymap.set("n", "gn", ":tabnew ~/.notes/src/SUMMARY.md<CR>")
+-- keymap configuration ---------------------------------------------------------------------------
+
+vim.keymap.set("n", "gn", ":tabnew<CR>")
+vim.keymap.set("n", "gs", ":tabnew ~/.notes/src/SUMMARY.md<CR>")
 vim.keymap.set("n", "g0", function () vim.lsp.stop_client(vim.lsp.get_active_clients()) end)
+vim.keymap.set("n", "gl", ":set rnu!<CR>") -- toggle relative line number
+vim.keymap.set("n", "<C-q>", ":q<CR>")
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>")
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>")
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>")
@@ -59,6 +93,47 @@ vim.keymap.set("n", "L", function () vim.diagnostic.open_float(0, {scope="line"}
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("i", "<C-l>", " => ")
 vim.keymap.set("i", "<C-u>", " -> ")
+vim.keymap.set("t", "<C-g>", "<C-\\><C-n>")
+-- M-o? other-window <C-\><C-n><C-w><C-w>i
+-- autocmd TermOpen * setlocal nonumber norelativenumber
+
+-- always open quickfix window automatically.
+-- this uses cwindows which will open it only if there are entries.
+vim.api.nvim_create_autocmd("QuickFixCmdPost", {
+  group = vim.api.nvim_create_augroup("AutoOpenQuickfix", { clear = true }),
+  pattern = { "[^l]*" },
+  command = "cwindow"
+})
+
+local css_reset = [[
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0;}
+body { line-height: 1.5; font-size: 100%; -webkit-font-smoothing: antialiased; }
+img, picture, video, canvas, svg { display: block; max-width: 100%; }
+input, button, textarea, select { font: inherit; }
+p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
+html { -moz-text-size-adjust: none; -webkit-text-size-adjust: none; text-size-adjust: none; }
+]]
+vim.fn.setreg("r", css_reset)
+
+local html_template = [[
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="/style.css" type="text/css" media="all" />  
+	</head>
+</html>
+]]
+vim.fn.setreg("h", html_template)
+
+-- environment configuration ----------------------------------------------------------------------
+
+if vim.fn.executable("rg") == 1 then
+    -- works slightly differently, use :grep foo, open results with copen
+    vim.opt.grepprg = "rg --vimgrep"
+    vim.opt.grepformat = "%f:%l:%c:%m"
+end
 
 vim.keymap.set("n", "gr", function ()
     if vim.g.loaded_telescope == 1 then
@@ -76,7 +151,6 @@ vim.keymap.set("n", "<space>", function ()
     end
 end, { expr = true })
 
--- LSP ------------------------------------------------------------------------
 function register_lsp(cmd, pattern, root_files)
     vim.api.nvim_create_autocmd("FileType", {
         pattern = pattern,
@@ -92,6 +166,7 @@ function register_lsp(cmd, pattern, root_files)
     })
 end
 
+-- TODO if available, register it
 register_lsp({'rust-analyzer'}, 'rust', {'Cargo.toml'})
 register_lsp({'typescript-language-server', '--stdio'},
              'javascript,typescript,javascriptreact,typescriptreact',
@@ -129,7 +204,6 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   end
 })
 
--- external config ------------------------------------------------------------
 local bashrc = [[
 export EDITOR=nvim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
 export PATH=$HOME/go/bin:$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
@@ -138,8 +212,36 @@ shopt -s histappend
 alias vi='nvim' gr='cd $(git rev-parse --show-toplevel || echo \".\")'
 alias x='tmux attach -t x || tmux new -s x' sk='eval $(ssh-agent -k)'
 alias sa='pkill ssh-agent; eval $(ssh-agent -t 28800); ssh-add ~/.ssh/id_rsa'
+alias new-pass="head -c 16 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | echo"
 PS1='\h:\W($(git branch --show-current 2>/dev/null || echo "!")) \$ '
 ]]
+
+local tmux_conf = [[
+set -g history-limit 100000; set -g status on; set -g lock-after-time 0
+set -g status-position top;
+set-window-option -g alternate-screen on
+unbind C-b; set -g prefix C-q; unbind x; bind x kill-pane
+set -gq utf-8 on; set -g mouse on; set -g set-clipboard external;
+set -g default-terminal \"tmux-256color\"; set -ag terminal-overrides \",$TERM:RGB\"
+]]
+
+-- set -g history-limit 100000
+-- set-window-option -g alternate-screen on
+-- set -g status off
+-- set -g lock-after-time 0
+-- unbind C-b; set -g prefix C-q;
+-- unbind space ; bind space list-windows
+-- unbind v ; bind v split-window -c "#{pane_current_path}"
+-- unbind s ; bind s split-window -h -c "#{pane_current_path}"
+-- unbind x ; bind x kill-pane
+-- set -gq utf-8 on;
+-- set -g mouse on;
+-- set -g set-clipboard external;
+-- set -g pane-border-style fg=default,bg=default;
+-- set -g pane-active-border-style fg=default,bg=default;
+-- set -g message-style "fg=colour5,bg=default"
+-- set -g default-terminal "tmux-256color"
+-- set -ag terminal-overrides ",$TERM:RGB"
 
 local git_config = {
     ["core.editor"] = "nvim",
@@ -162,6 +264,7 @@ local utilities = { "rg", "htop", "tmux", "go", "node" }
 function dots()
     vim.fn.writefile({". ~/.bashrc"}, vim.fn.expand("$HOME/.bash_profile"))
     vim.fn.writefile(vim.fn.split(bashrc, "\n"), vim.fn.expand("$HOME/.bashrc"))
+    vim.fn.writefile(vim.fn.split(tmux_conf, "\n"), vim.fn.expand("$HOME/.config/tmux/tmux.conf"))
     if vim.fn.executable("git") == 1 then
         for k, v in pairs(git_config) do
             vim.fn.system("git config --global --replace-all " .. k .. " '" .. v .. "'")
@@ -177,13 +280,14 @@ end
 
 vim.api.nvim_create_user_command('Dots', dots, {})
 
--- snippets -------------------------------------------------------------------
-local css_reset = [[
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0;}
-body { line-height: 1.5; font-size: 100%; -webkit-font-smoothing: antialiased; }
-img, picture, video, canvas, svg { display: block; max-width: 100%; }
-input, button, textarea, select { font: inherit; }
-p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
-html { -moz-text-size-adjust: none; -webkit-text-size-adjust: none; text-size-adjust: none; }
-]]
-vim.fn.setreg("r", css_reset)
+-- external stuff/packages ------------------
+-- Linting --------------------------------------------------------------------
+-- require('lint').linters_by_ft = {
+--   go = {'golangcilint',}
+-- }
+
+-- vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+--   callback = function()
+--     require("lint").try_lint()
+--   end,
+-- })

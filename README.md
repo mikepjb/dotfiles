@@ -37,55 +37,15 @@ ephemeral ones where your changes get reset).
     - There is a default lifetime for keys of 8 hours, so if for some reason your computer is
       compromised the agent will expire around the end of a working day.
 
-[this readme is in progress]
+## How to use these tools
 
-## old readme below
+While we can't list _everything_ you can do, it's worth pointing out a few highlights:
 
-A minimal, optimised configuration for working on Linux.
+- Using (neo)vim to merge conflicts with `git mergetool`.
+    - This is a great built-in diff resolution with 4 panes, the top 3 are local (your changes),
+      base (the original commonality version between the conflicts) & remote (their changes). The
+      bottom pane is where you manually resolve the conflicts yourself.
 
-This runs without any vim plugins, and assumes a minimal set of tools namely:
-
-- `vim` (anything 8+ but 9.1+ is preferred and quite easy to compile)
-- `bash`
-- `git`
-- rust runtime e.g `rustc`/`rustup`/`cargo`
-- javascript runtime e.g `npm`/`node`
-- `sqlite3`
-- `docker`? `postgres`?
-
-## Getting Started
-
-
-1. Download (or copy/paste the vimrc file):  
-`wget -O ~/.vimrc https://raw.githubusercontent.com/mikepjb/configure/main/vimrc`
-or
-`git clone` and `ln -sfv`
-2. `vim +Dots +qall` or just run the `Dots` command when you open vim.
-3. `mkdir -p ~/.vim/pack/x/start && git clone --depth 1 https://github.com/dense-analysis/ale.git !$/ale`
-
-## How to use
-
-- `vim` for text editing
-- `nohup ./a_script.sh &` for running a background process during development.
-- Inside vim `:grep <search-term> <location/*>`
-
-## Manual Steps
-
-You will need to:
-1. setup your name/email on git as this can change via work/home/different environments.
-2. add rust tools:
-```
-rustup component add rust-src # include rust source code for jumping
-```
-3. add javascript tools
-4. compile vim if your OS package manager doesn't include 9.1+:
-```bash
-# git clone/source the vim source code a cd into the directory
-./configure --with-features=huge --prefix=$HOME/.local
-make VMRUNTIMEDIR=$HOME/.local/share/vim/vim9
-make install
-```
-8. Run these only if you are using Gnome:
 ```bash
 # Set your npm registry if need be (e.g Artifactory/in protected environment)
 npm config set registry <registry-url>
@@ -98,6 +58,9 @@ gsettings set org.gnome.settings-daemon.plugins.media-keys logout "['<Control><A
 ```
 
 ## Philosophy a.k.a Why?
+
+_Make each program do one thing well. To do a new job, build afresh rather than complicate old
+programs by adding new "features"_ ~ Doug McIlroy documenting the Unix Philospohy.
 
 This selection of tools are chosen to keep the common case fast (text editing &
 compiling software) whilst keeping anything extra to a minimum. This is
@@ -129,12 +92,23 @@ _Some decisions may seem strange, some decisions are documented here_
 - a color scheme - Do not bother modifying the colorscheme, most terminals
   support 256+/truecolor. This means that you can just use a basic black
   terminal with a theme in Vim without extra config.
+- `emacs` - I have used Emacs quite a few times for a long while and even enjoy writing elisp!
+  However it must be said that the size of this program brings about enough instability that stops
+  be relying on it. I say this as someone who strives to use as few packages as possible to avoid
+  conflicts, the standout problem for me last time was GTK conflicting with Emacs where the editor
+  will shutdown if a display is lost to avoid an infinite loop. The practical result meant that
+  creating new frames could not have their size defined normally and even if you use daemon mode,
+  it wouldn't persist if your display server broke (happens very occasionally). At the end of the
+  day (neo)vim is a really small tool that works in a large environment of micro tools, which not
+  only produces more stable (less chance of stuff going wrong) but is easier to change
+  versions/tools (e.g revert neovim version or even use regular vim as a backup) without affecting
+  the rest of the system.
 
 ## Useful Commands you might have forgotten
 
 - `lsof -ti :8080` looks for processes listening on the given port.
 
-## Reference / Minor Detail
+## Reference / Minor Detail / Commentary
 
 - You shouldn't set your own `TERM` value, unless you are logging into a remote
   system where the local and remote machines have different terminal databases.
@@ -142,3 +116,12 @@ _Some decisions may seem strange, some decisions are documented here_
   light or dark. This can be important as changing the background value
   retriggers loading the current theme and `default` calls `bg&` which will set
   background to light when left to it's own devices.
+- Arch Linux breaks in unexpected ways, despite me being a very long term user it does just keep
+  happening. The latest break I've had with Gnome where after an update many of the gtk4/libadwaita
+  apps (e.g Gnome Console + Gnome Settings) have a large black box around them, looking online it
+  seems some other people have experienced this in other DEs with Gnome apps where their compositor
+  was not working properly. This leads me to suspect that there's some kind of bug with my
+  workstation graphics (AMD iGPU)
+  - actually https://gitlab.gnome.org/GNOME/gtk/-/issues/6890 
+  - this highlighted that I'm using amdvlk > vulkan-radeon (the open source driver)
+  - Debian only provides RADV.. so this wouldn't be a problem?
