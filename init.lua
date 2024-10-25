@@ -253,7 +253,8 @@ local git_config = {
 
 local utilities = {
     -- main utils provided
-    "git", "rg", "htop", "tmux", "psql", "wget", "ssh", "go", "node", "rustc", "java", "ruby", "python",
+    "git", "rg", "htop", "tmux", "psql", "wget", "ssh", "go", "node", "rustc", "java", "ruby",
+    "python", "jq",
     -- sourced via go get
     "gopls", "golangci-lint", "air"
 }
