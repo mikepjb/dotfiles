@@ -246,26 +246,8 @@ set -g status-position top;
 set-window-option -g alternate-screen on
 unbind C-b; set -g prefix C-q; unbind x; bind x kill-pane
 set -gq utf-8 on; set -g mouse on; set -g set-clipboard external;
-set -g default-terminal \"tmux-256color\"; set -ag terminal-overrides \",$TERM:RGB\"
+set -g default-terminal tmux-256color; set -ag terminal-overrides \",$TERM:RGB\"
 ]]
-
--- set -g history-limit 100000
--- set-window-option -g alternate-screen on
--- set -g status off
--- set -g lock-after-time 0
--- unbind C-b; set -g prefix C-q;
--- unbind space ; bind space list-windows
--- unbind v ; bind v split-window -c "#{pane_current_path}"
--- unbind s ; bind s split-window -h -c "#{pane_current_path}"
--- unbind x ; bind x kill-pane
--- set -gq utf-8 on;
--- set -g mouse on;
--- set -g set-clipboard external;
--- set -g pane-border-style fg=default,bg=default;
--- set -g pane-active-border-style fg=default,bg=default;
--- set -g message-style "fg=colour5,bg=default"
--- set -g default-terminal "tmux-256color"
--- set -ag terminal-overrides ",$TERM:RGB"
 
 local git_config = {
     ["core.editor"] = "nvim",
