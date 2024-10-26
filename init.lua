@@ -106,7 +106,6 @@ vim.keymap.set("n", "gP", set_path_to_git_root) -- backup, shouldn't need to do 
 vim.api.nvim_create_autocmd("TabNewEntered", {
     group = base, callback = function(ev)
         vim.schedule(function()
-            print(vim.inspect(ev))
             local netrw_dir = vim.b.netrw_curdir
             if netrw_dir then
                 set_path_to_git_root(netrw_curdir)
