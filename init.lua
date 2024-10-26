@@ -20,7 +20,7 @@
 -- language config (in-built?)
 -- external packages (if available) with package config
 
-local base = vim.api.nvim_create_augroup('Base', {})
+local base = vim.api.nvim_create_augroup('Base', { clear = true })
 
 -- editor configuration ---------------------------------------------------------------------------
 vim.opt.guicursor = ""        -- a. visual config
@@ -69,11 +69,19 @@ end
 
 -- keymap configuration ---------------------------------------------------------------------------
 
-vim.keymap.set("n", "gn", ":tabnew<CR>")
-vim.keymap.set("n", "gs", ":tabnew ~/.notes/src/SUMMARY.md<CR>")
-vim.keymap.set("n", "g0", function () vim.lsp.stop_client(vim.lsp.get_active_clients()) end)
-vim.keymap.set("n", "gl", ":set rnu!<CR>") -- toggle relative line number
-vim.keymap.set("n", "g?", ":Dots<CR>")
+function set_path_to_git_root(filepath) -- or do nothing if not in git.
+    if not filepath then
+        filepath = vim.fn.expand("%:p:h")
+    end
+    local pwd_cmd = string.format(
+        "cd %s && echo -n \"$(git rev-parse --show-toplevel 2>/dev/null || echo $PWD)\"",
+        filepath
+    )
+    local new_pwd = vim.fn.system(pwd_cmd)
+    print(string.format("tcd set as '%s'", new_pwd))
+    vim.cmd(string.format(":tcd  %s", new_pwd))
+end
+
 vim.keymap.set("n", "<C-q>", ":q<CR>")
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>")
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>")
@@ -86,8 +94,26 @@ vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("i", "<C-l>", " => ")
 vim.keymap.set("i", "<C-u>", " -> ")
 vim.keymap.set("t", "<C-g>", "<C-\\><C-n>")
--- M-o? other-window <C-\><C-n><C-w><C-w>i
--- autocmd TermOpen * setlocal nonumber norelativenumber
+vim.keymap.set("n", "<C-t>", ":tabnew<CR>")
+vim.keymap.set("n", "gn", ":tabnew ~/.notes/src/SUMMARY.md<CR>")
+vim.keymap.set("n", "g0", function () vim.lsp.stop_client(vim.lsp.get_active_clients()) end)
+vim.keymap.set("n", "gl", ":set rnu!<CR>") -- toggle relative line number
+vim.keymap.set("n", "g?", ":Dots<CR>")
+vim.keymap.set("n", "gi", ":tabnew ~/.config/nvim/init.lua<CR>")
+vim.keymap.set("n", "gp", ":call feedkeys(':tabnew<space>~/src/<tab>', 't')<CR>")
+vim.keymap.set("n", "gP", set_path_to_git_root) -- backup, shouldn't need to do this manually.
+
+vim.api.nvim_create_autocmd("TabNewEntered", {
+    group = base, callback = function(ev)
+        vim.schedule(function()
+            print(vim.inspect(ev))
+            local netrw_dir = vim.b.netrw_curdir
+            if netrw_dir then
+                set_path_to_git_root(netrw_curdir)
+            end
+        end)
+    end
+})
 
 -- always open quickfix window automatically.
 -- this uses cwindows which will open it only if there are entries.
