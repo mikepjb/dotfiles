@@ -32,6 +32,14 @@ docker pull hypalynx/box:latest # Get the latest version:
 docker run --rm -it hypalynx/box /bin/bash # Try out the box with:
 ```
 
+### Remove Servers
+
+- just use regular vim
+- set `export PAGER="less -S"` if you are going to be using `psql` to stop the results wrapping and
+  making everything unreadable.
+- this section should probably be placed in a link instead of having it's own section on this
+  README.
+
 ## How to use these tools
 
 While we can't list _everything_ you can do, it's worth pointing out a few highlights:

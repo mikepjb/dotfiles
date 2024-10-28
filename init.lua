@@ -64,6 +64,7 @@ vim.opt.smartcase = true
 vim.opt.inccommand = "split"
 
 vim.g.markdown_fenced_languages = {'typescript', 'javascript', 'bash', 'go'}
+vim.g.omni_sql_no_default_maps = 1 -- don't use C-c for autocompletion in SQL.
 
 local ok, _ = pcall(vim.cmd, 'colorscheme retrobox')
 if not ok then
@@ -113,7 +114,7 @@ vim.api.nvim_create_autocmd("TabNewEntered", {
         vim.schedule(function()
             local netrw_dir = vim.b.netrw_curdir
             if netrw_dir then
-                set_path_to_git_root(netrw_curdir)
+                set_path_to_git_root(netrw_dir)
             end
         end)
     end
