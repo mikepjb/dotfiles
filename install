@@ -25,6 +25,7 @@ apt_available=$(available pacman)
 
 # packages that share the same name between package managers.
 # packages to add: node & jdk are named differently.
+# only linux requires x11 + wayland clipboard utils to integrate with system clipboard.
 common_packages=(
     git
     ripgrep
@@ -46,7 +47,7 @@ if [[ $brew_available -eq 0 ]]; then
     brew install $(join_by ' ' "${common_packages[@]}") node openjdk
 elif [[ $pacman_available -eq 0 ]]; then
     echo 'pacman found'
-    sudo pacman -Syu --needed $(join_by ' ' "${common_packages[@]}") nodejs jdk-openjdk
+    sudo pacman -Syu --needed $(join_by ' ' "${common_packages[@]}") nodejs jdk-openjdk wl-clipboard xclip
 else
     echo 'package manager not found/supported (dnf/apt specifically not supported)'
 fi
