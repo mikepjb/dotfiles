@@ -106,6 +106,7 @@ vim.keymap.set("n", "g?", ":Dots<CR>")
 vim.keymap.set("n", "gi", ":tabnew ~/.config/nvim/init.lua<CR>")
 vim.keymap.set("n", "gp", ":call feedkeys(':tabnew<space>~/src/<tab>', 't')<CR>")
 vim.keymap.set("n", "gP", set_path_to_git_root) -- backup, shouldn't need to do this manually.
+vim.keymap.set("n", "g*", function () vim.cmd(":grep " .. vim.fn.expand("<cword>")) end)
 
 vim.api.nvim_create_autocmd("TabNewEntered", {
     group = base, callback = function(ev)
