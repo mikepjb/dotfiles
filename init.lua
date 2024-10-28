@@ -1,6 +1,9 @@
 -- Editor Configuration
 -- (plenary, telescope + nvim-lint) clone plugins here: ~/.config/nvim/pack/base/start/ --
 --
+-- TODO maybe git fugitive too?
+-- TODO lsp-zero can do eslint? have a look and see how!
+--
 -- Commentary:
 -- Can we truly be plugin free? use fzf for now but replace if really needed?
 -- Should we be plugin free? Can we gracefully include/exclude these extensions?
@@ -54,7 +57,7 @@ vim.opt.undodir = os.getenv("HOME") .. "/.config/nvim/undodir"
 vim.opt.undofile = true
 
 vim.opt.gdefault = true        -- d. search/replacment
-vim.opt.hlsearch = false
+vim.opt.hlsearch = true
 vim.opt.incsearch = true
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
@@ -64,7 +67,8 @@ vim.g.markdown_fenced_languages = {'typescript', 'javascript', 'bash', 'go'}
 
 local ok, _ = pcall(vim.cmd, 'colorscheme retrobox')
 if not ok then
-  vim.cmd 'colorscheme default' -- if the above fails, then use default
+    -- can use vim.cmd.colorscheme(input)
+    vim.cmd 'colorscheme default' -- if the above fails, then use default
 end
 
 -- keymap configuration ---------------------------------------------------------------------------
@@ -265,14 +269,6 @@ local git_config = {
     "\"%C(yellow)%h%Creset %<(7,trunc)%ae%C(auto)%d %Creset%s %Cgreen(%cr)\""
 }
 
-local utilities = {
-    -- main utils provided
-    "git", "rg", "htop", "tmux", "psql", "wget", "ssh", "go", "node", "rustc", "java", "ruby",
-    "python", "jq",
-    -- sourced via go get
-    "gopls", "golangci-lint", "air"
-}
-
 function dots()
     vim.fn.writefile({". ~/.bashrc"}, vim.fn.expand("$HOME/.bash_profile"))
     vim.fn.writefile(vim.fn.split(bashrc, "\n"), vim.fn.expand("$HOME/.bashrc"))
@@ -280,12 +276,6 @@ function dots()
     if vim.fn.executable("git") == 1 then
         for k, v in pairs(git_config) do
             vim.fn.system("git config --global --replace-all " .. k .. " '" .. v .. "'")
-        end
-    end
-
-    for _, u in ipairs(utilities) do
-        if vim.fn.executable(u) == 0 then
-            print("missing " .. u)
         end
     end
 end
