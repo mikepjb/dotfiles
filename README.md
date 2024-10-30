@@ -2,7 +2,7 @@
 
 _A barebones, productive working environment._
 
-## Getting Started (or getting up to date!)
+## Getting Started
 
 Easy as:
 
@@ -15,12 +15,9 @@ wget https://raw.githubusercontent.com/mikepjb/configure/refs/heads/main/init.lu
 nvim +Dots +qall
 ```
 
-3. Install the external dependencies (things like `ripgrep`) you can check what's missing using the
-   `:Dots` command inside Neovim. If you are unsure how to do this then try using your built-in
-   package manager (if using Linux that'll be either pacman/dnf/apt), [homebrew](brew.sh) on Mac OS
-   or [winget](https://winstall.app/) on Windows. Some dependencies aren't provided by these
-   general package managers and you'll have to get them seperately (e.g `air` is provided by go
-   get). Check the `utilities` variable in `init.lua` for more information on where to source them.
+3. Install the external dependencies (things like `ripgrep`) using the `./install` command. This
+   will use your package manager (e.g brew for Mac OS, pacman for Arch) to get what you need.
+   
 
 ### Development environment inside Docker.
 
