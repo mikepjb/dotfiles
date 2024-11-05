@@ -34,7 +34,6 @@ vim.opt.spell = false -- no spell, can we enable for just markdown + comments?
 vim.opt.nu = true
 vim.opt.rnu = false -- maybe default true in future?
 vim.opt.showtabline = 2
-vim.opt.termguicolors = true
 vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
 vim.opt.updatetime = 50
@@ -65,6 +64,8 @@ vim.opt.inccommand = "split"
 
 vim.g.markdown_fenced_languages = {'typescript', 'javascript', 'bash', 'go'}
 vim.g.omni_sql_no_default_maps = 1 -- don't use C-c for autocompletion in SQL.
+
+vim.opt.termguicolors = os.getenv("COLORTERM") == 'truecolor'
 
 local ok, _ = pcall(vim.cmd, 'colorscheme retrobox')
 if not ok then
@@ -234,17 +235,19 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   end
 })
 
-local bashrc = [[
+local bashrc = [=[
+export BASH_SILENCE_DEPRECATION_WARNING=1 # Mac OS likes to think bash is going out of fashion.
 export EDITOR=nvim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
-export PATH=$HOME/go/bin:$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
-export HISTSIZE=10000 HISTCONTROL=erasedups
+export PATH=$HOME/go/bin:$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin
+export HISTSIZE=100000 HISTCONTROL=erasedups
 shopt -s histappend
 alias vi='nvim' gr='cd $(git rev-parse --show-toplevel || echo \".\")'
 alias x='tmux attach -t x || tmux new -s x' sk='eval $(ssh-agent -k)'
 alias sa='pkill ssh-agent; eval $(ssh-agent -t 28800); ssh-add ~/.ssh/id_rsa'
 alias new-pass="head -c 16 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | echo"
+[[ -f $HOME/.bashrc.local ]] && . $HOME/.bashrc.local
 PS1='\h:\W($(git branch --show-current 2>/dev/null || echo "!")) \$ '
-]]
+]=]
 
 local tmux_conf = [[
 set -g history-limit 100000; set -g status on; set -g lock-after-time 0
@@ -266,6 +269,7 @@ local git_config = {
     ["alias.co"] = "checkout",
     ["alias.ci"] = "commit --verbose",
     ["alias.di"] = "diff",
+    ["alias.count"] = "shortlog -sn",
     ["alias.push-new"] = "push -u origin HEAD",
     ["alias.ra"] = "log --pretty=format:" ..
     "\"%C(yellow)%h%Creset %<(7,trunc)%ae%C(auto)%d %Creset%s %Cgreen(%cr)\""
@@ -283,6 +287,9 @@ function dots()
 end
 
 vim.api.nvim_create_user_command('Dots', dots, {})
+vim.api.nvim_create_user_command('Prettify', function()
+    vim.cmd '%!jq .'
+end, {})
 
 -- external stuff/packages ------------------
 -- Linting --------------------------------------------------------------------

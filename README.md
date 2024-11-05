@@ -18,6 +18,10 @@ nvim +Dots +qall
 3. Install the external dependencies (things like `ripgrep`) using the `./install` command. This
    will use your package manager (e.g brew for Mac OS, pacman for Arch) to get what you need.
    
+### Extra housekeeping when setting up a new machine
+
+1. Set caps lock as control.
+2. Disable audible/visual bell.
 
 ### Development environment inside Docker.
 
