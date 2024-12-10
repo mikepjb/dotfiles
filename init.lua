@@ -1,3 +1,5 @@
+-- TODO clean up this file! no more blocks of comments please!
+
 -- Editor Configuration
 -- (plenary, telescope + nvim-lint) clone plugins here: ~/.config/nvim/pack/base/start/ --
 --
@@ -145,7 +147,7 @@ local html_template = [[
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<link rel="stylesheet" href="/style.css" type="text/css" media="all" />  
+		<link rel="stylesheet" href="/style.css" type="text/css" media="all" />
 	</head>
 </html>
 ]]
@@ -192,6 +194,7 @@ end
 
 -- TODO if available, register it
 register_lsp({'rust-analyzer'}, 'rust', {'Cargo.toml'})
+register_lsp({'jdtls'}, 'java', {'gradlew'})
 
 if vim.fn.executable("typescript-language-server") == 1 and
     vim.fn.isdirectory("./node_modules/typescript") == 1 then
@@ -238,7 +241,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 local bashrc = [=[
 export BASH_SILENCE_DEPRECATION_WARNING=1 # Mac OS likes to think bash is going out of fashion.
 export EDITOR=nvim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
-export PATH=$HOME/go/bin:$HOME/.cargo/bin:$HOME/.npm/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin
+export PATH=$HOME/go/bin:$HOME/.cargo/bin:$HOME/.npm/bin:/opt/homebrew/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
 export HISTSIZE=100000 HISTCONTROL=erasedups
 shopt -s histappend
 alias vi='nvim' gr='cd $(git rev-parse --show-toplevel || echo \".\")'
@@ -290,6 +293,34 @@ vim.api.nvim_create_user_command('Dots', dots, {})
 vim.api.nvim_create_user_command('Prettify', function()
     vim.cmd '%!jq .'
 end, {})
+vim.api.nvim_create_user_command('TrimWhitespace', function()
+    vim.cmd '%s/\\s\\+$//e'
+end, {})
+
+-- Extra Highlighting
+--
+-- TODO.. TODO/NEXT etc highlighting, maybe for markdown only?
+-- TODO extra whitespace /\s\+$/
+-- :highlight ExtraWhitespace ctermbg=red guibg=red
+-- :match ExtraWhitespace /\s\+$/
+-- ..alternatively set listchars https://vim.fandom.com/wiki/Highlight_unwanted_spaces#Using_the_list_and_listchars_options
+
+_G.md_fold = function()
+    local hashBlock = vim.fn.matchstr(vim.fn.getline(vim.v.lnum), '^#\\+')
+    if hashBlock == '' then
+        return '='
+    else
+        return '>' .. vim.fn.len(hashBlock)
+    end
+end
+
+vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = '*.md',
+    callback = function()
+        vim.opt_local.foldexpr = 'v:lua.md_fold()'
+        vim.opt_local.foldmethod = 'expr'
+    end
+})
 
 -- external stuff/packages ------------------
 -- Linting --------------------------------------------------------------------
@@ -302,3 +333,6 @@ end, {})
 --     require("lint").try_lint()
 --   end,
 -- })
+
+-- TODO write a function that will try to download your dependencies and optionally takes an
+-- argument to prefix so you can use artifactory etc? or overkill?
