@@ -60,6 +60,9 @@ While we can't list _everything_ you can do, it's worth pointing out a few highl
       enter your password once and do your work.
     - There is a default lifetime for keys of 8 hours, so if for some reason your computer is
       compromised the agent will expire around the end of a working day.
+- bash
+    - `lsof -i tcp:5432` to see what is listening on port 5432 (you may need to run as root if the
+      process is not owned by your user for a correct answer.)
 
 ```bash
 # Set your npm registry if need be (e.g Artifactory/in protected environment)

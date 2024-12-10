@@ -54,5 +54,6 @@ mkdir -p $HOME/.local/man
 # in the make <here> install command seemed to fix that!
 export CMAKE_BUILD_TYPE=Release
 export CMAKE_INSTALL_PREFIX="$HOME/.local"
+# TODO USE_EXISTING_SRC_DIR fails because libvterm can't be found (on debian 12 at least)
 export DEPS_CMAKE_FLAGS="-DUSE_EXISTING_SRC_DIR=ON -DUSE_BUNDLED_LUAROCKS=ON -DUSE_BUNDLED_LUAJIT=ON -DUSE_BUNDLED_LUV=ON"
-make && make CMAKE_INSTALL_PREFIX="HOME/.local" install
+make && make CMAKE_INSTALL_PREFIX="$HOME/.local" install
