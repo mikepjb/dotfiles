@@ -24,6 +24,8 @@
 -- environment config (writing rc files, checking for external programs)
 -- language config (in-built?)
 -- external packages (if available) with package config
+--
+-- For folding, zM (close all), zR (open all), za (toggle open/close current)
 
 local base = vim.api.nvim_create_augroup('Base', { clear = true })
 
@@ -44,6 +46,7 @@ vim.opt.wildignore:append({"node_modules"})
 vim.opt.suffixesadd:append({".rs"}) -- search for suffixes using gf
 vim.opt.completeopt:remove("preview") -- no preview buffer during completion
 vim.opt.clipboard:append({"unnamedplus"}) -- integrate with system clipboard
+vim.opt.foldlevel = 20 -- by default, all folds are fully expanded
 
 vim.opt.tabstop = 4            -- b. indentation
 vim.opt.softtabstop = 4
