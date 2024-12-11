@@ -46,6 +46,7 @@ common_packages=(
     python
     jq
     neovim
+    hugo
 )
 
 if [[ $brew_available -eq 0 ]]; then
