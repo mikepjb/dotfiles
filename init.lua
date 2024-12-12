@@ -244,7 +244,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 local bashrc = [=[
 export BASH_SILENCE_DEPRECATION_WARNING=1 # Mac OS likes to think bash is going out of fashion.
 export EDITOR=nvim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
-export PATH=$HOME/go/bin:$HOME/.cargo/bin:$HOME/.npm/bin:/opt/homebrew/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
+export PATH=/usr/local/go/bin:$HOME/go/bin:$HOME/.cargo/bin:$HOME/.npm/bin:/opt/homebrew/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
 export HISTSIZE=100000 HISTCONTROL=erasedups
 shopt -s histappend
 alias vi='nvim' gr='cd $(git rev-parse --show-toplevel || echo \".\")'
