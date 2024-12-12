@@ -252,7 +252,8 @@ alias x='tmux attach -t x || tmux new -s x' sk='eval $(ssh-agent -k)'
 alias sa='pkill ssh-agent; eval $(ssh-agent -t 28800); ssh-add ~/.ssh/id_rsa'
 alias new-pass="head -c 16 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | echo"
 [[ -f $HOME/.bashrc.local ]] && . $HOME/.bashrc.local
-PS1='\h:\W($(git branch --show-current 2>/dev/null || echo "!")) \$ '
+jobs_signal() { [[ $(jobs) != "" ]] && echo -e "\033[0;36m\$\033[0m" || echo -e "\$"; }
+PS1='\h:\W($(git branch --show-current 2>/dev/null || echo "!")) $(jobs_signal) '
 ]=]
 
 local tmux_conf = [[
