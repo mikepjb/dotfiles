@@ -107,6 +107,7 @@ vim.keymap.set("i", "<C-u>", " -> ")
 vim.keymap.set("t", "<C-g>", "<C-\\><C-n>")
 vim.keymap.set("n", "<C-t>", ":tabnew<CR>")
 vim.keymap.set("n", "gn", ":tabnew ~/.notes/src/index.md<CR>")
+vim.keymap.set("n", "go", ":tabnew ~/.notes/src/ops.md<CR>")
 vim.keymap.set("n", "g0", function () vim.lsp.stop_client(vim.lsp.get_active_clients()) end)
 vim.keymap.set("n", "gl", ":set rnu!<CR>") -- toggle relative line number
 vim.keymap.set("n", "g?", ":Dots<CR>")
