@@ -308,6 +308,7 @@ end, {})
 -- :match ExtraWhitespace /\s\+$/
 -- ..alternatively set listchars https://vim.fandom.com/wiki/Highlight_unwanted_spaces#Using_the_list_and_listchars_options
 
+-- note taking section --------------------------------------------------------
 _G.md_fold = function()
     local hashBlock = vim.fn.matchstr(vim.fn.getline(vim.v.lnum), '^#\\+')
     if hashBlock == '' then
@@ -324,6 +325,14 @@ vim.api.nvim_create_autocmd("BufEnter", {
         vim.opt_local.foldmethod = 'expr'
     end
 })
+
+vim.api.nvim_create_user_command('Archive', function()
+    -- this works manually but needs to accept a range
+    -- also needs to delete the range after saving to the archive.
+    -- maybe also needs to change TODO/NEXT etc and DONE too before sending?
+    vim.cmd '\'<,\'>w! >>$HOME/.notes/src/archive.md'
+end, {})
+-- '<,'>w! >>file.bak
 
 -- external stuff/packages ------------------
 -- Linting --------------------------------------------------------------------
