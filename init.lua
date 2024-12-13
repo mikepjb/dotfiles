@@ -5,6 +5,7 @@
 --
 -- TODO maybe git fugitive too?
 -- TODO lsp-zero can do eslint? have a look and see how!
+-- TODO auto-re-read from disk on file change pls!
 --
 -- Commentary:
 -- Can we truly be plugin free? use fzf for now but replace if really needed?
