@@ -115,6 +115,7 @@ vim.keymap.set("n", "g?", ":Dots<CR>")
 vim.keymap.set("n", "gi", ":tabnew ~/.config/nvim/init.lua<CR>")
 vim.keymap.set("n", "gp", ":call feedkeys(':tabnew<space>~/src/<tab>', 't')<CR>")
 vim.keymap.set("n", "gP", set_path_to_git_root) -- backup, shouldn't need to do this manually.
+vim.keymap.set("n", "gr", ":call feedkeys(':grep<space>', 't')<CR>")
 vim.keymap.set("n", "g*", function () vim.cmd(":grep " .. vim.fn.expand("<cword>")) end)
 
 vim.api.nvim_create_autocmd("TabNewEntered", {
@@ -166,14 +167,6 @@ if vim.fn.executable("rg") == 1 then
     vim.opt.grepformat = "%f:%l:%c:%m"
 end
 
-vim.keymap.set("n", "gr", function ()
-    if vim.g.loaded_telescope == 1 then
-        return ":Telescope live_grep<CR>"
-    else
-        return ":grep "
-    end
-end, { expr = true })
-
 vim.keymap.set("n", "<space>", function ()
     if vim.g.loaded_telescope == 1 then
         return ":Telescope find_files<CR>"
@@ -212,6 +205,7 @@ end
 
 register_lsp({"gopls"}, "go", {"go.mod"})
 -- register_lsp({"golangci-lint"}, "go", {"go.mod"})
+
 --
 vim.api.nvim_create_autocmd('LspAttach', {
     group = base,
@@ -351,3 +345,4 @@ end, {})
 
 -- TODO write a function that will try to download your dependencies and optionally takes an
 -- argument to prefix so you can use artifactory etc? or overkill?
+-- TODO pushd on cd, allow selecta style cli to pick from previous stack (deduped)
