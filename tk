@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set +e
+
+echo "Toolkit, a bash script to help provide access to regular and helpful one-liners"
+
+# TODO make this easy to use as a cli tool, auto-complete/switch statement style etc like tpope.
+
+echo "gpg-zip, for encrypting/decrypting folders"

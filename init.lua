@@ -1,32 +1,7 @@
--- TODO clean up this file! no more blocks of comments please!
-
 -- Editor Configuration
 -- (plenary, telescope + nvim-lint) clone plugins here: ~/.config/nvim/pack/base/start/ --
---
 -- TODO maybe git fugitive too?
 -- TODO lsp-zero can do eslint? have a look and see how!
--- TODO auto-re-read from disk on file change pls!
---
--- Commentary:
--- Can we truly be plugin free? use fzf for now but replace if really needed?
--- Should we be plugin free? Can we gracefully include/exclude these extensions?
--- Vim is very reliable! (although tree-sitter... man!)
---
---  tmux > neovim terminal - learn how to copy from tmux to the clipboard that can paste into
---  neovim!!!!!
---
---  can you configure your font and/or terminal config? on mac os? on linux?
---  - alternatively just use the default for the OS on the default terminal? e.g terminal/monaco
---  - print? print list of dependencies/check? how to have a common set of utils you rely on work
---  between linux distros + mac os (but not windows, ssh/wsl instead)
---  - ideally alt + ret
--- editor config
--- keybindings (for built-in)
--- environment config (writing rc files, checking for external programs)
--- language config (in-built?)
--- external packages (if available) with package config
---
--- For folding, zM (close all), zR (open all), za (toggle open/close current)
 
 local base = vim.api.nvim_create_augroup('Base', { clear = true })
 
@@ -48,6 +23,7 @@ vim.opt.suffixesadd:append({".rs"}) -- search for suffixes using gf
 vim.opt.completeopt:remove("preview") -- no preview buffer during completion
 vim.opt.clipboard:append({"unnamedplus"}) -- integrate with system clipboard
 vim.opt.foldlevel = 20 -- by default, all folds are fully expanded
+vim.opt.autoread = true
 
 vim.opt.tabstop = 4            -- b. indentation
 vim.opt.softtabstop = 4
@@ -107,8 +83,8 @@ vim.keymap.set("i", "<C-l>", " => ")
 vim.keymap.set("i", "<C-u>", " -> ")
 vim.keymap.set("t", "<C-g>", "<C-\\><C-n>")
 vim.keymap.set("n", "<C-t>", ":tabnew<CR>")
-vim.keymap.set("n", "gn", ":tabnew ~/.notes/src/index.md<CR>")
-vim.keymap.set("n", "go", ":tabnew ~/.notes/src/ops.md<CR>")
+vim.keymap.set("n", "gn", ":tabnew ~/notes/src/index.md<CR>")
+vim.keymap.set("n", "go", ":tabnew ~/notes/src/ops.md<CR>")
 vim.keymap.set("n", "g0", function () vim.lsp.stop_client(vim.lsp.get_active_clients()) end)
 vim.keymap.set("n", "gl", ":set rnu!<CR>") -- toggle relative line number
 vim.keymap.set("n", "g?", ":Dots<CR>")
@@ -185,14 +161,17 @@ function register_lsp(cmd, pattern, root_files)
             local client = vim.lsp.start({
                 name = cmd[0], cmd = cmd, root_dir = root_dir,
             })
-            vim.lsp.buf_attach_client(0, client)
+            if vim.fn.executable(cmd[0]) == 1 then
+                vim.lsp.buf_attach_client(0, client)
+            else
+               print("Could not register lsp, '" .. cmd[0] .. "' couldn't be found.") 
+            end
         end
     })
 end
 
--- TODO if available, register it
 register_lsp({'rust-analyzer'}, 'rust', {'Cargo.toml'})
-register_lsp({'jdtls'}, 'java', {'gradlew'})
+-- register_lsp({'jdtls'}, 'java', {'gradlew'})
 
 if vim.fn.executable("typescript-language-server") == 1 and
     vim.fn.isdirectory("./node_modules/typescript") == 1 then
@@ -238,6 +217,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 })
 
 local bashrc = [=[
+[[ -f /etc/bash_completion ]] && . /etc/bash_completion
 export BASH_SILENCE_DEPRECATION_WARNING=1 # Mac OS likes to think bash is going out of fashion.
 export EDITOR=nvim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
 export PATH=/usr/local/go/bin:$HOME/go/bin:$HOME/.cargo/bin:$HOME/.npm/bin:/opt/homebrew/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin

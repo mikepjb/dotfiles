@@ -1,3 +1,6 @@
+grab:
+	go run grab.go
+
 build:
 	docker build -t hypalynx/box --target=box .
 
