@@ -22,8 +22,8 @@ vim.opt.wildignore:append({"node_modules"})
 vim.opt.suffixesadd:append({".rs"}) -- search for suffixes using gf
 vim.opt.completeopt:remove("preview") -- no preview buffer during completion
 vim.opt.clipboard:append({"unnamedplus"}) -- integrate with system clipboard
-vim.opt.foldlevel = 20 -- by default, all folds are fully expanded
 vim.opt.autoread = true
+vim.opt.foldlevel = 1 -- by default, only show top level fold/heading
 
 vim.opt.tabstop = 4            -- b. indentation
 vim.opt.softtabstop = 4
@@ -93,6 +93,8 @@ vim.keymap.set("n", "gp", ":call feedkeys(':tabnew<space>~/src/<tab>', 't')<CR>"
 vim.keymap.set("n", "gP", set_path_to_git_root) -- backup, shouldn't need to do this manually.
 vim.keymap.set("n", "gr", ":call feedkeys(':grep<space>', 't')<CR>")
 vim.keymap.set("n", "g*", function () vim.cmd(":grep " .. vim.fn.expand("<cword>")) end)
+vim.keymap.set("n", "-", "za")
+vim.keymap.set("n", "_", ":set foldlevel=1<CR>")
 
 vim.api.nvim_create_autocmd("TabNewEntered", {
     group = base, callback = function(ev)
