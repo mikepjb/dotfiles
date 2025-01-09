@@ -23,12 +23,14 @@ setup_neovim() {
 }
 
 link_scripts() {
+    info "Linking scripts to ~/.local/bin"
     for script in "$DOTFILES_PATH/bin/"*; do
         ln -sfv "$script" "$HOME/.local/bin/"
     done
 }
 
 link_config() {
+    info "Linking configuration files"
     for config in "$DOTFILES_PATH/config/"*; do
         local name=$(basename "$config" | sed 's/\.[^.]*$//')
         if [[ "$config" == *rc ]]; then
@@ -54,7 +56,7 @@ ensure_repo() {
 
 info() {
     local text="$1"
-    echo -e "\033[32m${text}\033[0m"
+    echo -e "\033[33m-> \033[32m${text}\033[0m"
 }
 
 main
