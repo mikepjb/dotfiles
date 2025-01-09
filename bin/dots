@@ -42,6 +42,7 @@ link_config() {
             [[ "$config" != .* ]] && config=".$config"
             ln -sfv "$config" "$HOME/$(basename $config)"
         else
+            mkdir -p "$HOME/.config/$name"
             ln -sfv "$config" "$HOME/.config/$name/$(basename $config)"
         fi
     done
