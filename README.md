@@ -1,4 +1,4 @@
-# Configure
+# Dotfiles
 
 _A barebones, productive working environment._
 

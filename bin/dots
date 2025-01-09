@@ -6,6 +6,7 @@ export DOTFILES_PATH="$HOME/.dotfiles"
 export DOTFILES_REPO="mikepjb/dotfiles.git"
 export NOTES_PATH="$HOME/.notes"
 export NOTES_REPO="mikepjb/notes.git"
+export NEOVIM_PATH="$HOME/.config/nvim"
 
 main() {
     ensure_repo $DOTFILES_PATH $DOTFILES_REPO
@@ -13,6 +14,12 @@ main() {
 
     link_scripts 
     link_config
+    setup_neovim
+}
+
+setup_neovim() {
+    mkdir -p "$NEOVIM_PATH"
+    ln -sfv $DOTFILES_PATH/init.lua "$NEOVIM_PATH/init.lua"
 }
 
 link_scripts() {

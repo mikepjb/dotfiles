@@ -3,6 +3,19 @@
 -- TODO maybe git fugitive too?
 -- TODO lsp-zero can do eslint? have a look and see how!
 
+-- local function maybe_require(module_name)
+--     local ok, module = pcall(require, module_name)
+--     if ok then
+--         return module
+--     end
+--     return nil
+-- end
+-- 
+-- local telescope = maybe_require("telescope.builtin")
+-- if telescope then
+--     vim.keymap.set('n', '<space>', builtin.find_files, {})
+-- end
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
