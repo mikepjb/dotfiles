@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -eu
+
+export GITHUB=${GITHUB:-https://github.com}
+export DOTFILES_PATH="$HOME/.dotfiles"
+export DOTFILES_REPO="mikepjb/dotfiles.git"
+export NOTES_PATH="$HOME/.notes"
+export NOTES_REPO="mikepjb/notes.git"
+
+main() {
+    ensure_repo $DOTFILES_PATH $DOTFILES_REPO
+    # ensure_repo $NOTES_PATH $NOTES_REPO # doesn't work yet because you need SSH
+
+    link_scripts 
+    link_config
+}
+
+link_scripts() {
+    for script in $DOTFILES_PATH/bin/*; do
+        echo "$script"
+        # ln -sfv "$script" "$HOME/.local/bin/"
+    done
+}
+
+link_config() {
+    for config in "$DOTFILES_PATH/config/"*; do
+        echo $config
+        # if [[ "$config" == *rc ]]; then
+        #     # ln -sfv "$config" "$HOME/.config/${filename%%.*}/$config"
+        # else
+        #     # ln -sfv "$config" "$HOME/.config/${filename%%.*}/$config"
+        # fi
+    done
+}
+
+
+ensure_repo() {
+    info "Ensuring $1 is available & up to date"
+    if [ ! -d "$1" ]; then
+        mkdir -p "${1%/*}"
+        echo "${1%/*}"
+        git clone "$GITHUB/$2" "$1"
+    else
+        git -C "$1" pull
+    fi
+}
+
+info() {
+    local text="$1"
+    echo -e "\033[32m${text}\033[0m"
+}
+
+main
