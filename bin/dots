@@ -16,20 +16,20 @@ main() {
 }
 
 link_scripts() {
-    for script in $DOTFILES_PATH/bin/*; do
-        echo "$script"
-        # ln -sfv "$script" "$HOME/.local/bin/"
+    for script in "$DOTFILES_PATH/bin/"*; do
+        ln -sfv "$script" "$HOME/.local/bin/"
     done
 }
 
 link_config() {
     for config in "$DOTFILES_PATH/config/"*; do
-        echo $config
-        # if [[ "$config" == *rc ]]; then
-        #     # ln -sfv "$config" "$HOME/.config/${filename%%.*}/$config"
-        # else
-        #     # ln -sfv "$config" "$HOME/.config/${filename%%.*}/$config"
-        # fi
+        local name=$(basename "$config" | sed 's/\.[^.]*$//')
+        if [[ "$config" == *rc ]]; then
+            [[ "$config" != .* ]] && config=".$config"
+            ln -sfv "$config" "$HOME/$(basename $config)"
+        else
+            ln -sfv "$config" "$HOME/.config/$name/$(basename $config)"
+        fi
     done
 }
 

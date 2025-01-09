@@ -17,8 +17,8 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- Set leader key before lazy
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
+-- vim.g.mapleader = " "
+-- vim.g.maplocalleader = " "
 
 -- TODO do not use lazy.nvim since you can't resource :so your config
 -- Initialize lazy with plugins
@@ -33,10 +33,10 @@ require("lazy").setup({
     config = function()
       -- Basic Telescope keymaps
       local builtin = require('telescope.builtin')
-      vim.keymap.set('n', '<leader>f', builtin.find_files, {})
-      vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
-      vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
-      vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
+      vim.keymap.set('n', '<space>', builtin.find_files, {})
+      -- vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+      -- vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
+      -- vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
     end,
   },
   {
@@ -199,13 +199,13 @@ if vim.fn.executable("rg") == 1 then
     vim.opt.grepformat = "%f:%l:%c:%m"
 end
 
-vim.keymap.set("n", "<space>", function ()
-    if vim.g.loaded_telescope == 1 then
-        return ":Telescope find_files<CR>"
-    else
-        return ":find "
-    end
-end, { expr = true })
+-- vim.keymap.set("n", "<space>", function ()
+--     if vim.g.loaded_telescope == 1 then
+--         return ":Telescope find_files<CR>"
+--     else
+--         return ":find "
+--     end
+-- end, { expr = true })
 
 function register_lsp(cmd, pattern, root_files)
     vim.api.nvim_create_autocmd("FileType", {
@@ -287,15 +287,6 @@ alias new-pass="head -c 16 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | echo"
 jobs_signal() { [[ $(jobs) != "" ]] && echo -e "\x01\033[0;36m\x02\$\x01\033[0m\x02" || echo -e "\$"; }
 PS1='\h:\W($(git branch --show-current 2>/dev/null || echo "!")) $(jobs_signal) '
 ]=]
-
-local tmux_conf = [[
-set -g history-limit 100000; set -g status on; set -g lock-after-time 0
-set -g status-position top;
-set-window-option -g alternate-screen on
-unbind C-b; set -g prefix C-q; unbind x; bind x kill-pane
-set -gq utf-8 on; set -g mouse on; set -g set-clipboard external;
-set -g default-terminal tmux-256color; set -ag terminal-overrides \",$TERM:RGB\"
-]]
 
 local git_config = {
     ["core.editor"] = "nvim",
