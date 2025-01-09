@@ -4,19 +4,7 @@ _A barebones, productive working environment._
 
 ## Getting Started
 
-Easy as:
-
-1. Install Neovim
-
-2. Download and run the config:
-```bash
-mkdir -p ~/.config/nvim
-wget https://raw.githubusercontent.com/mikepjb/configure/refs/heads/main/init.lua
-nvim +Dots +qall
-```
-
-3. Install the external dependencies (things like `ripgrep`) using the `./install` command. This
-   will use your package manager (e.g brew for Mac OS, pacman for Arch) to get what you need.
+curl -fsSL https://raw.githubusercontent.com/mikepjb/dotfiles/main/bin/dots | sh
    
 ### Extra housekeeping when setting up a new machine
 

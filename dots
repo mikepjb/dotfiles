@@ -11,12 +11,19 @@ main() {
     ensure_repo $DOTFILES_PATH $DOTFILES_REPO
     ensure_repo $NOTES_PATH $NOTES_REPO
 
-    
+    link_scripts 
+    link_config
 }
 
-scripts_on_path() {
-    for script in "$DOTFILES_PATH/bin"; do
+link_scripts() {
+    for script in "$DOTFILES_PATH/bin/*"; do
         ln -sfv "$script" "$HOME/.local/bin/"
+    done
+}
+
+link_config() {
+    for config in "$DOTFILES_PATH/config/*"; do
+        ln -sfv "$config" "$HOME/.config/${filename%%.*}/$config"
     done
 }
 

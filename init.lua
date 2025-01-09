@@ -3,6 +3,59 @@
 -- TODO maybe git fugitive too?
 -- TODO lsp-zero can do eslint? have a look and see how!
 
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable",
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
+-- Set leader key before lazy
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
+
+-- TODO do not use lazy.nvim since you can't resource :so your config
+-- Initialize lazy with plugins
+require("lazy").setup({
+  {
+    'nvim-telescope/telescope.nvim', 
+    tag = '0.1.5',
+    dependencies = { 
+      'nvim-lua/plenary.nvim',
+      'nvim-tree/nvim-web-devicons', -- optional, for file icons
+    },
+    config = function()
+      -- Basic Telescope keymaps
+      local builtin = require('telescope.builtin')
+      vim.keymap.set('n', '<leader>f', builtin.find_files, {})
+      vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+      vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
+      vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
+    end,
+  },
+  {
+    'folke/tokyonight.nvim',
+    lazy = false,
+    priority = 1000,
+    config = function()
+        require("tokyonight").setup({
+            transparent = true,  -- Enable transparency
+            styles = {
+                sidebars = "transparent",
+                floats = "transparent",
+            },
+        })
+      vim.cmd([[colorscheme tokyonight]])
+    end,
+  },
+})
+
 local base = vim.api.nvim_create_augroup('Base', { clear = true })
 
 -- editor configuration ---------------------------------------------------------------------------
@@ -49,11 +102,11 @@ vim.g.omni_sql_no_default_maps = 1 -- don't use C-c for autocompletion in SQL.
 
 vim.opt.termguicolors = os.getenv("COLORTERM") == 'truecolor'
 
-local ok, _ = pcall(vim.cmd, 'colorscheme retrobox')
-if not ok then
-    -- can use vim.cmd.colorscheme(input)
-    vim.cmd 'colorscheme default' -- if the above fails, then use default
-end
+-- local ok, _ = pcall(vim.cmd, 'colorscheme retrobox')
+-- if not ok then
+--     -- can use vim.cmd.colorscheme(input)
+--     vim.cmd 'colorscheme default' -- if the above fails, then use default
+-- end
 
 -- keymap configuration ---------------------------------------------------------------------------
 
@@ -93,6 +146,7 @@ vim.keymap.set("n", "gp", ":call feedkeys(':tabnew<space>~/src/<tab>', 't')<CR>"
 vim.keymap.set("n", "gP", set_path_to_git_root) -- backup, shouldn't need to do this manually.
 vim.keymap.set("n", "gr", ":call feedkeys(':grep<space>', 't')<CR>")
 vim.keymap.set("n", "g*", function () vim.cmd(":grep " .. vim.fn.expand("<cword>")) end)
+vim.keymap.set("n", ",", "/TODO\\|NEXT\\|XXX<CR>")
 vim.keymap.set("n", "-", "za")
 vim.keymap.set("n", "_", ":set foldlevel=1<CR>")
 
@@ -161,9 +215,9 @@ function register_lsp(cmd, pattern, root_files)
                 vim.fs.find(root_files, { upward = true })[1]
             )
             local client = vim.lsp.start({
-                name = cmd[0], cmd = cmd, root_dir = root_dir,
+                name = cmd[1], cmd = cmd, root_dir = root_dir,
             })
-            if vim.fn.executable(cmd[0]) == 1 then
+            if vim.fn.executable(cmd[1]) == 1 then
                 vim.lsp.buf_attach_client(0, client)
             else
                print("Could not register lsp, '" .. cmd[0] .. "' couldn't be found.") 
@@ -286,32 +340,6 @@ end, {})
 -- :highlight ExtraWhitespace ctermbg=red guibg=red
 -- :match ExtraWhitespace /\s\+$/
 -- ..alternatively set listchars https://vim.fandom.com/wiki/Highlight_unwanted_spaces#Using_the_list_and_listchars_options
-
--- note taking section --------------------------------------------------------
-_G.md_fold = function()
-    local hashBlock = vim.fn.matchstr(vim.fn.getline(vim.v.lnum), '^#\\+')
-    if hashBlock == '' then
-        return '='
-    else
-        return '>' .. vim.fn.len(hashBlock)
-    end
-end
-
-vim.api.nvim_create_autocmd("BufEnter", {
-    pattern = '*.md',
-    callback = function()
-        vim.opt_local.foldexpr = 'v:lua.md_fold()'
-        vim.opt_local.foldmethod = 'expr'
-    end
-})
-
-vim.api.nvim_create_user_command('Archive', function()
-    -- this works manually but needs to accept a range
-    -- also needs to delete the range after saving to the archive.
-    -- maybe also needs to change TODO/NEXT etc and DONE too before sending?
-    vim.cmd '\'<,\'>w! >>$HOME/.notes/src/archive.md'
-end, {})
--- '<,'>w! >>file.bak
 
 -- external stuff/packages ------------------
 -- Linting --------------------------------------------------------------------
