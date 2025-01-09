@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -eu
+
+export GITHUB=${GITHUB:-https://github.com}
+export DOTFILES_PATH="$HOME/.dotfiles"
+export DOTFILES_REPO="mikepjb/dotfiles"
+export NOTES_PATH="$HOME/.dotfiles"
+export NOTES_REPO="mikepjb/notes"
+
+main() {
+    ensure_repo $DOTFILES_PATH $DOTFILES_REPO
+    ensure_repo $NOTES_PATH $NOTES_REPO
+
+    
+}
+
+scripts_on_path() {
+    for script in "$DOTFILES_PATH/bin"; do
+        ln -sfv "$script" "$HOME/.local/bin/"
+    done
+}
+
+
+ensure_repo() {
+    if [ ! -d "$1" ]; then
+        mkdir -p "$1"
+        git clone "$2" "$1"
+    else
+        git -C "$1" pull
+    fi
+}
+
+warn() {
+    local text="$1"
+    echo -e "\033[31m${text}\033[0m"
+}
+
+main
