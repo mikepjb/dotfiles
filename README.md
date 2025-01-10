@@ -13,6 +13,7 @@ curl -fsSL https://raw.githubusercontent.com/mikepjb/dotfiles/main/bin/dots | sh
 3. Trackpad/Mouse tracking speed + tap to click!
 4. Disable hold to quit in Chrome/Chromium.
 5. Increase key repeat rate and shorten delay until first repeat.
+6. Make sure all 4 Rec Mono Linear font styles are installed (Regular/Italic/Bold/Bold Italic).
 
 ### Development environment inside Docker.
 
