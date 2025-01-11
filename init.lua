@@ -1,214 +1,34 @@
 -- Editor Configuration
--- (plenary, telescope + nvim-lint) clone plugins here: ~/.config/nvim/pack/base/start/ --
--- TODO maybe git fugitive too?
--- TODO lsp-zero can do eslint? have a look and see how!
 
--- local function maybe_require(module_name)
---     local ok, module = pcall(require, module_name)
---     if ok then
---         return module
---     end
---     return nil
--- end
---
--- local telescope = maybe_require("telescope.builtin")
--- if telescope then
---     vim.keymap.set('n', '<space>', builtin.find_files, {})
--- end
+-- Performance Tuning ------------------------------------------------
+-- TODO not sure this is needed, remove?
+-- Environment -------------------------------------------------------
+-- Appearance --------------------------------------------------------
+-- Emacs Behaviour ---------------------------------------------------
+-- Keybindings -------------------------------------------------------
+-- Packages & Configuration ------------------------------------------
 
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-    vim.fn.system({
-        "git",
-        "clone",
-        "--filter=blob:none",
-        "https://github.com/folke/lazy.nvim.git",
-        "--branch=stable",
-        lazypath,
-    })
+local function maybe_require(module_name)
+    local ok, module = pcall(require, module_name)
+    if ok then
+        return module
+    end
+    return nil
 end
-vim.opt.rtp:prepend(lazypath)
 
--- Set leader key before lazy
--- vim.g.mapleader = " "
--- vim.g.maplocalleader = " "
 
--- TODO do not use lazy.nvim since you can't resource :so your config
--- Initialize lazy with plugins
-require("lazy").setup({
-    {
-        'nvim-telescope/telescope.nvim',
-        tag = '0.1.5',
-        dependencies = {
-            'nvim-lua/plenary.nvim',
-            'nvim-tree/nvim-web-devicons', -- optional, for file icons
+local tokyonight = maybe_require('tokyonight')
+if tokyonight then
+    tokyonight.setup({
+        transparent = true, -- Enable transparency
+        styles = {
+            sidebars = 'transparent',
+            floats = 'transparent',
         },
-        config = function()
-            -- Basic Telescope keymaps
-            local builtin = require('telescope.builtin')
-            vim.keymap.set('n', '<space>', builtin.find_files, {})
-            -- vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
-            -- vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
-            -- vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
-        end,
-    },
-    {
-        'folke/tokyonight.nvim',
-        lazy = false,
-        priority = 1000,
-        config = function()
-            require("tokyonight").setup({
-                transparent = true, -- Enable transparency
-                styles = {
-                    sidebars = "transparent",
-                    floats = "transparent",
-                },
-            })
-            vim.cmd([[colorscheme tokyonight]])
-        end,
-    },
-    {
-        'hrsh7th/nvim-cmp',
-        dependencies = {
-            'hrsh7th/cmp-nvim-lsp',
-            'hrsh7th/cmp-buffer',
-            'hrsh7th/cmp-path',
-        },
-        config = function()
-            local cmp = require('cmp')
-            cmp.setup({
-                mapping = cmp.mapping.preset.insert({
-                    ['<C-p>'] = cmp.mapping.select_prev_item(),
-                    ['<C-n>'] = cmp.mapping.select_next_item(),
-                    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-                    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-                    ['<C-Space>'] = cmp.mapping.complete(),
-                    ['<C-e>'] = cmp.mapping.abort(),
-                    ['<CR>'] = cmp.mapping.confirm({ select = true }),
-                }),
-                sources = cmp.config.sources({
-                    { name = 'nvim_lsp' },
-                    { name = 'buffer' },
-                    { name = 'path' },
-                }),
-                window = {
-                    completion = cmp.config.window.bordered(),
-                    documentation = cmp.config.window.bordered(),
-                },
-            })
-        end
-    },
-    {
-        "neovim/nvim-lspconfig",
-        dependencies = {
-            "hrsh7th/nvim-cmp",
-            "hrsh7th/cmp-nvim-lsp",
-            "williamboman/mason.nvim",
-            "williamboman/mason-lspconfig.nvim",
-        },
-        config = function()
-            -- Setup Mason to automatically install LSP servers
-            require("mason").setup()
-            require("mason-lspconfig").setup({
-                automatic_installation = true,
-                ensure_installed = {
-                    "lua_ls",
-                    "gopls",
-                    "pyright",
-                    "ts_ls",
-                    "rust_analyzer",
-                    "jdtls",
-                },
-            })
+    })
 
-            -- LSP attach function
-            local on_attach = function(client, bufnr)
-                -- Keymaps
-                local opts = { noremap = true, silent = true, buffer = bufnr }
-                vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-                vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-                -- vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, opts)
-                -- vim.keymap.set("n", "<space>ca", vim.lsp.buf.code_action, opts)
-                vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-            end
-
-            -- LSP server configurations
-            local capabilities = require("cmp_nvim_lsp").default_capabilities()
-            local lspconfig = require("lspconfig")
-
-            -- Lua
-            lspconfig.lua_ls.setup({
-                capabilities = capabilities,
-                on_attach = on_attach,
-                settings = {
-                    Lua = {
-                        diagnostics = { globals = { "vim" } },
-                    },
-                },
-            })
-
-            local go_on_attach = function(_, bufnr)
-                -- Basic LSP keybindings
-                local opts = { noremap = true, silent = true, buffer = bufnr }
-                vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
-                vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-                -- vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
-                -- vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
-            end
-
-            -- Format and organize imports on save
-            vim.api.nvim_create_autocmd("BufWritePre", {
-                pattern = "*.go",
-                callback = function()
-                    -- First organize imports
-                    vim.lsp.buf.code_action({
-                        context = { only = { "source.organizeImports" } },
-                        apply = true,
-                        async = false,
-                        timeout_ms = 3000,
-                    })
-
-                    -- Then format the file
-                    vim.lsp.buf.format({
-                        async = false,
-                        timeout_ms = 3000,
-                        filter = function(client)
-                            -- Only use gopls for formatting
-                            return client.name == "gopls"
-                        end,
-                    })
-                end,
-            })
-
-            -- Configure gopls
-            require('lspconfig').gopls.setup({
-                on_attach = go_on_attach,
-                settings = {
-                    gopls = {
-                        analyses = {
-                            unusedparams = true,
-                        },
-                        staticcheck = true,
-                        gofumpt = true, -- Enable stricter formatting
-                        buildFlags = { "-tags=integration" },
-                    },
-                },
-                flags = {
-                    debounce_text_changes = 150,
-                },
-            })
-
-            -- Other LSPs with default settings
-            local servers = { "pyright", "ts_ls", "rust_analyzer", "jdtls" }
-            for _, lsp in ipairs(servers) do
-                lspconfig[lsp].setup({
-                    capabilities = capabilities,
-                    on_attach = on_attach,
-                })
-            end
-        end,
-    },
-})
+    vim.cmd([[colorscheme tokyonight]])
+end
 
 local base = vim.api.nvim_create_augroup('Base', { clear = true })
 
@@ -502,3 +322,123 @@ end, {})
 -- TODO write a function that will try to download your dependencies and optionally takes an
 -- argument to prefix so you can use artifactory etc? or overkill?
 -- TODO pushd on cd, allow selecta style cli to pick from previous stack (deduped)
+
+
+maybe_require('plenary') -- dep for telescope
+-- maybe_require('nvim-web-devicons') -- dep for telescope, think it gets loaded automatically
+local telescope = maybe_require('telescope')
+if telescope then
+    local builtin = require('telescope.builtin')
+    vim.keymap.set('n', '<space>', builtin.find_files, {})
+    vim.keymap.set('n', 'gr', builtin.live_grep, {})
+    vim.keymap.set('n', 'gb', builtin.buffers, {})
+    vim.keymap.set('n', 'gh', builtin.help_tags, {})
+end
+
+local cmp = maybe_require('cmp')
+if cmp then
+    cmp.setup({
+        mapping = cmp.mapping.preset.insert({
+            ['<C-p>'] = cmp.mapping.select_prev_item(),
+            ['<C-n>'] = cmp.mapping.select_next_item(),
+            ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+            ['<C-f>'] = cmp.mapping.scroll_docs(4),
+            ['<C-Space>'] = cmp.mapping.complete(),
+            ['<C-e>'] = cmp.mapping.abort(),
+            ['<CR>'] = cmp.mapping.confirm({ select = true }),
+        }),
+        sources = cmp.config.sources({
+            { name = 'nvim_lsp' },
+            { name = 'buffer' }, -- for buffer words
+            { name = 'path' }, -- for path
+        }),
+        window = {
+            completion = cmp.config.window.bordered(),
+            documentation = cmp.config.window.bordered(),
+        },
+    })
+end
+
+local mason = maybe_require('mason')
+local mason_lspconfig = maybe_require('mason-lspconfig')
+local lspconfig = maybe_require('lspconfig')
+if lspconfig and mason and mason_lspconfig then
+    mason.setup()
+    mason_lspconfig.setup({
+        automatic_installation = true,
+        ensure_installed = {
+            "lua_ls",
+            "gopls",
+            "pyright",
+            "ts_ls",
+            "rust_analyzer",
+            "jdtls",
+        },
+    })
+
+    local on_attach = function(client, bufnr)
+        -- Keymaps
+        local opts = { noremap = true, silent = true, buffer = bufnr }
+        vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+        vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+        -- vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, opts)
+        -- vim.keymap.set("n", "<space>ca", vim.lsp.buf.code_action, opts)
+        vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+    end
+
+    local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+    lspconfig.lua_ls.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+        settings = {
+            Lua = {
+                diagnostics = { globals = { "vim" } },
+            },
+        },
+    })
+
+    lspconfig.gopls.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+        settings = {
+            gopls = {
+                analyses = {
+                    unusedparams = true,
+                },
+                staticcheck = true,
+                gofumpt = true, -- Enable stricter formatting
+                buildFlags = { "-tags=integration" },
+            },
+        },
+        flags = {
+            debounce_text_changes = 150,
+        },
+    })
+
+    local servers = { "pyright", "ts_ls", "rust_analyzer", "jdtls" }
+    for _, lsp in ipairs(servers) do
+        lspconfig[lsp].setup({
+            capabilities = capabilities,
+            on_attach = on_attach,
+        })
+    end
+
+    vim.api.nvim_create_autocmd("BufWritePre", {
+        pattern = { "*.go" },
+        callback = function()
+            vim.lsp.buf.format()
+
+            vim.lsp.buf.code_action({
+                context = {
+                    only = { "source.organizeImports" }
+                },
+                apply = true
+            })
+        end
+    })
+end
+
+-- TODO nvim-lint?
+-- TODO maybe git fugitive too?
+-- TODO lsp-zero can do eslint? have a look and see how!

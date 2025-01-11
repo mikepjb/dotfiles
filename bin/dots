@@ -16,15 +16,29 @@ main() {
 
     link_scripts 
     link_config
-    # setup_neovim
+    setup_neovim
 }
 
 setup_neovim() {
+    info "Linking neovim config & installing packages"
     mkdir -p "$NEOVIM_PATH"
     ln -sfv $DOTFILES_PATH/init.lua "$NEOVIM_PATH/init.lua"
 
+    mkdir -p "$NEOVIM_PLUGIN_PATH"
     # ensure_repo $DOTFILES_PATH $DOTFILES_REPO
-    ensure_repo "nvim-telescope/telescope.nvim" "$NEOVIM_PLUGIN_PATH" ;
+    ensure_repo "$NEOVIM_PLUGIN_PATH/telescope.nvim" "nvim-telescope/telescope.nvim"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/plenary.nvim" "nvim-lua/plenary.nvim"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-cmp" "hrsh7th/nvim-cmp"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/cmp-nvim-lsp" "hrsh7th/cmp-nvim-lsp"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/cmp-buffer" "hrsh7th/cmp-buffer"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/cmp-path" "hrsh7th/cmp-path"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/tokyonight.nvim" "folke/tokyonight.nvim"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-web-devicons" "nvim-tree/nvim-web-devicons"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-lspconfig" "neovim/nvim-lspconfig"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/mason.nvim" "williamboman/mason.nvim"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/mason-lspconfig.nvim" "williamboman/mason-lspconfig.nvim"
+    
+    # fugitive?
 }
 
 link_scripts() {
