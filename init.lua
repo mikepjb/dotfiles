@@ -68,6 +68,37 @@ require("lazy").setup({
         end,
     },
     {
+        'hrsh7th/nvim-cmp',
+        dependencies = {
+            'hrsh7th/cmp-nvim-lsp',
+            'hrsh7th/cmp-buffer',
+            'hrsh7th/cmp-path',
+        },
+        config = function()
+            local cmp = require('cmp')
+            cmp.setup({
+                mapping = cmp.mapping.preset.insert({
+                    ['<C-p>'] = cmp.mapping.select_prev_item(),
+                    ['<C-n>'] = cmp.mapping.select_next_item(),
+                    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+                    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+                    ['<C-Space>'] = cmp.mapping.complete(),
+                    ['<C-e>'] = cmp.mapping.abort(),
+                    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+                }),
+                sources = cmp.config.sources({
+                    { name = 'nvim_lsp' },
+                    { name = 'buffer' },
+                    { name = 'path' },
+                }),
+                window = {
+                    completion = cmp.config.window.bordered(),
+                    documentation = cmp.config.window.bordered(),
+                },
+            })
+        end
+    },
+    {
         "neovim/nvim-lspconfig",
         dependencies = {
             "hrsh7th/nvim-cmp",
@@ -90,23 +121,8 @@ require("lazy").setup({
                 },
             })
 
-            -- Format on save function
-            local format_on_save = function(client, bufnr)
-                if client.supports_method("textDocument/formatting") then
-                    vim.api.nvim_create_autocmd("BufWritePre", {
-                        buffer = bufnr,
-                        callback = function()
-                            vim.lsp.buf.format({ buffer = bufnr })
-                        end,
-                    })
-                end
-            end
-
             -- LSP attach function
             local on_attach = function(client, bufnr)
-                -- Enable format on save
-                format_on_save(client, bufnr)
-
                 -- Keymaps
                 local opts = { noremap = true, silent = true, buffer = bufnr }
                 vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -131,8 +147,70 @@ require("lazy").setup({
                 },
             })
 
+            local go_on_attach = function(_, bufnr)
+                -- Basic LSP keybindings
+                local opts = { noremap = true, silent = true, buffer = bufnr }
+                vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+                vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+                -- vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+                -- vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
+            end
+
+            -- Format and organize imports on save
+            vim.api.nvim_create_autocmd("BufWritePre", {
+                pattern = "*.go",
+                callback = function()
+                    -- First organize imports
+                    vim.lsp.buf.code_action({
+                        context = { only = { "source.organizeImports" } },
+                        apply = true,
+                        async = false,
+                    })
+
+                    -- Then format the file
+                    vim.lsp.buf.format({
+                        async = false,
+                        timeout_ms = 3000,
+                        filter = function(client)
+                            -- Only use gopls for formatting
+                            return client.name == "gopls"
+                        end,
+                    })
+                end,
+            })
+
+            -- Configure gopls
+            require('lspconfig').gopls.setup({
+                on_attach = go_on_attach,
+                settings = {
+                    gopls = {
+                        analyses = {
+                            unusedparams = true,
+                        },
+                        staticcheck = true,
+                        gofumpt = true, -- Enable stricter formatting
+                        buildFlags = { "-tags=integration" },
+                        -- Prevent multiple formatting passes
+                        -- formatting = {
+                        --     -- Disable other formatters when using gopls
+                        --     source = {
+                        --         organizeImports = true,
+                        --         formatTool = "gofumpt",
+                        --     },
+                        -- },
+                    },
+                },
+                flags = {
+                    debounce_text_changes = 150,
+                },
+            })
+
+            -- Disable other formatters for Go files
+            vim.g.go_fmt_autosave = 0
+            vim.g.go_imports_autosave = 0
+
             -- Other LSPs with default settings
-            local servers = { "gopls", "pyright", "ts_ls", "rust_analyzer", "jdtls" }
+            local servers = { "pyright", "ts_ls", "rust_analyzer", "jdtls" }
             for _, lsp in ipairs(servers) do
                 lspconfig[lsp].setup({
                     capabilities = capabilities,
