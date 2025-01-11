@@ -165,6 +165,7 @@ require("lazy").setup({
                         context = { only = { "source.organizeImports" } },
                         apply = true,
                         async = false,
+                        timeout_ms = 3000,
                     })
 
                     -- Then format the file
@@ -190,24 +191,12 @@ require("lazy").setup({
                         staticcheck = true,
                         gofumpt = true, -- Enable stricter formatting
                         buildFlags = { "-tags=integration" },
-                        -- Prevent multiple formatting passes
-                        -- formatting = {
-                        --     -- Disable other formatters when using gopls
-                        --     source = {
-                        --         organizeImports = true,
-                        --         formatTool = "gofumpt",
-                        --     },
-                        -- },
                     },
                 },
                 flags = {
                     debounce_text_changes = 150,
                 },
             })
-
-            -- Disable other formatters for Go files
-            vim.g.go_fmt_autosave = 0
-            vim.g.go_imports_autosave = 0
 
             -- Other LSPs with default settings
             local servers = { "pyright", "ts_ls", "rust_analyzer", "jdtls" }
