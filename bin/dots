@@ -37,6 +37,9 @@ setup_neovim() {
     ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-lspconfig" "neovim/nvim-lspconfig"
     ensure_repo "$NEOVIM_PLUGIN_PATH/mason.nvim" "williamboman/mason.nvim"
     ensure_repo "$NEOVIM_PLUGIN_PATH/mason-lspconfig.nvim" "williamboman/mason-lspconfig.nvim"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/vim-fugitive" "tpope/vim-fugitive"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-treesitter" "nvim-treesitter/nvim-treesitter"
+
     
     # fugitive?
 }
@@ -52,12 +55,13 @@ link_config() {
     info "Linking configuration files"
     for config in "$DOTFILES_PATH/config/"*; do
         local name=$(basename "$config" | sed 's/\.[^.]*$//')
-        if [[ "$config" == *rc ]]; then
-            [[ "$config" != .* ]] && config=".$config"
-            ln -sfv "$config" "$HOME/$(basename $config)"
-        else
+        local filename=$(basename "$config")
+        if [[ "${filename##*.}" != "$filename" ]]; then # if no ext it's a .file
             mkdir -p "$HOME/.config/$name"
             ln -sfv "$config" "$HOME/.config/$name/$(basename $config)"
+        else
+            [[ "$filename" != .* ]] && filename=".$filename"
+            ln -sfv "$config" "$HOME/$filename"
         fi
     done
 }
