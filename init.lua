@@ -303,6 +303,7 @@ if treesitter then
         ensure_installed = { "markdown", "java", "go", "lua", "bash" },
         highlight = {
             enable = true,
+            disable = { "gitcommit" }, -- for some reason treesitter doesn't highlight diffs
         },
     }
 end
