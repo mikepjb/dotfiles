@@ -12,7 +12,11 @@ export NEOVIM_PLUGIN_PATH="$HOME/.config/nvim/pack/base/start"
 
 main() {
     ensure_repo $DOTFILES_PATH $DOTFILES_REPO
-    # ensure_repo $NOTES_PATH $NOTES_REPO # doesn't work yet because you need SSH
+    if [[ -d $NOTES_PATH ]]; then
+        ensure_repo $NOTES_PATH $NOTES_REPO
+    else
+        warn "Notes repo is missing, get it manually to include in future updates."
+    fi
 
     link_scripts 
     link_config
@@ -80,6 +84,11 @@ ensure_repo() {
 info() {
     local text="$1"
     echo -e "\033[33m-> \033[32m${text}\033[0m"
+}
+
+warn() {
+    local text="$1"
+    echo -e "\033[33m-> \033[34m${text}\033[0m"
 }
 
 main
