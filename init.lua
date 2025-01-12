@@ -75,6 +75,19 @@ vim.g.omni_sql_no_default_maps = 1 -- don't use C-c for autocompletion in SQL.
 
 vim.opt.termguicolors = os.getenv("COLORTERM") == 'truecolor'
 
+local function set_path_to_git_root(filepath) -- or do nothing if not in git.
+    if not filepath then
+        filepath = vim.fn.expand("%:p:h")
+    end
+    local pwd_cmd = string.format(
+        "cd %s && echo -n \"$(git rev-parse --show-toplevel 2>/dev/null || echo $PWD)\"",
+        filepath
+    )
+    local new_pwd = vim.fn.system(pwd_cmd)
+    print(string.format("tcd set as '%s'", new_pwd))
+    vim.cmd(string.format(":tcd  %s", new_pwd))
+end
+
 vim.api.nvim_create_autocmd("TabNewEntered", {
     group = base,
     callback = function(ev)
@@ -97,19 +110,6 @@ vim.api.nvim_create_autocmd("QuickFixCmdPost", {
 
 -- Keybindings & Commands -------------------------------------------------------------------------
 
-local function set_path_to_git_root(filepath) -- or do nothing if not in git.
-    if not filepath then
-        filepath = vim.fn.expand("%:p:h")
-    end
-    local pwd_cmd = string.format(
-        "cd %s && echo -n \"$(git rev-parse --show-toplevel 2>/dev/null || echo $PWD)\"",
-        filepath
-    )
-    local new_pwd = vim.fn.system(pwd_cmd)
-    print(string.format("tcd set as '%s'", new_pwd))
-    vim.cmd(string.format(":tcd  %s", new_pwd))
-end
-
 vim.keymap.set("n", "<C-q>", ":q<CR>")
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>")
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>")
@@ -123,10 +123,11 @@ vim.keymap.set("i", "<C-l>", " => ")
 vim.keymap.set("i", "<C-u>", " -> ")
 vim.keymap.set("t", "<C-g>", "<C-\\><C-n>")
 vim.keymap.set("n", "<C-t>", ":tabnew<CR>")
+vim.keymap.set("n", "gh", ":Explore<CR>")
 vim.keymap.set("n", "gn", ":tabnew ~/.notes/index.md<CR>")
-vim.keymap.set("n", "go", ":tabnew ~/.notes/projects/ops.md<CR>")
-vim.keymap.set("n", "gw", ":tabnew ~/.notes/projects/work.md<CR>")
-vim.keymap.set("n", "gs", ":tabnew ~/.notes/projects/special-ops.md<CR>")
+vim.keymap.set("n", "go", ":tabnew ~/.notes/areas/ops.md<CR>")
+vim.keymap.set("n", "gw", ":tabnew ~/.notes/areas/work.md<CR>")
+vim.keymap.set("n", "gs", ":tabnew ~/.notes/areas/special-ops.md<CR>")
 vim.keymap.set("n", "g0", function() vim.lsp.stop_client(vim.lsp.get_active_clients()) end)
 vim.keymap.set("n", "gl", ":set rnu!<CR>") -- toggle relative line number
 vim.keymap.set("n", "g?", ":Dots<CR>")
@@ -176,14 +177,13 @@ local telescope = maybe_require('telescope')
 if telescope then
     telescope.setup({
         defaults = {
-            color_devicons = true
+            path_display = { "truncate" }
         }
     })
     local builtin = require('telescope.builtin')
     vim.keymap.set('n', '<space>', builtin.find_files, {})
     vim.keymap.set('n', 'gr', builtin.live_grep, {})
     vim.keymap.set('n', 'gb', builtin.buffers, {})
-    vim.keymap.set('n', 'gh', builtin.help_tags, {})
 end
 
 local cmp = maybe_require('cmp')
@@ -233,7 +233,7 @@ if lspconfig and mason and mason_lspconfig then
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
         vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
         -- vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, opts)
-        -- vim.keymap.set("n", "<space>ca", vim.lsp.buf.code_action, opts)
+        vim.keymap.set("n", "ga", vim.lsp.buf.code_action, opts)
         -- vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
     end
 
