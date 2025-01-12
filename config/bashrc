@@ -4,6 +4,7 @@ export EDITOR=nvim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/
 export PATH=/usr/local/go/bin:$HOME/go/bin:$HOME/.cargo/bin:$HOME/.npm/bin:/opt/homebrew/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
 export HISTSIZE=100000 HISTCONTROL=erasedups
 shopt -s histappend
+stty -ixon # disable C-s C-q terminal slow/regular printing keybinds
 alias vi='nvim' gr='cd $(git rev-parse --show-toplevel || echo \".\")'
 alias x='tmux attach -t x || tmux new -s x' sk='eval $(ssh-agent -k)'
 alias sa='pkill ssh-agent; eval $(ssh-agent -t 28800); ssh-add ~/.ssh/id_rsa'
