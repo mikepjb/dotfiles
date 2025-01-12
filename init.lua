@@ -1,6 +1,6 @@
 -- Editor Configuration
 
--- Environment -------------------------------------------------------
+-- Environment ------------------------------------------------------------------------------------
 
 local function maybe_require(module_name)
     local ok, module = pcall(require, module_name)
@@ -245,6 +245,9 @@ if lspconfig and mason and mason_lspconfig then
         settings = {
             Lua = {
                 diagnostics = { globals = { "vim" } },
+                workspace = {
+                    ignoreDir = { "undodir" }
+                },
             },
         },
     })
