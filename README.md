@@ -115,6 +115,14 @@ _Some decisions may seem strange, some decisions are documented here_
 
 - `lsof -ti :8080` looks for processes listening on the given port.
 
+## IntelliJ
+
+_For Java work, IntelliJ is pretty essential. I haven't found a decent solution (and don't have
+time to invest re-inventing this wheel) so here are a few shortcuts and nice things to help use
+this IDE._
+
+- `Cmd + Shift + F12` closes all sidebars allow you to just work on code.
+
 ## Reference / Minor Detail / Commentary
 
 - You shouldn't set your own `TERM` value, unless you are logging into a remote
