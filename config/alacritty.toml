@@ -16,6 +16,47 @@ mods = "Alt"
 args = ["-c", "kill -USR1 $PPID"]
 program = "sh"
 
+[keyboard]
+[[keyboard.bindings]]
+key = "Left"
+mods = "Alt"
+chars = "\u001bb"
+
+[[keyboard.bindings]]
+key = "Right"
+mods = "Alt"
+chars = "\u001bf"
+
+[[keyboard.bindings]]
+key = "Left"
+mods = "Command"
+chars = "\u001bb"
+
+[[keyboard.bindings]]
+key = "Right"
+mods = "Command"
+chars = "\u001bf"
+
+[[keyboard.bindings]]
+key = "B"
+mods = "Alt"
+chars = "\u001bb"
+
+[[keyboard.bindings]]
+key = "F"
+mods = "Alt"
+chars = "\u001bf"
+
+[[keyboard.bindings]]
+key = "B"
+mods = "Command"
+chars = "\u001bb"
+
+[[keyboard.bindings]]
+key = "F"
+mods = "Command"
+chars = "\u001bf"
+
 [colors.bright]
 black = "0x444b6a"
 blue = "0x7da6ff"
@@ -62,5 +103,3 @@ style = "Regular"
 [window]
 opacity = 0.95
 decorations = "Full"
-
-[keyboard]
