@@ -9,6 +9,7 @@ alias vi='nvim' gr='cd $(git rev-parse --show-toplevel || echo \".\")'
 alias x='tmux attach -t x || tmux new -s x' sk='eval $(ssh-agent -k)'
 alias sa='pkill ssh-agent; eval $(ssh-agent -t 28800); ssh-add ~/.ssh/id_rsa'
 alias new-pass="head -c 16 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | echo"
+alias t="ps aux | grep chromium | wc -l" # count number of tabs open
 [[ -f $HOME/.bashrc.local ]] && . $HOME/.bashrc.local
 jobs_signal() { [[ $(jobs) != "" ]] && echo -e "\x01\033[0;36m\x02\$\x01\033[0m\x02" || echo -e "\$"; }
 PS1='\h:\W($(git branch --show-current 2>/dev/null || echo "!")) $(jobs_signal) '

@@ -50,6 +50,7 @@ vim.opt.completeopt:remove("preview")       -- no preview buffer during completi
 vim.opt.clipboard:append({ "unnamedplus" }) -- integrate with system clipboard
 vim.opt.autoread = true
 vim.opt.foldlevel = 1                       -- by default, only show top level fold/heading
+vim.opt.lazyredraw = false                  -- make sure we always redraw
 
 vim.opt.tabstop = 4                         -- b. indentation
 vim.opt.softtabstop = 4
