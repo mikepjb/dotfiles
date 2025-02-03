@@ -25,3 +25,9 @@
 	email = mike@hypalynx.com
 [init]
 	defaultBranch = main
+[pull]
+	rebase = true
+
+# Use alternative email for work projects
+[includeIf "hasconfig:remote.*.url:git@github.com:loveholidays/*"]
+    path = "~/.gitconfig_loveholidays"
