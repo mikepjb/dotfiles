@@ -71,13 +71,27 @@ link_config() {
 
 
 ensure_repo() {
-    info "Ensuring $1 is available & up to date"
-    if [ ! -d "$1" ]; then
-        mkdir -p "${1%/*}"
-        echo "${1%/*}"
-        git clone "$GITHUB/$2" "$1"
+    local repo_path="$1"
+    local repo_name="$2"
+    local branch_tag="${3:-}"
+
+    info "Ensuring $repo_path is available & up to date"
+    if [ ! -d "$repo_path" ]; then
+        mkdir -p "${repo_path%/*}"
+        echo "${repo_path%/*}"
+        if [ -n "$branch_tag" ]; then
+            git clone -b "$branch_tag" "$GITHUB/$repo_name" "$repo_path"
+        else
+            git clone "$GITHUB/$repo_name" "$repo_path"
+        fi
     else
-        git -C "$1" pull
+        if [ -n "$branch_tag" ]; then
+            git -C "$repo_path" fetch
+            git -C "$repo_path" checkout "$branch_tag"
+            git -C "$repo_path" pull
+        else
+            git -C "$repo_path" pull
+        fi
     fi
 }
 
