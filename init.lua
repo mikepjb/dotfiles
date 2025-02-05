@@ -309,6 +309,27 @@ if treesitter then
     }
 end
 
+local lint = maybe_require('nvim-lint')
+if lint then
+    lint.linters_by_ft = {
+        typescript = { 'eslint' },
+        typescriptreact = { 'eslint' },
+        javascript = { 'eslint' },
+        javascriptreact = { 'eslint' },
+        golang = { 'golangci-lint' },
+    }
+end
+
+local conform = maybe_require('conform.nvim')
+if conform then
+    conform.formatters_by_ft = {
+        typescript = { "prettier" },
+        typescriptreact = { "prettier" },
+        javascript = { "prettier" },
+        javascriptreact = { "prettier" },
+    }
+end
+
 vim.keymap.set("n", "gB", ":G blame<CR>")
 
 -- TODO nvim-lint?
