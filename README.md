@@ -14,6 +14,7 @@ curl -fsSL https://raw.githubusercontent.com/mikepjb/dotfiles/main/bin/dots | sh
 4. Disable hold to quit in Chrome/Chromium.
 5. Increase key repeat rate and shorten delay until first repeat.
 6. Make sure all 4 Rec Mono Linear font styles are installed (Regular/Italic/Bold/Bold Italic).
+7. Set keyboard to US/Macintosh (for ISO layouts you get `~` and `\`` left of Z.
 
 ### Development environment inside Docker.
 

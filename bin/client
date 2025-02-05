@@ -1,0 +1,99 @@
+#!/bin/sh
+# client is a script for creating frontend clients quickly, it expects you to have a backend
+# service that serves requests over /api on port 8080.
+
+
+# Initialize client
+npm create vite@latest client -- --template react-ts
+cd client
+
+# Install core dependencies
+npm install
+
+# Install styling dependencies
+npm install -D tailwindcss postcss autoprefixer
+npm install @headlessui/react
+npx tailwindcss init -p
+
+# Install API client generator
+npm install -D @openapi-generator-cli/cli
+
+# Update package.json scripts
+cat > package.json << EOL
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview",
+    "generate-api": "openapi-generator-cli generate -i ../api/openapi.yaml -g typescript-fetch -o src/api"
+  }
+}
+EOL
+
+# Configure Tailwind
+cat > tailwind.config.js << EOL
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+EOL
+
+# Add Tailwind directives to CSS
+cat > src/index.css << EOL
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+EOL
+
+# Configure Vite for proxy to Go backend
+cat > vite.config.ts << EOL
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
+  },
+})
+EOL
+
+# Create a sample component
+mkdir -p src/components
+cat > src/components/Button.tsx << EOL
+type ButtonProps = {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: 'primary' | 'secondary';
+}
+
+export function Button({ children, onClick, variant = 'primary' }: ButtonProps) {
+  const baseStyle = 'px-4 py-2 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2';
+  const variants = {
+    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500',
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className={`${baseStyle} ${variants[variant]}`}
+    >
+      {children}
+    </button>
+  );
+}
+EOL
+}
