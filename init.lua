@@ -163,10 +163,18 @@ local html_template = [[
 ]]
 vim.fn.setreg("h", html_template)
 
+-- take single line stacktraces from logs and expand them
+vim.api.nvim_create_user_command('Destack', function()
+    vim.cmd [[silent! %s/\\t/	/]]
+    vim.cmd [[silent! %s/\\n/\r/]]
+end, {})
+
+-- same for json
 vim.api.nvim_create_user_command('Prettify', function()
     vim.cmd [[silent! %s/\\//]]
-    vim.cmd [[%!jq .]]
+    vim.cmd [[:. !jq .]]
 end, {})
+
 vim.api.nvim_create_user_command('TrimWhitespace', function()
     vim.cmd '%s/\\s\\+$//e'
 end, {})
