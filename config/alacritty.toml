@@ -57,6 +57,16 @@ key = "F"
 mods = "Command"
 chars = "\u001bf"
 
+[[keyboard.bindings]]
+key = "D"
+mods = "Alt"
+chars = "\u001bd"
+
+[[keyboard.bindings]]
+key = "D"
+mods = "Command"
+chars = "\u001bd"
+
 [colors.bright]
 black = "0x444b6a"
 blue = "0x7da6ff"

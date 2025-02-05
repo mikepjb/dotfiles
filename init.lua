@@ -164,7 +164,8 @@ local html_template = [[
 vim.fn.setreg("h", html_template)
 
 vim.api.nvim_create_user_command('Prettify', function()
-    vim.cmd '%!jq .'
+    vim.cmd [[silent! %s/\\//]]
+    vim.cmd [[%!jq .]]
 end, {})
 vim.api.nvim_create_user_command('TrimWhitespace', function()
     vim.cmd '%s/\\s\\+$//e'
