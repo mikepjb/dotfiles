@@ -21,6 +21,7 @@ main() {
     link_scripts 
     link_config
     setup_neovim
+    client_deps
 }
 
 setup_neovim() {
@@ -42,6 +43,9 @@ setup_neovim() {
     ensure_repo "$NEOVIM_PLUGIN_PATH/mason-lspconfig.nvim" "williamboman/mason-lspconfig.nvim"
     ensure_repo "$NEOVIM_PLUGIN_PATH/vim-fugitive" "tpope/vim-fugitive"
     ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-treesitter" "nvim-treesitter/nvim-treesitter"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/conform.nvim" "stevearc/conform.nvim"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-lint" "mfussenegger/nvim-lint"
+
 
     
     # fugitive?
@@ -93,6 +97,11 @@ ensure_repo() {
             git -C "$repo_path" pull
         fi
     fi
+}
+
+web_deps() {
+    into "Installing web client development tools"
+    npm install -g typescript typescript-language-server eslint prettier
 }
 
 info() {

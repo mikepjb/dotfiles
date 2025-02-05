@@ -1,5 +1,5 @@
 #!/bin/sh
-# client is a script for creating frontend clients quickly, it expects you to have a backend
+# new-client is a script for creating frontend clients quickly, it expects you to have a backend
 # service that serves requests over /api on port 8080.
 
 
@@ -11,22 +11,31 @@ cd client
 npm install
 
 # Install styling dependencies
-npm install -D tailwindcss postcss autoprefixer
+npm install -D tailwindcss postcss autoprefixer @tailwindcss/vite
 npm install @headlessui/react
 npx tailwindcss init -p
 
 # Install API client generator
-npm install -D @openapi-generator-cli/cli
+npm i -D @openapitools/openapi-generator-cli
 
 # Update package.json scripts
 cat > package.json << EOL
 {
+  "name": "client",
+  "version": "1.0.0",
+  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "main": "eslint.config.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
-    "generate-api": "openapi-generator-cli generate -i ../api/openapi.yaml -g typescript-fetch -o src/api"
+    "generate-api": "openapi-generator-cli generate -i ../api/openapi.yaml -g typescript-fetch -o src/api",
+    'lint': 'eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0',
+    'format': 'prettier --write \"src/**/*.{ts,tsx}\"'
   }
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
 EOL
 
@@ -55,10 +64,11 @@ EOL
 # Configure Vite for proxy to Go backend
 cat > vite.config.ts << EOL
 import { defineConfig } from 'vite'
+import tailwindcss from '@tailwind/vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: {
     proxy: {
       '/api': {
