@@ -7,17 +7,6 @@
 npm create vite@latest client -- --template react-ts
 cd client
 
-# Install core dependencies
-npm install
-
-# Install styling dependencies
-npm install -D tailwindcss postcss autoprefixer @tailwindcss/vite
-npm install @headlessui/react
-npx tailwindcss init -p
-
-# Install API client generator
-npm i -D @openapitools/openapi-generator-cli
-
 # Update package.json scripts
 cat > package.json << EOL
 {
@@ -31,13 +20,30 @@ cat > package.json << EOL
     "serve": "vite preview",
     "generate-api": "openapi-generator-cli generate -i ../api/openapi.yaml -g typescript-fetch -o src/api",
     'lint': 'eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0',
-    'format': 'prettier --write \"src/**/*.{ts,tsx}\"'
+    'format': 'prettier --write \"src/**/*.{ts,tsx}\"',
+    'test': 'jest'
   }
   "keywords": [],
   "author": "",
   "license": "ISC"
 }
 EOL
+
+# Install styling dependencies
+npm install -D tailwindcss postcss autoprefixer @tailwindcss/vite
+npm install @headlessui/react
+npx tailwindcss init -p
+
+# Install API client generator
+npm i -D @openapitools/openapi-generator-cli
+
+# Install testing libraries
+npm i -D jest ts-jest
+npm i -D storybook@latest playwright@latest
+
+npx storybook@latest init
+npm init playwright@latest
+# Adds dependencies and creates playwright.config.ts
 
 # Configure Tailwind
 cat > tailwind.config.js << EOL
