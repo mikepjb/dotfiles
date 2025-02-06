@@ -13,16 +13,17 @@ cat > package.json << EOL
   "name": "client",
   "version": "1.0.0",
   "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
-  "main": "eslint.config.js",
+  "main": "./dist/index.js",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
     "generate-api": "openapi-generator-cli generate -i ../api/openapi.yaml -g typescript-fetch -o src/api",
-    'lint': 'eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0',
-    'format': 'prettier --write \"src/**/*.{ts,tsx}\"',
-    'test': 'jest'
-  }
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "test": "jest"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC"
@@ -32,17 +33,16 @@ EOL
 # Install styling dependencies
 npm install -D tailwindcss postcss autoprefixer @tailwindcss/vite
 npm install @headlessui/react
-npx tailwindcss init -p
 
 # Install API client generator
 npm i -D @openapitools/openapi-generator-cli
 
 # Install testing libraries
-npm i -D jest ts-jest
-npm i -D storybook@latest playwright@latest
+npm i -D jest ts-jest @vitejs/plugin-react
+npm i -D storybook@latest playwright@latest 
 
-npx storybook@latest init
-npm init playwright@latest
+npx storybook@latest init --type react
+npx playwright@latest init
 # Adds dependencies and creates playwright.config.ts
 
 # Configure Tailwind
@@ -70,7 +70,7 @@ EOL
 # Configure Vite for proxy to Go backend
 cat > vite.config.ts << EOL
 import { defineConfig } from 'vite'
-import tailwindcss from '@tailwind/vite'
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
