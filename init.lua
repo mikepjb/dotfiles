@@ -310,11 +310,25 @@ if treesitter then
         sync_install = false,
         auto_install = true,
         ignore_install = {},
-        ensure_installed = { "markdown", "java", "go", "lua", "bash" },
+        ensure_installed = {
+            "markdown",
+            "java",
+            "go",
+            "lua",
+            "bash",
+            "javascript",
+            "typescript",
+            "tsx"
+        },
+
         highlight = {
             enable = true,
             disable = { "gitcommit" }, -- for some reason treesitter doesn't highlight diffs
         },
+
+        indent = {
+            enable = true,
+        }
     }
 end
 
@@ -329,14 +343,25 @@ if lint then
     }
 end
 
-local conform = maybe_require('conform.nvim')
+local conform = maybe_require('conform')
 if conform then
-    conform.formatters_by_ft = {
-        typescript = { "prettier" },
-        typescriptreact = { "prettier" },
-        javascript = { "prettier" },
-        javascriptreact = { "prettier" },
-    }
+    conform.setup(
+        {
+            formatters_by_ft = {
+                typescript = { "prettier" },
+                typescriptreact = { "prettier" },
+                javascript = { "prettier" },
+                javascriptreact = { "prettier" },
+            }
+        }
+    )
+
+    vim.api.nvim_create_autocmd("BufWritePre", {
+        pattern = "*",
+        callback = function(args)
+            require("conform").format({ bufnr = args.buf })
+        end,
+    })
 end
 
 vim.keymap.set("n", "gB", ":G blame<CR>")
