@@ -62,9 +62,7 @@ EOL
 
 # Add Tailwind directives to CSS
 cat > src/index.css << EOL
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss"
 EOL
 
 # Configure Vite for proxy to Go backend
