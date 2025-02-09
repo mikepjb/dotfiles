@@ -37,6 +37,9 @@ npm install @headlessui/react
 # Install API client generator
 npm i -D @openapitools/openapi-generator-cli
 
+# Install API validtion
+npm i zod
+
 # Install testing libraries
 npm i -D jest ts-jest @vitejs/plugin-react
 npm i -D storybook@latest playwright@latest 
