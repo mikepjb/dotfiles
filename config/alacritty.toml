@@ -67,6 +67,16 @@ key = "D"
 mods = "Command"
 chars = "\u001bd"
 
+[[keyboard.bindings]]
+key = "O"
+mods = "Alt"
+chars = "\u001bo"
+
+[[keyboard.bindings]]
+key = "O"
+mods = "Command"
+chars = "\u001bo"
+
 [colors.bright]
 black = "0x444b6a"
 blue = "0x7da6ff"
