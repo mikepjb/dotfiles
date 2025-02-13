@@ -76,6 +76,16 @@ vim.g.omni_sql_no_default_maps = 1 -- don't use C-c for autocompletion in SQL.
 
 vim.opt.termguicolors = os.getenv("COLORTERM") == 'truecolor'
 
+vim.api.nvim_create_autocmd("FileType", {
+    group = base,
+    pattern = {"javascript", "typescript", "javascriptreact", "typescriptreact", "json"},
+    callback = function()
+        vim.opt_local.shiftwidth = 2
+        vim.opt_local.tabstop = 2
+        vim.opt_local.softtabstop = 2
+    end,
+})
+
 local function set_path_to_git_root(filepath) -- or do nothing if not in git.
     if not filepath then
         filepath = vim.fn.expand("%:p:h")
