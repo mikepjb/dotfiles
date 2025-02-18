@@ -101,7 +101,7 @@ end
 
 vim.api.nvim_create_autocmd("TabNewEntered", {
     group = base,
-    callback = function(ev)
+    callback = function(_)
         vim.schedule(function()
             local netrw_dir = vim.b.netrw_curdir
             if netrw_dir then
