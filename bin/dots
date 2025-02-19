@@ -21,7 +21,7 @@ main() {
     link_scripts 
     link_config
     setup_neovim
-    client_deps
+    web_deps
 }
 
 setup_neovim() {
