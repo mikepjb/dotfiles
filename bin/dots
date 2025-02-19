@@ -100,7 +100,7 @@ ensure_repo() {
 }
 
 web_deps() {
-    into "Installing web client development tools"
+    info "Installing web client development tools"
     npm install -g typescript typescript-language-server eslint prettier n
 }
 
