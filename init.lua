@@ -150,6 +150,24 @@ vim.keymap.set("n", "g*", function() vim.cmd(":grep " .. vim.fn.expand("<cword>"
 vim.keymap.set("n", ",", "/TODO\\|NEXT\\|XXX<CR>")
 vim.keymap.set("n", "-", "za")
 vim.keymap.set("n", "_", ":set foldlevel=1<CR>")
+vim.keymap.set('n', 'ge', function()
+    local current_dir = vim.fn.expand('%:p:h')
+    local input_cmd = ':e ' .. current_dir .. '/'
+
+    -- Enable auto-creation of parent directories
+    vim.opt.backupskip:append('*')  -- Avoid backup file issues
+    vim.api.nvim_create_autocmd('BufWritePre', {
+        pattern = '*',
+        callback = function()
+            local dir = vim.fn.expand('<afile>:p:h')
+            if vim.fn.isdirectory(dir) == 0 then
+                vim.fn.mkdir(dir, 'p')
+            end
+        end
+    })
+
+    vim.api.nvim_feedkeys(input_cmd, 'n', true)
+end, { desc = 'Create/edit file relative to current buffer' })
 
 local css_reset = [[
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0;}

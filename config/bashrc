@@ -8,7 +8,7 @@ stty -ixon # disable C-s C-q terminal slow/regular printing keybinds
 alias vi='nvim' gr='cd $(git rev-parse --show-toplevel || echo \".\")'
 alias x='tmux attach -t x || tmux new -s x' sk='eval $(ssh-agent -k)'
 alias sa='pkill ssh-agent; eval $(ssh-agent -t 28800); ssh-add ~/.ssh/id_rsa'
-alias new-pass="head -c 16 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | echo"
+alias new-pass="head -c 16 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' && echo"
 alias t="ps aux | grep chromium | wc -l" # count number of tabs open
 alias p='head -c 18 /dev/urandom | base64 | tr -dc "A-Za-z0-9#@$%&*+-=" | head -c 24 && echo'
 alias nr='npm run'

@@ -2,6 +2,8 @@
 # new-client is a script for creating frontend clients quickly, it expects you to have a backend
 # service that serves requests over /api on port 8080.
 
+# TODO needs updating, tailwind now uses css import instead of a config file etc.
+# we probably don't want an openapi generator from the client side either.
 
 # Initialize client
 npm create vite@latest client -- --template react-ts

@@ -28,8 +28,14 @@ analyze_code() {
     echo -e "\nTemplate files:"
     find . -type f -name "*.tmpl" -exec wc -l {} + | sort -nr
     
+    echo -e "\nTS files:"
+    find . -type f -name "*.ts" ! -path "*node_modules*" -exec wc -l {} + | sort -nr
+
+    echo -e "\nTSX files:"
+    find . -type f -name "*.tsx" ! -path "*node_modules*" -exec wc -l {} + | sort -nr
+
     echo -e "\nCSS files:"
-    find . -type f -name "*.css" -exec wc -l {} + | sort -nr
+    find . -type f -name "*.css" ! -path "*node_modules*" -exec wc -l {} + | sort -nr
 }
 
 analyze_go() {
