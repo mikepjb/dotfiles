@@ -219,7 +219,11 @@ if telescope then
         }
     })
     local builtin = require('telescope.builtin')
-    vim.keymap.set('n', '<space>', builtin.find_files, {})
+    vim.keymap.set('n', '<space>', function()
+        builtin.find_files({
+            hidden = true
+        })
+    end, {})
     vim.keymap.set('n', 'gr', builtin.live_grep, {})
     vim.keymap.set('n', 'gb', builtin.buffers, {})
 end
