@@ -63,7 +63,7 @@ cat > package.json << EOL
     "react-dom": "^19.0.0",
     "typescript": "^5.7.3",
     "zod": "^3.24.2"
-  }
+  },
   "keywords": ["react", "typescript", "vite", "tailwind"],
   "author": "",
   "license": "ISC"
