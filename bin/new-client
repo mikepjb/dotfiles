@@ -12,6 +12,11 @@ else
   echo "Creating project: $PROJECT_NAME"
 fi
 
+mkdir -p ./src/client/__tests__/features/currency
+mkdir -p ./src/client/features/currency
+mkdir -p ./src/client/pages
+mkdir -p ./src/client/components
+
 # Create package.json with enhanced scripts
 cat > package.json << EOL
 {
@@ -118,26 +123,6 @@ export default tseslint.config(
 );
 EOL
 
-# Create Tailwind config
-cat > tailwind.config.js << EOL
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        'neutral-dark': '#2e2e2e',
-        'neutral-dark-700': '#1a1a1a',
-      },
-    },
-  },
-  plugins: [],
-}
-EOL
-
 # Create Vite config with proper proxy
 cat > vite.config.ts << EOL
 import { defineConfig } from 'vite';
@@ -233,7 +218,11 @@ cat > src/client/index.css << EOL
 @tailwind components;
 @tailwind utilities;
 
-/* Import Inter font */
+@theme {
+    --color-neutral-dark: #2e2e2e;
+    --color-neutral-dark-700: #1a1a1a;
+}
+
 @import '@fontsource/inter';
 
 body {
@@ -410,7 +399,7 @@ export function Button({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${baseStyle} ${variants[variant]} ${className}`}
+      className={\`\${baseStyle} \${variants[variant]} \${className}\`}
     >
       {children}
     </button>
@@ -484,7 +473,7 @@ export function Input({
   className = '',
 }: InputProps) {
   return (
-    <div className={`mb-4 ${className}`}>
+    <div className={\`mb-4 \${className}\`}>
       {label && (
         <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
           {label} {required && <span className="text-red-500">*</span>}
@@ -499,9 +488,9 @@ export function Input({
         onChange={onChange}
         required={required}
         disabled={disabled}
-        className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-neutral-dark ${
+        className={\`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-neutral-dark \${
           error ? 'border-red-500' : 'border-gray-300'
-        } ${disabled ? 'bg-gray-100 text-gray-500' : ''}`}
+        } \${disabled ? 'bg-gray-100 text-gray-500' : ''}\`}
       />
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </div>
