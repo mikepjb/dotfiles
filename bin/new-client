@@ -12,10 +12,6 @@ else
   echo "Creating project: $PROJECT_NAME"
 fi
 
-# Create project directory
-mkdir -p $PROJECT_NAME
-cd $PROJECT_NAME
-
 # Create package.json with enhanced scripts
 cat > package.json << EOL
 {
@@ -40,20 +36,6 @@ cat > package.json << EOL
   "license": "ISC"
 }
 EOL
-
-# Install core dependencies
-npm install react@latest react-dom@latest react-router-dom@latest zod@latest
-
-# Install development dependencies
-npm install -D typescript@latest @types/react@latest @types/react-dom@latest
-npm install -D @vitejs/plugin-react tailwindcss postcss autoprefixer
-npm install -D eslint@latest eslint-plugin-react-hooks@latest eslint-plugin-react-refresh@latest typescript-eslint@latest @eslint/js@latest
-npm install -D prettier@latest
-npm install -D jest@latest ts-jest@latest @types/jest@latest jest-environment-jsdom@latest @testing-library/react@latest @testing-library/jest-dom@latest
-npm install -D @phosphor-icons/react@latest @fontsource/inter@latest
-
-# Setup Tailwind CSS
-npx tailwindcss init -p
 
 # Create Prettier config
 cat > .prettierrc.js << EOL
@@ -224,7 +206,7 @@ EOL
 mkdir -p src/components src/pages src/features/currency src/__tests__/features src/components/__tests__
 
 # Create Jest setup file
-cat > src/setupTests.ts << EOL
+cat > src/client/setupTests.ts << EOL
 import '@testing-library/jest-dom';
 EOL
 
@@ -246,7 +228,7 @@ cat > index.html << EOL
 EOL
 
 # Create CSS with Tailwind directives
-cat > src/index.css << EOL
+cat > src/client/index.css << EOL
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -260,7 +242,7 @@ body {
 EOL
 
 # Create main entry point
-cat > src/main.tsx << EOL
+cat > src/client/main.tsx << EOL
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -281,7 +263,7 @@ if (root) {
 EOL
 
 # Create App component
-cat > src/App.tsx << EOL
+cat > src/client/App.tsx << EOL
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -299,7 +281,7 @@ export default App;
 EOL
 
 # Create a feature-specific formatter function
-cat > src/features/currency/formatters.ts << EOL
+cat > src/client/features/currency/formatters.ts << EOL
 /**
  * Formats a number as a currency string
  * @param amount - The amount to format
@@ -316,7 +298,7 @@ export function formatCurrency(amount: number, currency = 'USD'): string {
 EOL
 
 # Create a test for the feature-specific function
-cat > src/__tests__/features/currency-formatters.test.ts << EOL
+cat > src/client/__tests__/features/currency-formatters.test.ts << EOL
 import { formatCurrency } from '../../features/currency/formatters';
 
 describe('Currency formatters', () => {
@@ -334,7 +316,7 @@ describe('Currency formatters', () => {
 EOL
 
 # Create HomePage
-cat > src/pages/HomePage.tsx << EOL
+cat > src/client/pages/HomePage.tsx << EOL
 import { Button } from '../components/Button';
 import { useState } from 'react';
 
@@ -374,7 +356,7 @@ export default function HomePage() {
 EOL
 
 # Create NotFoundPage
-cat > src/pages/NotFoundPage.tsx << EOL
+cat > src/client/pages/NotFoundPage.tsx << EOL
 import { Link } from 'react-router-dom';
 import { Button } from '../components/Button';
 
@@ -397,7 +379,7 @@ export default function NotFoundPage() {
 EOL
 
 # Create Button component
-cat > src/components/Button.tsx << EOL
+cat > src/client/components/Button.tsx << EOL
 import React from 'react';
 
 type ButtonProps = {
@@ -437,8 +419,8 @@ export function Button({
 EOL
 
 # Create Button test
-mkdir -p src/components/__tests__
-cat > src/components/__tests__/Button.test.tsx << EOL
+mkdir -p src/client/components/__tests__
+cat > src/client/components/__tests__/Button.test.tsx << EOL
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Button } from '../Button';
 
@@ -471,7 +453,7 @@ describe('Button component', () => {
 EOL
 
 # Create Input component
-cat > src/components/Input.tsx << EOL
+cat > src/client/components/Input.tsx << EOL
 import React from 'react';
 
 type InputProps = {
@@ -528,7 +510,7 @@ export function Input({
 EOL
 
 # Create Input test
-cat > src/components/__tests__/Input.test.tsx << EOL
+cat > src/client/components/__tests__/Input.test.tsx << EOL
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Input } from '../Input';
 
@@ -595,17 +577,3 @@ EOL
 echo "==================================================="
 echo "🎉 Setup complete! Your project is ready to go!"
 echo "==================================================="
-echo ""
-echo "Your new React app has been created with:"
-echo "- React + TypeScript + Vite"
-echo "- Tailwind CSS"
-echo "- React Router"
-echo "- ESLint + Prettier"
-echo "- Jest for testing"
-echo ""
-echo "To get started:"
-echo "cd ${PROJECT_NAME}"
-echo "npm install"
-echo "npm run dev"
-echo ""
-echo "Happy coding! 🚀"
