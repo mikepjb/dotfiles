@@ -1,56 +1,142 @@
 #!/bin/sh
-# new-client is a script for creating frontend clients quickly, it expects you to have a backend
-# service that serves requests over /api on port 8080.
+# new-client is a script for creating frontend clients quickly
+# It creates a modern React + TypeScript + Vite project with Tailwind CSS
+# and expects a backend service running on port 8080 serving requests via /api
 
-# TODO needs updating, tailwind now uses css import instead of a config file etc.
-# we probably don't want an openapi generator from the client side either.
+# Check if the first argument exists, otherwise use default
+if [ -z "$1" ]; then
+  PROJECT_NAME="client"
+  echo "No project name provided, using default: $PROJECT_NAME"
+else
+  PROJECT_NAME="$1"
+  echo "Creating project: $PROJECT_NAME"
+fi
 
-# Initialize client
-npm create vite@latest client -- --template react-ts
-cd client
+# Create project directory
+mkdir -p $PROJECT_NAME
+cd $PROJECT_NAME
 
-# Update package.json scripts
+# Create package.json with enhanced scripts
 cat > package.json << EOL
 {
-  "name": "client",
+  "name": "${PROJECT_NAME}",
   "version": "1.0.0",
-  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
-  "main": "./dist/index.js",
+  "description": "Modern React TypeScript frontend with Tailwind CSS",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "serve": "vite preview",
-    "generate-api": "openapi-generator-cli generate -i ../api/openapi.yaml -g typescript-fetch -o src/api",
-    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "verify": "npm run type-check && npm run lint && npm run format:check && npm run test",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "test": "jest"
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "test": "jest",
+    "clean": "rm -rf ./dist"
   },
-  "keywords": [],
+  "keywords": ["react", "typescript", "vite", "tailwind"],
   "author": "",
   "license": "ISC"
 }
 EOL
 
-# Install styling dependencies
-npm install -D tailwindcss postcss autoprefixer @tailwindcss/vite
-npm install @headlessui/react
+# Install core dependencies
+npm install react@latest react-dom@latest react-router-dom@latest zod@latest
 
-# Install API client generator
-npm i -D @openapitools/openapi-generator-cli
+# Install development dependencies
+npm install -D typescript@latest @types/react@latest @types/react-dom@latest
+npm install -D @vitejs/plugin-react tailwindcss postcss autoprefixer
+npm install -D eslint@latest eslint-plugin-react-hooks@latest eslint-plugin-react-refresh@latest typescript-eslint@latest @eslint/js@latest
+npm install -D prettier@latest
+npm install -D jest@latest ts-jest@latest @types/jest@latest jest-environment-jsdom@latest @testing-library/react@latest @testing-library/jest-dom@latest
+npm install -D @phosphor-icons/react@latest @fontsource/inter@latest
 
-# Install API validtion
-npm i zod
+# Setup Tailwind CSS
+npx tailwindcss init -p
 
-# Install testing libraries
-npm i -D jest ts-jest @vitejs/plugin-react
-npm i -D storybook@latest playwright@latest 
+# Create Prettier config
+cat > .prettierrc.js << EOL
+export default {
+  singleQuote: true,
+  trailingComma: "es5",
+  semi: true,
+  tabWidth: 2,
+};
+EOL
 
-npx storybook@latest init --type react
-npx playwright@latest init
-# Adds dependencies and creates playwright.config.ts
+# Create TypeScript config
+cat > tsconfig.json << EOL
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
+EOL
 
-# Configure Tailwind
+# Create Node-specific TypeScript config
+cat > tsconfig.node.json << EOL
+{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
+}
+EOL
+
+# Create ESLint config
+cat > eslint.config.js << EOL
+import js from '@eslint/js';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from 'typescript-eslint';
+
+export default tseslint.config(
+  { ignores: ['dist', 'coverage'] },
+  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    files: ['**/*.{ts,tsx}'],
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
+    },
+  }
+);
+EOL
+
+# Create Tailwind config
 cat > tailwind.config.js << EOL
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -59,60 +145,467 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'neutral-dark': '#2e2e2e',
+        'neutral-dark-700': '#1a1a1a',
+      },
+    },
   },
   plugins: [],
 }
 EOL
 
-# Add Tailwind directives to CSS
-cat > src/index.css << EOL
-@import "tailwindcss"
-EOL
-
-# Configure Vite for proxy to Go backend
+# Create Vite config with proper proxy
 cat > vite.config.ts << EOL
-import { defineConfig } from 'vite'
-import tailwindcss from '@tailwindcss/vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react()],
   server: {
+    port: 3000,
+    strictPort: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Sending Request to the Target:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+          });
+        },
       },
     },
   },
-})
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
+});
 EOL
 
-# Create a sample component
-mkdir -p src/components
+# Setup Jest configuration
+cat > jest.config.cjs << EOL
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+  },
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', {
+      tsconfig: 'tsconfig.json',
+      useESM: true,
+    }],
+  },
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+};
+EOL
+
+# Create directories for project structure
+mkdir -p src/components src/pages src/features/currency src/__tests__/features src/components/__tests__
+
+# Create Jest setup file
+cat > src/setupTests.ts << EOL
+import '@testing-library/jest-dom';
+EOL
+
+# Update HTML file
+cat > index.html << EOL
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${PROJECT_NAME}</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+EOL
+
+# Create CSS with Tailwind directives
+cat > src/index.css << EOL
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Inter font */
+@import '@fontsource/inter';
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+EOL
+
+# Create main entry point
+cat > src/main.tsx << EOL
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import './index.css';
+import App from './App';
+
+const root = document.getElementById('root');
+
+if (root) {
+  createRoot(root).render(
+    <StrictMode>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </StrictMode>
+  );
+}
+EOL
+
+# Create App component
+cat > src/App.tsx << EOL
+import { Routes, Route } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import NotFoundPage from './pages/NotFoundPage';
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
+}
+
+export default App;
+EOL
+
+# Create a feature-specific formatter function
+cat > src/features/currency/formatters.ts << EOL
+/**
+ * Formats a number as a currency string
+ * @param amount - The amount to format
+ * @param currency - The currency code (default: 'USD')
+ * @returns Formatted currency string
+ */
+export function formatCurrency(amount: number, currency = 'USD'): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2
+  }).format(amount);
+}
+EOL
+
+# Create a test for the feature-specific function
+cat > src/__tests__/features/currency-formatters.test.ts << EOL
+import { formatCurrency } from '../../features/currency/formatters';
+
+describe('Currency formatters', () => {
+  test('formats a number as USD currency by default', () => {
+    expect(formatCurrency(1000)).toBe('$1,000.00');
+    expect(formatCurrency(10.5)).toBe('$10.50');
+    expect(formatCurrency(0)).toBe('$0.00');
+  });
+
+  test('formats a number with specified currency', () => {
+    expect(formatCurrency(1000, 'EUR')).toBe('€1,000.00');
+    expect(formatCurrency(1000, 'JPY')).toBe('¥1,000.00');
+  });
+});
+EOL
+
+# Create HomePage
+cat > src/pages/HomePage.tsx << EOL
+import { Button } from '../components/Button';
+import { useState } from 'react';
+
+export default function HomePage() {
+  const [count, setCount] = useState(0);
+  
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+        <h1 className="text-2xl font-bold text-center mb-6">Welcome to ${PROJECT_NAME}</h1>
+        
+        <div className="mb-6 text-center">
+          <p className="mb-4">
+            This app uses Vite, React, TypeScript, and Tailwind CSS.
+          </p>
+          
+          <Button 
+            onClick={() => setCount((count) => count + 1)}
+            variant="primary"
+          >
+            Count is {count}
+          </Button>
+        </div>
+        
+        <div className="mt-6 flex space-x-2 justify-center">
+          <Button variant="secondary">Cancel</Button>
+          <Button variant="primary">Submit</Button>
+        </div>
+        
+        <p className="mt-6 text-sm text-gray-500 text-center">
+          Edit <code className="font-mono bg-gray-100 p-1 rounded">src/App.tsx</code> and save to test HMR
+        </p>
+      </div>
+    </div>
+  );
+}
+EOL
+
+# Create NotFoundPage
+cat > src/pages/NotFoundPage.tsx << EOL
+import { Link } from 'react-router-dom';
+import { Button } from '../components/Button';
+
+export default function NotFoundPage() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 text-center">
+        <h1 className="text-4xl font-bold text-red-500 mb-4">404</h1>
+        <h2 className="text-2xl font-semibold mb-4">Page Not Found</h2>
+        <p className="mb-6 text-gray-600">
+          The page you are looking for doesn't exist or has been moved.
+        </p>
+        <Link to="/">
+          <Button variant="primary">Go Home</Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
+EOL
+
+# Create Button component
 cat > src/components/Button.tsx << EOL
+import React from 'react';
+
 type ButtonProps = {
   children: React.ReactNode;
   onClick?: () => void;
   variant?: 'primary' | 'secondary';
+  disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  className?: string;
 }
 
-export function Button({ children, onClick, variant = 'primary' }: ButtonProps) {
-  const baseStyle = 'px-4 py-2 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2';
+export function Button({ 
+  children, 
+  onClick, 
+  variant = 'primary', 
+  disabled = false,
+  type = 'button',
+  className = '' 
+}: ButtonProps) {
+  const baseStyle = 'px-4 py-2 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors';
   const variants = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500',
+    primary: 'bg-neutral-dark text-white hover:bg-neutral-dark-700 focus:ring-gray-500 disabled:opacity-50',
+    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-400 disabled:bg-gray-100 disabled:text-gray-400',
   };
 
   return (
     <button
+      type={type}
       onClick={onClick}
-      className={`${baseStyle} ${variants[variant]}`}
+      disabled={disabled}
+      className={`${baseStyle} ${variants[variant]} ${className}`}
     >
       {children}
     </button>
   );
 }
 EOL
+
+# Create Button test
+mkdir -p src/components/__tests__
+cat > src/components/__tests__/Button.test.tsx << EOL
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Button } from '../Button';
+
+describe('Button component', () => {
+  test('renders correctly', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByText('Click me')).toBeInTheDocument();
+  });
+
+  test('calls onClick handler when clicked', () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+    fireEvent.click(screen.getByText('Click me'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  test('applies different styles based on variant', () => {
+    const { rerender } = render(<Button variant="primary">Primary</Button>);
+    expect(screen.getByText('Primary')).toHaveClass('bg-neutral-dark');
+    
+    rerender(<Button variant="secondary">Secondary</Button>);
+    expect(screen.getByText('Secondary')).toHaveClass('bg-gray-200');
+  });
+
+  test('is disabled when disabled prop is true', () => {
+    render(<Button disabled>Disabled</Button>);
+    expect(screen.getByText('Disabled')).toBeDisabled();
+  });
+});
+EOL
+
+# Create Input component
+cat > src/components/Input.tsx << EOL
+import React from 'react';
+
+type InputProps = {
+  label?: string;
+  id: string;
+  name: string;
+  type?: 'text' | 'password' | 'email' | 'number';
+  placeholder?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  error?: string;
+  required?: boolean;
+  disabled?: boolean;
+  className?: string;
 }
+
+export function Input({
+  label,
+  id,
+  name,
+  type = 'text',
+  placeholder,
+  value,
+  onChange,
+  error,
+  required = false,
+  disabled = false,
+  className = '',
+}: InputProps) {
+  return (
+    <div className={`mb-4 ${className}`}>
+      {label && (
+        <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+          {label} {required && <span className="text-red-500">*</span>}
+        </label>
+      )}
+      <input
+        id={id}
+        name={name}
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        required={required}
+        disabled={disabled}
+        className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-neutral-dark ${
+          error ? 'border-red-500' : 'border-gray-300'
+        } ${disabled ? 'bg-gray-100 text-gray-500' : ''}`}
+      />
+      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+    </div>
+  );
+}
+EOL
+
+# Create Input test
+cat > src/components/__tests__/Input.test.tsx << EOL
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Input } from '../Input';
+
+describe('Input component', () => {
+  test('renders correctly with label', () => {
+    render(
+      <Input
+        label="Email"
+        id="email"
+        name="email"
+        value=""
+        onChange={() => {}}
+      />
+    );
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+  });
+
+  test('shows error message when provided', () => {
+    render(
+      <Input
+        label="Email"
+        id="email"
+        name="email"
+        value=""
+        onChange={() => {}}
+        error="Invalid email address"
+      />
+    );
+    expect(screen.getByText('Invalid email address')).toBeInTheDocument();
+  });
+
+  test('calls onChange handler when input value changes', () => {
+    const handleChange = jest.fn();
+    render(
+      <Input
+        label="Email"
+        id="email"
+        name="email"
+        value=""
+        onChange={handleChange}
+      />
+    );
+    
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'test@example.com' } });
+    expect(handleChange).toHaveBeenCalledTimes(1);
+  });
+
+  test('shows required indicator when required prop is true', () => {
+    render(
+      <Input
+        label="Email"
+        id="email"
+        name="email"
+        value=""
+        onChange={() => {}}
+        required
+      />
+    );
+    expect(screen.getByText('*')).toBeInTheDocument();
+  });
+});
+EOL
+
+echo "==================================================="
+echo "🎉 Setup complete! Your project is ready to go!"
+echo "==================================================="
+echo ""
+echo "Your new React app has been created with:"
+echo "- React + TypeScript + Vite"
+echo "- Tailwind CSS"
+echo "- React Router"
+echo "- ESLint + Prettier"
+echo "- Jest for testing"
+echo ""
+echo "To get started:"
+echo "cd ${PROJECT_NAME}"
+echo "npm install"
+echo "npm run dev"
+echo ""
+echo "Happy coding! 🚀"
