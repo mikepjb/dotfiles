@@ -1,0 +1,693 @@
+#!/bin/bash
+# SPA creation script, includes basic backend!
+
+set -e # Exit on error
+
+PROJECT_NAME=${1:-"fullstack-app"}
+echo "Creating project: $PROJECT_NAME"
+mkdir -p $PROJECT_NAME && cd $PROJECT_NAME
+
+# Create basic directory structure
+mkdir -p src/{client/{components/{ui,composed,layouts},pages,features,hooks},common/types,server/{routes,services,workers}}
+
+cat > package.json << EOL
+{
+  "name": "${PROJECT_NAME}",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n \"client,server\" -c \"blue,green\" \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:client": "vite",
+    "dev:server": "tsx watch src/server/index.ts",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "vite build",
+    "build:server": "esbuild src/server/index.ts --bundle --platform=node --sourcemap --outfile=dist/server/index.js --packages=external --format=esm",
+    "start": "node dist/server/index.js",
+    "lint": "eslint src --ext ts,tsx --fix",
+    "test": "vitest run",
+    "image": "docker build -t ${PROJECT_NAME}:latest -t ${PROJECT_NAME}:\$(git rev-parse --short HEAD) ."
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.0",
+    "@fastify/static": "^7.0.0",
+    "@radix-ui/colors": "^3.0.0", 
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-icons": "^1.3.0",
+    "@radix-ui/react-navigation-menu": "^1.1.4",
+    "@radix-ui/react-popover": "^1.0.7",
+    "@radix-ui/react-slot": "^1.0.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "fastify": "^4.26.1",
+    "piscina": "^4.3.0",
+    "react": "^19.0.0", 
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^6.22.0",
+    "tailwind-merge": "^2.2.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@typescript-eslint/eslint-plugin": "^7.1.0", 
+    "@typescript-eslint/parser": "^7.1.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "tailwindcss": "^4.0.6",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.4",
+    "vitest": "^1.3.1"
+  }
+}
+EOL
+
+cat > tsconfig.json << EOL
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@client/*": ["./src/client/*"],
+      "@common/*": ["./src/common/*"],
+      "@server/*": ["./src/server/*"]
+    }
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
+EOL
+
+cat > tsconfig.node.json << EOL
+{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
+}
+EOL
+
+# Create Vite config
+cat > vite.config.ts << EOL
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+      '@client': resolve(__dirname, 'src/client'),
+      '@common': resolve(__dirname, 'src/common'),
+      '@server': resolve(__dirname, 'src/server')
+    }
+  },
+  server: {
+    port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      }
+    }
+  },
+  build: {
+    outDir: 'dist/client'
+  },
+  test: {
+    environment: 'node'
+  }
+});
+EOL
+
+# Create index.html for client
+cat > index.html << EOL
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${PROJECT_NAME}</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/client/main.tsx"></script>
+  </body>
+</html>
+EOL
+
+# Create client CSS with Tailwind v4
+cat > src/client/index.css << EOL
+@import "tailwindcss";
+
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --color-primary: #1e293b;
+  --color-primary-foreground: #f8fafc;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #1e293b;
+}
+EOL
+
+# Create utils for the client
+cat > src/client/lib/utils.ts << EOL
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+EOL
+
+# Create shared types
+cat > src/common/types/api.ts << EOL
+export interface ApiResponse<T> {
+  data?: T;
+  error?: string;
+  success: boolean;
+}
+
+export interface Item {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  createdAt: string;
+}
+EOL
+
+# Create button component with Radix
+mkdir -p src/client/components/ui
+cat > src/client/components/ui/button.tsx << EOL
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+
+import { cn } from "@client/lib/utils";
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Button.displayName = "Button";
+
+export { Button, buttonVariants };
+EOL
+
+# Create main client files
+cat > src/client/main.tsx << EOL
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+import './index.css';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>,
+);
+EOL
+
+cat > src/client/App.tsx << EOL
+import { Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import About from './pages/About';
+import Layout from './components/layouts/Layout';
+
+export const App = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Home />} />
+        <Route path="about" element={<About />} />
+      </Route>
+    </Routes>
+  );
+}
+
+export default App;
+EOL
+
+mkdir -p src/client/components/layouts
+cat > src/client/components/layouts/Layout.tsx << EOL
+import { Outlet, Link } from 'react-router-dom';
+import { Button } from '@client/components/ui/button';
+
+export default function Layout() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <header className="border-b p-4">
+        <nav className="container mx-auto flex justify-between items-center">
+          <h1 className="text-xl font-bold">${PROJECT_NAME}</h1>
+          <div className="flex gap-4">
+            <Link to="/">
+              <Button variant="ghost">Home</Button>
+            </Link>
+          </div>
+        </nav>
+      </header>
+      <main className="flex-grow container mx-auto p-4">
+        <Outlet />
+      </main>
+      <footer className="border-t p-4">
+        <div className="container mx-auto text-center text-sm text-muted-foreground">
+          © {new Date().getFullYear()} ${PROJECT_NAME}
+        </div>
+      </footer>
+    </div>
+  );
+}
+EOL
+
+cat > src/client/pages/Home.tsx << EOL
+import { useState } from 'react';
+import { Button } from '@client/components/ui/button';
+
+export default function Home() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Welcome to ${PROJECT_NAME}</h1>
+      <p className="text-muted-foreground">
+        A React + TypeScript + Vite + Radix UI + Fastify application
+      </p>
+      <div className="flex items-center gap-4">
+        <Button onClick={() => setCount(count => count + 1)}>
+          Count is {count}
+        </Button>
+        <Button variant="outline" onClick={() => setCount(0)}>
+          Reset
+        </Button>
+      </div>
+    </div>
+  );
+}
+EOL
+
+# Create worker thread setup
+mkdir -p src/server/workers
+cat > src/server/workers/index.ts << EOL
+import { fork } from 'node:child_process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const workerPath = path.join(__dirname, 'worker.js');
+
+export async function runJob<T>(task: string, data: any): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const worker = fork(workerPath);
+    
+    worker.on('message', (result) => {
+      resolve(result);
+      worker.kill();
+    });
+    
+    worker.on('error', (err) => {
+      reject(err);
+      worker.kill();
+    });
+    
+    worker.send({ task, data });
+  });
+}
+EOL
+
+cat > src/server/workers/worker.ts << EOL
+import type { Item } from '@common/types/api';
+
+type WorkerTask = {
+  task: string;
+  data: any;
+};
+
+export default async function worker({ task, data }: WorkerTask) {
+  switch (task) {
+    case 'processItems':
+      return processItems(data);
+    default:
+      throw new Error(\`Unknown task: \${task}\`);
+  }
+}
+
+// Example worker task
+async function processItems(items: Item[]): Promise<Item[]> {
+  return items.map(item => ({
+    ...item,
+    price: item.price * 1.1, // Add 10% processing fee
+    description: item.description 
+      ? \`\${item.description} (Processed)\` 
+      : '(Processed)'
+  }));
+}
+EOL
+
+cat > src/server/workers/worker.ts << EOL
+import type { Item } from '@common/types/api';
+
+process.on('message', async (message) => {
+  try {
+    const result = await processMessage(message);
+    process.send?.(result);
+  } catch (error) {
+    process.send?.({ error: error.message });
+  }
+});
+
+async function processMessage({ task, data }: { task: string; data: any }) {
+  switch (task) {
+    case 'processItems':
+      return processItems(data);
+    default:
+      throw new Error(\`Unknown task: \${task}\`);
+  }
+}
+
+// Example worker function
+async function processItems(items: Item[]): Promise<Item[]> {
+  return items.map(item => ({
+    ...item,
+    price: item.price * 1.1 // Add 10% processing fee
+  }));
+}
+
+# Create server index file with worker integration
+cat > src/server/index.ts << EOL
+import path from 'path';
+import { fileURLToPath } from 'url';
+import Fastify from 'fastify';
+import cors from '@fastify/cors';
+import staticFiles from '@fastify/static';
+import type { ApiResponse, Item } from '@common/types/api';
+import { runTask } from './workers/index';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const server = Fastify({
+  logger: true
+});
+
+await server.register(cors, {
+  origin: true
+});
+
+await server.register(staticFiles, {
+  root: path.join(__dirname, '..', 'client'),
+  prefix: '/'
+});
+
+server.get('/api/hello', async (): Promise<ApiResponse<{ message: string }>> => {
+  return { 
+    success: true,
+    data: {
+      message: 'Hello from Fastify!'
+    }
+  };
+});
+
+// Example endpoint using worker thread
+server.get('/api/items/processed', async (): Promise<ApiResponse<Item[]>> => {
+  const items: Item[] = [
+    { id: '1', name: 'Item 1', price: 10.99, createdAt: new Date().toISOString() },
+    { id: '2', name: 'Item 2', price: 24.99, createdAt: new Date().toISOString() }
+  ];
+
+  // Process items in worker thread
+  const processedItems = await runTask<Item[]>('processItems', items);
+  
+  return { 
+    success: true,
+    data: processedItems
+  };
+});
+
+// Catch-all route for client-side routing
+server.setNotFoundHandler((request, reply) => {
+  if (request.raw.url?.startsWith('/api')) {
+    reply.code(404).send({ success: false, error: 'API route not found' });
+  } else {
+    reply.sendFile('index.html');
+  }
+});
+
+// Start the server
+const PORT = process.env.PORT || 8080;
+try {
+  await server.listen({ port: Number(PORT), host: '0.0.0.0' });
+  console.log(\`Server listening on http://localhost:\${PORT}\`);
+} catch (err) {
+  server.log.error(err);
+  process.exit(1);
+}
+EOL
+
+# Create example API route with Zod
+mkdir -p src/server/routes
+cat > src/server/routes/example.ts << EOL
+import { FastifyInstance } from 'fastify';
+import { z } from 'zod';
+import type { Item, ApiResponse } from '@common/types/api';
+
+export default async function exampleRoutes(fastify: FastifyInstance) {
+  // Get all items
+  fastify.get('/api/items', async (): Promise<ApiResponse<Item[]>> => {
+    return { 
+      success: true,
+      data: [
+        { id: '1', name: 'Item 1', price: 10.99, createdAt: new Date().toISOString() },
+        { id: '2', name: 'Item 2', price: 24.99, createdAt: new Date().toISOString() }
+      ]
+    };
+  });
+
+  // Get item by ID
+  fastify.get<{ Params: { id: string } }>('/api/items/:id', async (request): Promise<ApiResponse<Item>> => {
+    const id = request.params.id;
+    return { 
+      success: true,
+      data: { 
+        id, 
+        name: \`Item \${id}\`, 
+        price: 19.99, 
+        description: 'A sample item',
+        createdAt: new Date().toISOString() 
+      } 
+    };
+  });
+
+  // Create new item
+  const createItemSchema = z.object({
+    name: z.string().min(1),
+    price: z.number().positive(),
+    description: z.string().optional()
+  });
+
+  fastify.post('/api/items', async (request, reply): Promise<ApiResponse<Item>> => {
+    try {
+      const data = createItemSchema.parse(request.body);
+      
+      const newItem: Item = { 
+        id: Math.floor(Math.random() * 1000).toString(),
+        name: data.name,
+        price: data.price,
+        description: data.description,
+        createdAt: new Date().toISOString()
+      };
+      
+      reply.code(201);
+      return { success: true, data: newItem };
+    } catch (error) {
+      reply.code(400);
+      return { success: false, error: 'Invalid item data' };
+    }
+  });
+}
+EOL
+
+# Create Dockerfile
+cat > Dockerfile << EOL
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --production
+
+COPY --from=builder /app/dist ./dist
+
+ENV PORT=8080
+ENV NODE_ENV=production
+
+EXPOSE 8080
+
+CMD ["node", "dist/server/index.js"]
+EOL
+
+# Create a basic README
+cat > README.md << EOL
+# ${PROJECT_NAME}
+
+A modern full-stack Single Package Application (spa) with React, TypeScript, Vite, Radix UI frontend and Fastify backend.
+
+## Getting Started
+
+\`\`\`bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Build Docker image
+npm run image
+\`\`\`
+
+## Project Structure
+
+\`\`\`
+${PROJECT_NAME}/
+├── src/
+│   ├── client/           # Frontend code
+│   │   ├── components/   
+│   │   │   ├── ui/       # Basic UI components
+│   │   │   ├── composed/ # Composed components
+│   │   │   └── layouts/  # Layout components
+│   │   ├── pages/        # Route pages
+│   │   ├── features/     # Feature modules
+│   │   └── hooks/        # React hooks
+│   ├── common/           # Shared code
+│   │   └── types/        # Shared TypeScript types
+│   └── server/           # Backend code
+│       ├── routes/       # API routes
+│       ├── services/     # Business logic
+│       └── workers/      # Worker thread implementations
+└── ...
+\`\`\`
+EOL
+
+# Create .gitignore
+cat > .gitignore << EOL
+# dependencies
+node_modules
+.pnp
+.pnp.js
+
+# testing
+coverage
+
+# production
+dist
+build
+
+# misc
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE
+.idea
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+EOL
+
+echo "✅ Project created successfully!"

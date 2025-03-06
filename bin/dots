@@ -102,6 +102,8 @@ ensure_repo() {
 web_deps() {
     info "Installing web client development tools"
     npm install -g typescript typescript-language-server eslint prettier n
+
+    go install github.com/air-verse/air@latest
 }
 
 info() {

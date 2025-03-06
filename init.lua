@@ -221,7 +221,8 @@ if telescope then
     local builtin = require('telescope.builtin')
     vim.keymap.set('n', '<space>', function()
         builtin.find_files({
-            hidden = true
+            hidden = true,
+            file_ignore_patterns = { "^.git/" }
         })
     end, {})
     vim.keymap.set('n', 'gr', builtin.live_grep, {})
@@ -279,7 +280,9 @@ if lspconfig and mason and mason_lspconfig then
         -- vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
     end
 
-    local capabilities = require("cmp_nvim_lsp").default_capabilities()
+    -- More minimal capabilities
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
+    capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
     lspconfig.lua_ls.setup({
         capabilities = capabilities,
@@ -355,7 +358,7 @@ if treesitter then
 
         highlight = {
             enable = true,
-            disable = { "gitcommit" }, -- for some reason treesitter doesn't highlight diffs
+            disable = { "gitcommit", "xml", "html" },
         },
 
         indent = {
@@ -391,7 +394,10 @@ if conform then
     vim.api.nvim_create_autocmd("BufWritePre", {
         pattern = "*",
         callback = function(args)
-            require("conform").format({ bufnr = args.buf })
+            -- Only format files under a certain size
+            if vim.api.nvim_buf_line_count(args.buf) < 2000 then
+                require("conform").format({ bufnr = args.buf })
+            end
         end,
     })
 end

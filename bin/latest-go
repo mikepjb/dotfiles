@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# Script to download the latest Go binary from Google's servers
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Determine OS type
+OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+case "$OS" in
+    linux)
+        OS="linux"
+        ;;
+    darwin)
+        OS="darwin"
+        ;;
+    freebsd)
+        OS="freebsd"
+        ;;
+    msys*|mingw*|cygwin*)
+        OS="windows"
+        ;;
+    *)
+        echo "Unsupported OS: $OS"
+        exit 1
+        ;;
+esac
+
+# Determine architecture
+ARCH="$(uname -m)"
+case "$ARCH" in
+    x86_64|amd64)
+        ARCH="amd64"
+        ;;
+    armv*|aarch64|arm64)
+        ARCH="arm64"
+        ;;
+    i*86)
+        ARCH="386"
+        ;;
+    *)
+        echo "Unsupported architecture: $ARCH"
+        exit 1
+        ;;
+esac
+
+# Define installation directory
+INSTALL_DIR="/usr/local"
+
+# Fetch the latest version
+echo "Fetching the latest Go version..."
+LATEST_VERSION=$(curl -s https://go.dev/VERSION?m=text | head -n 1)
+# Remove the "go" prefix to get just the version number
+VERSION=${LATEST_VERSION#go}
+
+echo "Latest Go version: $LATEST_VERSION"
+
+# Create the download URL
+if [ "$OS" = "windows" ]; then
+    FILENAME="go${VERSION}.${OS}-${ARCH}.zip"
+else
+    FILENAME="go${VERSION}.${OS}-${ARCH}.tar.gz"
+fi
+
+DOWNLOAD_URL="https://go.dev/dl/${FILENAME}"
+
+echo "Downloading Go from: $DOWNLOAD_URL"
+
+# Create a temporary directory
+TMP_DIR=$(mktemp -d)
+cd "$TMP_DIR"
+
+# Download the archive
+curl -LO "$DOWNLOAD_URL"
+
+# Remove current version if it exists
+sudo rm -rf "$INSTALL_DIR/go"
+
+# Install Go
+echo "Installing Go to $INSTALL_DIR..."
+if [ "$OS" = "windows" ]; then
+    # For Windows, unzip the archive
+    unzip -q "$FILENAME"
+else
+    # For Unix systems, extract the tarball
+    sudo tar -C "$INSTALL_DIR" -xzf "$FILENAME"
+fi
+
+# Clean up
+cd - > /dev/null
+rm -rf "$TMP_DIR"
+
+echo "Go $VERSION has been installed successfully!"
+echo "Please add Go to your PATH if it's not already there:"
+echo "export PATH=\$PATH:${INSTALL_DIR}/go/bin"
+
+# Verify the installation
+if [ -x "${INSTALL_DIR}/go/bin/go" ]; then
+    echo "Installation verified. Go version:"
+    ${INSTALL_DIR}/go/bin/go version
+else
+    echo "Installation could not be verified. Please check the installation directory."
+    exit 1
+fi

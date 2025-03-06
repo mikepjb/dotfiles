@@ -235,7 +235,7 @@ cat > index.html << EOL
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/client/main.tsx"></script>
   </body>
 </html>
 EOL
@@ -344,12 +344,6 @@ export default function HomePage() {
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
         <h1 className="text-2xl font-bold text-center mb-6">Welcome to ${PROJECT_NAME}</h1>
-        
-        <div className="mb-6 text-center">
-          <p className="mb-4">
-            This app uses Vite, React, TypeScript, and Tailwind CSS.
-          </p>
-          
           <Button 
             onClick={() => setCount((count) => count + 1)}
             variant="primary"
@@ -357,15 +351,6 @@ export default function HomePage() {
             Count is {count}
           </Button>
         </div>
-        
-        <div className="mt-6 flex space-x-2 justify-center">
-          <Button variant="secondary">Cancel</Button>
-          <Button variant="primary">Submit</Button>
-        </div>
-        
-        <p className="mt-6 text-sm text-gray-500 text-center">
-          Edit <code className="font-mono bg-gray-100 p-1 rounded">src/App.tsx</code> and save to test HMR
-        </p>
       </div>
     </div>
   );
