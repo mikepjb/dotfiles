@@ -20,13 +20,13 @@ install_missing_tools() {
 analyze_code() {
     echo "=== Code Statistics ==="
     echo "Go files:"
-    find . -type f -name "*.go" -exec wc -l {} + | sort -nr
+    find . -type f -name "*.go" ! -path "*/node_modules/*" -exec wc -l {} + | sort -nr
     
     echo -e "\nHTML files:"
-    find . -type f -name "*.html" -exec wc -l {} + | sort -nr
+    find . -type f -name "*.html" ! -path "*/node_modules/*" -exec wc -l {} + | sort -nr
     
     echo -e "\nTemplate files:"
-    find . -type f -name "*.tmpl" -exec wc -l {} + | sort -nr
+    find . -type f -name "*.tmpl" ! -path "*/node_modules/*" -exec wc -l {} + | sort -nr
     
     echo -e "\nTS files:"
     find . -type f -name "*.ts" ! -path "*node_modules*" -exec wc -l {} + | sort -nr

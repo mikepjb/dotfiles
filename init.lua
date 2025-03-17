@@ -34,7 +34,7 @@ local base = vim.api.nvim_create_augroup('Base', { clear = true })
 -- Editor Behaviour -------------------------------------------------------------------------------
 vim.opt.guicursor = "" -- a. visual config
 vim.opt.cursorline = true
-vim.opt.textwidth = 99
+vim.opt.textwidth = 0
 vim.opt.colorcolumn = '100'
 vim.opt.spell = false -- no spell, can we enable for just markdown + comments?
 vim.opt.nu = true
@@ -150,6 +150,12 @@ vim.keymap.set("n", "g*", function() vim.cmd(":grep " .. vim.fn.expand("<cword>"
 vim.keymap.set("n", ",", "/TODO\\|NEXT\\|XXX<CR>")
 vim.keymap.set("n", "-", "za")
 vim.keymap.set("n", "_", ":set foldlevel=1<CR>")
+vim.keymap.set('n', 'gw', function()
+  local current_tw = vim.opt.textwidth
+  vim.opt.textwidth = 99
+  vim.cmd('normal! gw')
+  vim.opt.textwidth = current_tw
+end, {noremap = true, expr = true})
 vim.keymap.set('n', 'ge', function()
     local current_dir = vim.fn.expand('%:p:h')
     local input_cmd = ':e ' .. current_dir .. '/'
