@@ -2,6 +2,12 @@
 
 _A barebones, productive working environment._
 
+## Advice to improve this
+
+- curl is available on mac but wget on linux by default (generally)
+- jq/fd/ripgrep/gcc(for lsp)/chromium/chrome/alacritty missing
+- node/npm missing
+
 ## Getting Started
 
 curl -fsSL https://raw.githubusercontent.com/mikepjb/dotfiles/main/bin/dots | sh
