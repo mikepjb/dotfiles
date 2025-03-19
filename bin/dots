@@ -80,6 +80,12 @@ setup_containers() {
         else
             info "k3s already installed."
         fi
+
+        if ! command -v helm >/dev/null 2>&1; then
+            curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        else
+            info "helm already installed."
+        fi
     else
         warn "You are not using Linux (you poor soul), skipping container setup. kubectl/k3s may not be available"
     fi
