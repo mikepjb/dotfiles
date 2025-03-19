@@ -12,6 +12,7 @@ NEOVIM_PLUGIN_PATH="$HOME/.config/nvim/pack/base/start"
 ESSENTIAL_COMMANDS=(
     "curl"
     "wget"
+    "htop"
     "jq"
     "fd-find"
     "ripgrep"
