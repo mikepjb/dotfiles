@@ -7,6 +7,8 @@ _A barebones, productive working environment._
 - curl is available on mac but wget on linux by default (generally)
 - jq/fd/ripgrep/gcc(for lsp)/chromium/chrome/alacritty missing
 - node/npm missing
+- docker/docker compose missing (ensure v2 compose)
+- kubectl/k3s missing too
 
 ## Getting Started
 
