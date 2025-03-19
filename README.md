@@ -16,7 +16,7 @@ curl -fsSL https://raw.githubusercontent.com/mikepjb/dotfiles/main/bin/dots | sh
    
 ### Extra housekeeping when setting up a new machine
 
-1. Set caps lock as control.
+1. Set caps lock as control (auto-configured on Linux).
 2. Disable audible/visual bell.
 3. Trackpad/Mouse tracking speed + tap to click!
 4. Disable hold to quit in Chrome/Chromium.
@@ -34,7 +34,7 @@ docker pull hypalynx/box:latest # Get the latest version:
 docker run --rm -it hypalynx/box /bin/bash # Try out the box with:
 ```
 
-### Remove Servers
+### Remote Servers
 
 - just use regular vim
 - set `export PAGER="less -S"` if you are going to be using `psql` to stop the results wrapping and

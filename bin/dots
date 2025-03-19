@@ -1,15 +1,28 @@
 #!/usr/bin/env bash
 set -eu
 
-export GITHUB=${GITHUB:-https://github.com}
-export DOTFILES_PATH="$HOME/.dotfiles"
-export DOTFILES_REPO="mikepjb/dotfiles.git"
-export NOTES_PATH="$HOME/.notes"
-export NOTES_REPO="mikepjb/notes.git"
-export UPDATE_MODE=false
-
-export NEOVIM_PATH="$HOME/.config/nvim"
-export NEOVIM_PLUGIN_PATH="$HOME/.config/nvim/pack/base/start"
+GITHUB=${GITHUB:-https://github.com}
+DOTFILES_PATH="$HOME/.dotfiles"
+DOTFILES_REPO="mikepjb/dotfiles.git"
+NOTES_PATH="$HOME/.notes"
+NOTES_REPO="mikepjb/notes.git"
+UPDATE_MODE=false
+NEOVIM_PATH="$HOME/.config/nvim"
+NEOVIM_PLUGIN_PATH="$HOME/.config/nvim/pack/base/start"
+ESSENTIAL_COMMANDS=(
+    "curl"
+    "wget"
+    "jq"
+    "fd-find"
+    "ripgrep"
+    "gcc"
+    "chromium-browser"
+    "alacritty"
+    "nodejs"
+    "npm"
+    "docker.io"
+    "docker-compose-v2"
+)
 
 main() {
     local command="${1:-}"
@@ -28,11 +41,48 @@ main() {
         warn "Notes repo is missing, get it manually to include in future updates."
     fi
 
+    setup_commands
     link_scripts 
     link_config
     setup_neovim
     setup_golang
+    setup_containers
     # setup_node
+}
+
+setup_commands() {
+    info "Ensuring we have essential commands available"
+    if command -v dpkg 1>/dev/null; then
+        if ! (IFS=" "; dpkg -l ${ESSENTIAL_COMMANDS[*]} >/dev/null 2>&1); then
+            (IFS=" "; sudo apt update && sudo apt install -y --no-install-recommends ${ESSENTIAL_COMMANDS[*]})
+        fi
+    else
+        warn "dpkg not found, you are not using Ubuntu/Debian, skipping essential commands setup"
+    fi
+}
+
+setup_containers() {
+    if [[ "$(uname)" == "Linux" ]]; then
+        if ! command -v kubectl >/dev/null 2>&1; then
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" | sudo bash
+        fi
+
+        if ! command -v k3s >/dev/null 2>&1; then
+            info "Installing k3s..."
+            curl -sfL https://get.k3s.io | sh -
+
+            # Configure kubectl to use k3s
+            mkdir -p ~/.kube
+            sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config 2>/dev/null || true
+            sudo chown $(id -u):$(id -g) ~/.kube/config 2>/dev/null || true
+            sudo chmod 600 ~/.kube/config 2>/dev/null || true
+            grep -q "KUBECONFIG" ~/.bashrc.local || echo 'export KUBECONFIG=~/.kube/config' >> ~/.bashrc.local
+        else
+            info "k3s already installed."
+        fi
+    else
+        warn "You are not using Linux (you poor soul), skipping container setup. kubectl/k3s may not be available"
+    fi
 }
 
 setup_neovim() {
