@@ -21,6 +21,7 @@ main() {
     link_scripts 
     link_config
     setup_neovim
+    setup_golang
     web_deps
 }
 
@@ -49,6 +50,19 @@ setup_neovim() {
 
     
     # fugitive?
+}
+
+setup_golang() {
+    wget https://go.dev/dl/go1.24.0.linux-amd64.tar.gz
+
+    # Remove any existing Go installation
+    sudo rm -rf /usr/local/go
+
+    # Extract to /usr/local
+    sudo tar -C /usr/local -xzf go1.24.0.linux-amd64.tar.gz
+
+    # if go is available but air is not
+    # go install github.com/air-verse/air@latest
 }
 
 link_scripts() {
@@ -99,11 +113,9 @@ ensure_repo() {
     fi
 }
 
-web_deps() {
+setup_node() {
     info "Installing web client development tools"
     npm install -g typescript typescript-language-server eslint prettier n
-
-    go install github.com/air-verse/air@latest
 }
 
 info() {
