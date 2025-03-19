@@ -22,7 +22,7 @@ main() {
     link_config
     setup_neovim
     setup_golang
-    web_deps
+    # setup_node
 }
 
 setup_neovim() {
@@ -60,6 +60,9 @@ setup_golang() {
 
     # Extract to /usr/local
     sudo tar -C /usr/local -xzf go1.24.0.linux-amd64.tar.gz
+
+    # Clean up
+    rm go1.24.0.linux-amd64.tar.gz
 
     # if go is available but air is not
     # go install github.com/air-verse/air@latest
