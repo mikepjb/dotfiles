@@ -6,11 +6,21 @@ export DOTFILES_PATH="$HOME/.dotfiles"
 export DOTFILES_REPO="mikepjb/dotfiles.git"
 export NOTES_PATH="$HOME/.notes"
 export NOTES_REPO="mikepjb/notes.git"
+export UPDATE_MODE=false
 
 export NEOVIM_PATH="$HOME/.config/nvim"
 export NEOVIM_PLUGIN_PATH="$HOME/.config/nvim/pack/base/start"
 
 main() {
+    local command="${1:-}"
+
+    if [[ "$command" == "update" ]]; then
+        UPDATE_MODE=true
+        info "Running in update mode - will update all repositories and install packages"
+    else
+        info "Running in standard mode - will only set up configurations"
+    fi
+
     ensure_repo $DOTFILES_PATH $DOTFILES_REPO
     if [[ -d $NOTES_PATH ]]; then
         ensure_repo $NOTES_PATH $NOTES_REPO
@@ -31,7 +41,6 @@ setup_neovim() {
     ln -sfv $DOTFILES_PATH/init.lua "$NEOVIM_PATH/init.lua"
 
     mkdir -p "$NEOVIM_PLUGIN_PATH"
-    # ensure_repo $DOTFILES_PATH $DOTFILES_REPO
     ensure_repo "$NEOVIM_PLUGIN_PATH/telescope.nvim" "nvim-telescope/telescope.nvim"
     ensure_repo "$NEOVIM_PLUGIN_PATH/plenary.nvim" "nvim-lua/plenary.nvim"
     ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-cmp" "hrsh7th/nvim-cmp"
@@ -46,26 +55,25 @@ setup_neovim() {
     ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-treesitter" "nvim-treesitter/nvim-treesitter"
     ensure_repo "$NEOVIM_PLUGIN_PATH/conform.nvim" "stevearc/conform.nvim"
     ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-lint" "mfussenegger/nvim-lint"
-
-
-    
-    # fugitive?
 }
 
 setup_golang() {
-    wget https://go.dev/dl/go1.24.0.linux-amd64.tar.gz
-
-    # Remove any existing Go installation
-    sudo rm -rf /usr/local/go
-
-    # Extract to /usr/local
-    sudo tar -C /usr/local -xzf go1.24.0.linux-amd64.tar.gz
-
-    # Clean up
-    rm go1.24.0.linux-amd64.tar.gz
-
-    # if go is available but air is not
-    # go install github.com/air-verse/air@latest
+    if command -v go &> /dev/null; then
+        info "Go is already installed, skipping download"
+    else
+        wget https://go.dev/dl/go1.24.0.linux-amd64.tar.gz
+        sudo rm -rf /usr/local/go # useful when we look for the latest
+        sudo tar -C /usr/local -xzf go1.24.0.linux-amd64.tar.gz
+        rm go1.24.0.linux-amd64.tar.gz
+        if [[ "${1:-}" == "update" ]]; then
+            if command -v air &> /dev/null; then
+                info "air is already installed, skipping"
+            else
+                info "Installing air"
+                go install github.com/air-verse/air@latest
+            fi
+        fi
+    fi
 }
 
 link_scripts() {
@@ -96,7 +104,7 @@ ensure_repo() {
     local repo_name="$2"
     local branch_tag="${3:-}"
 
-    info "Ensuring $repo_path is available & up to date"
+    info "Ensuring $repo_path is available"
     if [ ! -d "$repo_path" ]; then
         mkdir -p "${repo_path%/*}"
         echo "${repo_path%/*}"
@@ -106,12 +114,15 @@ ensure_repo() {
             git clone "$GITHUB/$repo_name" "$repo_path"
         fi
     else
-        if [ -n "$branch_tag" ]; then
-            git -C "$repo_path" fetch
-            git -C "$repo_path" checkout "$branch_tag"
-            git -C "$repo_path" pull
-        else
-            git -C "$repo_path" pull
+        if $UPDATE_MODE; then
+            info "Ensuring $repo_path is up to date"
+            if [ -n "$branch_tag" ]; then
+                git -C "$repo_path" fetch
+                git -C "$repo_path" checkout "$branch_tag"
+                git -C "$repo_path" pull
+            else
+                git -C "$repo_path" pull
+            fi
         fi
     fi
 }
@@ -131,4 +142,4 @@ warn() {
     echo -e "\033[33m-> \033[34m${text}\033[0m"
 }
 
-main
+main "${1:-}"
