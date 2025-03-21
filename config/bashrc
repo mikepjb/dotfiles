@@ -1,7 +1,7 @@
 [[ -f /etc/bash_completion ]] && . /etc/bash_completion
 export BASH_SILENCE_DEPRECATION_WARNING=1 # Mac OS likes to think bash is going out of fashion.
 export EDITOR=nvim CDPATH=".:$HOME/src" PAGER='less -S' NPM_CONFIG_PREFIX=$HOME/.npm
-export PATH=/usr/local/go/bin:$HOME/go/bin:$HOME/.cargo/bin:$HOME/.config/n/bin:$HOME/.npm/bin:/opt/homebrew/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
+export PATH=/opt/nvim/bin:/usr/local/go/bin:$HOME/go/bin:$HOME/.cargo/bin:$HOME/.config/n/bin:$HOME/.npm/bin:/opt/homebrew/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin
 export HISTSIZE=100000 HISTCONTROL=erasedups PAGER="less -S" N_PREFIX=$HOME/.config
 shopt -s histappend
 [ -t 0 ] && stty -ixon # disable C-s C-q slow/regular print keybinds, only when in a terminal

@@ -100,6 +100,14 @@ setup_containers() {
 }
 
 setup_neovim() {
+    if ! command -v nvim >/dev/null 2>&1 || $UPDATE_MODE; then
+        curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+        sudo rm -rf /opt/nvim # is this okay? /opt/nvim won't exist on fresh install
+        sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+        sudo ln -s /opt/nvim-linux-x86_64 /opt/nvim
+        rm nvim-linux-x86_64.tar.gz
+    fi
+
     info "Linking neovim config & installing packages"
     mkdir -p "$NEOVIM_PATH"
     ln -sfv $DOTFILES_PATH/init.lua "$NEOVIM_PATH/init.lua"
@@ -117,7 +125,7 @@ setup_neovim() {
     ensure_repo "$NEOVIM_PLUGIN_PATH/mason-lspconfig.nvim" "williamboman/mason-lspconfig.nvim"
     ensure_repo "$NEOVIM_PLUGIN_PATH/vim-fugitive" "tpope/vim-fugitive"
     ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-treesitter" "nvim-treesitter/nvim-treesitter"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/conform.nvim" "stevearc/conform.nvim" "nvim-0.9"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/conform.nvim" "stevearc/conform.nvim"
     ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-lint" "mfussenegger/nvim-lint"
 }
 
