@@ -11,8 +11,11 @@ NEOVIM_PATH="$HOME/.config/nvim"
 NEOVIM_PLUGIN_PATH="$HOME/.config/nvim/pack/base/start"
 ESSENTIAL_COMMANDS=(
     "git"
+    "neovim"
+    "vim"
     "curl"
     "wget"
+    "make"
     "htop"
     "jq"
     "fd-find"
@@ -24,11 +27,6 @@ ESSENTIAL_COMMANDS=(
     "npm"
     "docker.io"
     "docker-compose-v2"
-    "ninja-build" 
-    "gettext"
-    "cmake"
-    "curl"
-    "build-essential"
 )
 
 main() {
@@ -102,14 +100,6 @@ setup_containers() {
 }
 
 setup_neovim() {
-    if ! command -v nvim >/dev/null 2>&1; then
-        git clone https://github.com/neovim/neovim $HOME/src/neovim
-        cd $HOME/src/neovim
-        make CMAKE_BUILD_TYPE=RelWithDebInfo
-        sudo make install
-        cd -
-    fi
-
     info "Linking neovim config & installing packages"
     mkdir -p "$NEOVIM_PATH"
     ln -sfv $DOTFILES_PATH/init.lua "$NEOVIM_PATH/init.lua"
@@ -127,7 +117,7 @@ setup_neovim() {
     ensure_repo "$NEOVIM_PLUGIN_PATH/mason-lspconfig.nvim" "williamboman/mason-lspconfig.nvim"
     ensure_repo "$NEOVIM_PLUGIN_PATH/vim-fugitive" "tpope/vim-fugitive"
     ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-treesitter" "nvim-treesitter/nvim-treesitter"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/conform.nvim" "stevearc/conform.nvim"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/conform.nvim" "stevearc/conform.nvim" "nvim-0.9"
     ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-lint" "mfussenegger/nvim-lint"
 }
 
