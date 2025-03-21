@@ -12,7 +12,7 @@ _A barebones, productive working environment._
 
 ## Getting Started
 
-curl -fsSL https://raw.githubusercontent.com/mikepjb/dotfiles/main/bin/dots | sh
+curl -fsSL https://raw.githubusercontent.com/mikepjb/dotfiles/main/bin/dots | bash
    
 ### Extra housekeeping when setting up a new machine
 

@@ -10,6 +10,7 @@ UPDATE_MODE=false
 NEOVIM_PATH="$HOME/.config/nvim"
 NEOVIM_PLUGIN_PATH="$HOME/.config/nvim/pack/base/start"
 ESSENTIAL_COMMANDS=(
+    "git"
     "curl"
     "wget"
     "htop"
@@ -23,6 +24,11 @@ ESSENTIAL_COMMANDS=(
     "npm"
     "docker.io"
     "docker-compose-v2"
+    "ninja-build" 
+    "gettext"
+    "cmake"
+    "curl"
+    "build-essential"
 )
 
 main() {
@@ -35,6 +41,10 @@ main() {
         info "Running in standard mode - will only set up configurations"
     fi
 
+    mkdir -p $HOME/.local/bin
+    mkdir -p $HOME/src
+    setup_commands # we at least need git to continue
+
     ensure_repo $DOTFILES_PATH $DOTFILES_REPO
     if [[ -d $NOTES_PATH ]]; then
         ensure_repo $NOTES_PATH $NOTES_REPO
@@ -42,7 +52,6 @@ main() {
         warn "Notes repo is missing, get it manually to include in future updates."
     fi
 
-    setup_commands
     link_scripts 
     link_config
     setup_neovim
@@ -93,6 +102,14 @@ setup_containers() {
 }
 
 setup_neovim() {
+    if ! command -v nvim >/dev/null 2>&1; then
+        git clone https://github.com/neovim/neovim $HOME/src/neovim
+        cd $HOME/src/neovim
+        make CMAKE_BUILD_TYPE=RelWithDebInfo
+        sudo make install
+        cd -
+    fi
+
     info "Linking neovim config & installing packages"
     mkdir -p "$NEOVIM_PATH"
     ln -sfv $DOTFILES_PATH/init.lua "$NEOVIM_PATH/init.lua"

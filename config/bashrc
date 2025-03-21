@@ -11,7 +11,7 @@ alias sa='pkill ssh-agent; eval $(ssh-agent -t 28800); ssh-add ~/.ssh/id_rsa'
 alias new-pass="head -c 16 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' && echo"
 alias t="ps aux | grep chromium | wc -l" # count number of tabs open
 alias p='head -c 18 /dev/urandom | base64 | tr -dc "A-Za-z0-9#@$%&*+-=" | head -c 24 && echo'
-alias nr='npm run' gd='cd $HOME/.dotfiles' gn='cd $HOME/.notes'
+alias nr='npm run' gd='cd $HOME/.dotfiles' gn='cd $HOME/.notes' k='kubectl'
 [[ -f $HOME/.bashrc.local ]] && . $HOME/.bashrc.local
 jobs_signal() { [[ $(jobs) != "" ]] && echo -e "\x01\033[0;36m\x02\$\x01\033[0m\x02" || echo -e "\$"; }
 PS1='\h:\W($(git branch --show-current 2>/dev/null || echo "!")) $(jobs_signal) '
