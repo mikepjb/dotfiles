@@ -373,16 +373,24 @@ if treesitter then
     }
 end
 
-local lint = maybe_require('nvim-lint')
+local lint = maybe_require('lint') -- nvim-lint
 if lint then
     lint.linters_by_ft = {
         typescript = { 'eslint' },
         typescriptreact = { 'eslint' },
         javascript = { 'eslint' },
         javascriptreact = { 'eslint' },
-        golang = { 'golangci-lint' },
+        go = { 'golangcilint' },
     }
+
+    vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost" }, {
+        group = base,
+        callback = function()
+            lint.try_lint()
+        end,
+    })
 end
+
 
 local conform = maybe_require('conform')
 if conform then
@@ -398,6 +406,7 @@ if conform then
     )
 
     vim.api.nvim_create_autocmd("BufWritePre", {
+        group = base,
         pattern = "*",
         callback = function(args)
             -- Only format files under a certain size
