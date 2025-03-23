@@ -30,6 +30,7 @@ ESSENTIAL_COMMANDS=(
     "docker-compose"
     "less"
     "wl-clipboard"
+    "postgresql"
 )
 
 main() {
