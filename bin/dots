@@ -13,20 +13,23 @@ ESSENTIAL_COMMANDS=(
     "git"
     "neovim"
     "vim"
+    "tmux"
     "curl"
     "wget"
     "make"
     "htop"
     "jq"
-    "fd-find"
+    "fd"
     "ripgrep"
     "gcc"
-    "chromium-browser"
+    "chromium"
     "alacritty"
     "nodejs"
     "npm"
-    "docker.io"
-    "docker-compose-v2"
+    "docker"
+    "docker-compose"
+    "less"
+    "wl-clipboard"
 )
 
 main() {
@@ -60,12 +63,21 @@ main() {
 
 setup_commands() {
     info "Ensuring we have essential commands available"
-    if command -v dpkg 1>/dev/null; then
-        if ! (IFS=" "; dpkg -l ${ESSENTIAL_COMMANDS[*]} >/dev/null 2>&1); then
-            (IFS=" "; sudo apt update && sudo apt install -y --no-install-recommends ${ESSENTIAL_COMMANDS[*]})
+    if command -v pacman 1>/dev/null; then
+        # Check if packages are installed using pacman -Q
+        local missing_packages=()
+        for cmd in "${ESSENTIAL_COMMANDS[@]}"; do
+            if ! pacman -Q "$cmd" >/dev/null 2>&1; then
+                missing_packages+=("$cmd")
+            fi
+        done
+
+        # Install missing packages if any
+        if [ ${#missing_packages[@]} -gt 0 ]; then
+            (IFS=" "; sudo pacman -Sy --needed --noconfirm ${missing_packages[*]})
         fi
     else
-        warn "dpkg not found, you are not using Ubuntu/Debian, skipping essential commands setup"
+        warn "pacman not found, you are not using Arch Linux, skipping essential commands setup"
     fi
 }
 
@@ -101,11 +113,7 @@ setup_containers() {
 
 setup_neovim() {
     if ! command -v nvim >/dev/null 2>&1 || $UPDATE_MODE; then
-        curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-        sudo rm -rf /opt/nvim # is this okay? /opt/nvim won't exist on fresh install
-        sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-        sudo ln -s /opt/nvim-linux-x86_64 /opt/nvim
-        rm nvim-linux-x86_64.tar.gz
+        warn "Neovim could not be found, install it with your package manager or grab the latest release from github"
     fi
 
     info "Linking neovim config & installing packages"
@@ -146,6 +154,9 @@ setup_golang() {
             fi
         fi
     fi
+
+    ! command -v air > /dev/null && go install github.com/air-verse/air@latest || true
+    ! command -v golangci-lint > /dev/null && go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest || true
 }
 
 link_scripts() {
