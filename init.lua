@@ -150,12 +150,12 @@ vim.keymap.set("n", "g*", function() vim.cmd(":grep " .. vim.fn.expand("<cword>"
 vim.keymap.set("n", ",", "/TODO\\|NEXT\\|XXX<CR>")
 vim.keymap.set("n", "-", "za")
 vim.keymap.set("n", "_", ":set foldlevel=1<CR>")
-vim.keymap.set('n', 'gw', function()
-  local current_tw = vim.opt.textwidth
-  vim.opt.textwidth = 99
-  vim.cmd('normal! gw')
-  vim.opt.textwidth = current_tw
-end, {noremap = true, expr = true})
+-- vim.keymap.set('n', 'gw', function()
+--   local current_tw = vim.opt.textwidth
+--   vim.opt.textwidth = 99
+--   vim.cmd('normal! gw')
+--   vim.opt.textwidth = current_tw
+-- end, {noremap = true, expr = true})
 vim.keymap.set('n', 'ge', function()
     local current_dir = vim.fn.expand('%:p:h')
     local input_cmd = ':e ' .. current_dir .. '/'
@@ -272,7 +272,6 @@ if lspconfig and mason and mason_lspconfig then
             "pyright",
             "ts_ls",
             "rust_analyzer",
-            "jdtls",
         },
     })
 
@@ -321,7 +320,7 @@ if lspconfig and mason and mason_lspconfig then
         },
     })
 
-    local servers = { "pyright", "ts_ls", "rust_analyzer", "jdtls" }
+    local servers = { "pyright", "ts_ls", "rust_analyzer" }
     for _, lsp in ipairs(servers) do
         lspconfig[lsp].setup({
             capabilities = capabilities,
