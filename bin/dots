@@ -31,6 +31,8 @@ ESSENTIAL_COMMANDS=(
     "less"
     "wl-clipboard"
     "postgresql"
+    "gimp"
+    "neomutt"
 )
 
 main() {
@@ -58,8 +60,13 @@ main() {
     link_config
     setup_neovim
     setup_golang
+    setup_python
     setup_containers
     # setup_node
+}
+
+setup_python() {
+    ln -s $(which python3) ~/.local/bin/python
 }
 
 setup_commands() {
@@ -168,16 +175,21 @@ link_scripts() {
 }
 
 link_config() {
-    info "Linking configuration files"
+    info "Linking configuration files and directories"
     for config in "$DOTFILES_PATH/config/"*; do
         local name=$(basename "$config" | sed 's/\.[^.]*$//')
-        local filename=$(basename "$config")
-        if [[ "${filename##*.}" != "$filename" ]]; then # if no ext it's a .file
-            mkdir -p "$HOME/.config/$name"
-            ln -sfv "$config" "$HOME/.config/$name/$(basename $config)"
+        if [ -d "$config" ]; then
+            mkdir -p "$HOME/.config"
+            ln -sfv "$config" "$HOME/.config/$filename"
         else
-            [[ "$filename" != .* ]] && filename=".$filename"
-            ln -sfv "$config" "$HOME/$filename"
+            local filename=$(basename "$config")
+            if [[ "${filename##*.}" != "$filename" ]]; then # if no ext it's a .file
+                mkdir -p "$HOME/.config/$name"
+                ln -sfv "$config" "$HOME/.config/$name/$(basename $config)"
+            else
+                [[ "$filename" != .* ]] && filename=".$filename"
+                ln -sfv "$config" "$HOME/$filename"
+            fi
         fi
     done
 }

@@ -42,6 +42,17 @@ docker run --rm -it hypalynx/box /bin/bash # Try out the box with:
 - this section should probably be placed in a link instead of having it's own section on this
   README.
 
+### Email Setup
+
+- Web based clients work fine for most day-to-day.
+- For more complex/bulk stuff, use neomutt you can define credentials like so:
+```
+set imap_user = "yourusername@gmail.com"
+set imap_pass = "your-app-password"
+set smtp_url = "smtps://yourusername@gmail.com@smtp.gmail.com:465/"
+set smtp_pass = "your-app-password"
+```
+
 ## How to use these tools
 
 While we can't list _everything_ you can do, it's worth pointing out a few highlights:

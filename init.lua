@@ -312,7 +312,7 @@ if lspconfig and mason and mason_lspconfig then
                 },
                 staticcheck = true,
                 gofumpt = true, -- Enable stricter formatting
-                buildFlags = { "-tags=integration" },
+                buildFlags = { "-tags=integration,e2e" },
             },
         },
         flags = {

@@ -1,0 +1,120 @@
+# NeoMutt Configuration File
+
+# General Settings
+set mail_check = 60
+set timeout = 10
+set sort = 'threads'
+set sort_aux = 'reverse-last-date-received'
+set editor = 'vim'
+set wait_key = no      # Don't ask for a key press after shell commands
+set delete = yes       # Don't ask for confirmation when deleting
+set markers = no       # Don't show + at the beginning of wrapped lines
+set smart_wrap         # Wrap at word boundaries
+set sleep_time = 0     # Speed up folder switching
+
+# Index and Pager View Customization
+set date_format = "%Y-%m-%d %H:%M"
+set index_format = "%4C %Z %[%b %d %R] %-15.15L (%?l?%4l&%4c?) %s"
+set pager_context = 3      # Show 3 lines of context when pressing space
+set pager_index_lines = 10 # Show 10 messages at top of pager
+set pager_stop = yes       # Don't move to next message at end of message
+
+# Header Display Settings
+ignore *                   # Ignore all headers
+unignore from: to: cc: date: subject:   # Show only these
+unhdr_order *              # Clear previous settings
+hdr_order from: to: cc: date: subject:  # Header display order
+
+# Sidebar settings
+set sidebar_visible = yes
+set sidebar_width = 30
+set sidebar_format = "%B%?F? [%F]?%* %?N?%N/?%S"
+set sidebar_short_path = yes
+set sidebar_folder_indent = yes
+set sidebar_indent_string = "  "
+
+# Colors
+color normal        default default
+color indicator     black   cyan    # Selected item
+color tree          cyan    default # Thread arrows
+color status        black   green   # Status bar
+color error         red     default # Error messages
+color message       cyan    default # Informational messages
+color signature     cyan    default # Email signatures
+color attachment    yellow  default # Attachments
+color search        black   yellow  # Search matches
+color tilde         blue    default # End of message tildes
+color markers       red     default # + at wrapped line
+color hdrdefault    cyan    default # Default headers
+color quoted        cyan    default # Quoted text
+color quoted1       yellow  default # Nested quotes
+color quoted2       red     default # 2nd level quotes
+color quoted3       green   default # 3rd level quotes
+color quoted4       magenta default # 4th level quotes
+color quoted5       cyan    default # 5th level quotes
+
+# Key bindings
+bind index,pager g noop
+bind index gg first-entry
+bind index G last-entry
+bind pager gg top
+bind pager G bottom
+bind index,pager B sidebar-toggle-visible
+bind index,pager \CP sidebar-prev
+bind index,pager \CN sidebar-next
+bind index,pager \CO sidebar-open
+bind index,pager R group-reply
+bind index,pager @ compose-to-sender
+bind index <space> collapse-thread
+bind index _ collapse-all
+
+# Macros
+macro index,pager \Cu "<pipe-message> urlscan<Enter>" "call urlscan to extract URLs"
+macro index,pager A "<save-message>=Archive<Enter>" "Archive message"
+macro index,pager \Cr "T~U<enter><tag-prefix><clear-flag>N<untag-pattern>.<enter>" "mark all messages as read"
+
+# ProtonMail Account (Default on startup)
+set realname = "Mike Bruce"
+set from = "mikepjb@proton.me"
+set folder = "imap://127.0.0.1:1143"
+set spoolfile = "+INBOX"
+set postponed = "+Drafts"
+set trash = "+Trash"
+set record = "+Sent"
+
+# Source ProtonMail credentials
+source "~/.config/neomutt/proton"
+
+# Gmail Account Settings (not active until F1 is pressed)
+# These lines define the account but don't activate it initially
+# account-hook imaps://imap.gmail.com:993/ "\
+#     set from = 'mikepjb@gmail.com' \
+#     realname = 'Mike Bruce'"
+
+# Add both mailboxes to the list of mailboxes
+# mailboxes imaps://127.0.0.1:1143/INBOX imaps://imap.gmail.com:993/INBOX
+mailboxes imap://127.0.0.1:1143/INBOX
+
+# Macro to switch to ProtonMail
+macro index,pager <F2> '\
+<enter-command>source ~/.config/neomutt/proton<enter>\
+<enter-command>set from = "mikepjb@proton.me"<enter>\
+<enter-command>set realname = "Mike Bruce"<enter>\
+<enter-command>set folder = "imaps://127.0.0.1:1143"<enter>\
+<enter-command>set spoolfile = "+INBOX"<enter>\
+<enter-command>set postponed = "+Drafts"<enter>\
+<enter-command>set trash = "+Trash"<enter>\
+<enter-command>set record = "+Sent"<enter>\
+<change-folder>!<enter>'
+
+# Macro to switch to Gmail
+macro index,pager <F1> '\
+<enter-command>source ~/.config/neomutt/gmail<enter>\
+<enter-command>set from = "mikepjb@gmail.com"<enter>\
+<enter-command>set realname = "Mike Bruce"<enter>\
+<enter-command>set folder = "imaps://imap.gmail.com:993"<enter>\
+<enter-command>set spoolfile = "+INBOX"<enter>\
+<enter-command>set postponed = "+[Gmail]/Drafts"<enter>\
+<enter-command>set trash = "+[Gmail]/Trash"<enter>\
+<enter-command>set record = "+[Gmail]/Sent Mail"<enter>\
+<change-folder>!<enter>'
