@@ -368,6 +368,9 @@ if treesitter then
 
         indent = {
             enable = true,
+            disable = {
+                "markdown", -- we like properly indented bullet points for notes thanks.
+            },
         }
     }
 end
