@@ -82,8 +82,8 @@ set postponed = "+Drafts"
 set trash = "+Trash"
 set record = "+Sent"
 
-# Source ProtonMail credentials
-source "~/.config/neomutt/proton"
+source -f "~/.config/neomutt/proton"
+source -f "~/.config/neomutt/gmail-old"
 
 # Gmail Account Settings (not active until F1 is pressed)
 # These lines define the account but don't activate it initially
