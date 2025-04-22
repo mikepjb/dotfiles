@@ -136,6 +136,7 @@ setup_neovim() {
     ensure_repo "$NEOVIM_PLUGIN_PATH/cmp-buffer" "hrsh7th/cmp-buffer"
     ensure_repo "$NEOVIM_PLUGIN_PATH/cmp-path" "hrsh7th/cmp-path"
     ensure_repo "$NEOVIM_PLUGIN_PATH/tokyonight.nvim" "folke/tokyonight.nvim"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/trouble.nvim" "folke/trouble.nvim"
     ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-lspconfig" "neovim/nvim-lspconfig"
     ensure_repo "$NEOVIM_PLUGIN_PATH/mason.nvim" "williamboman/mason.nvim"
     ensure_repo "$NEOVIM_PLUGIN_PATH/mason-lspconfig.nvim" "williamboman/mason-lspconfig.nvim"

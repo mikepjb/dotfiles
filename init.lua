@@ -140,7 +140,7 @@ vim.keymap.set("n", "go", ":tabnew ~/.notes/areas/ops.md<CR>")
 vim.keymap.set("n", "gw", ":tabnew ~/.notes/areas/work.md<CR>")
 vim.keymap.set("n", "gs", ":tabnew ~/.notes/areas/special-ops.md<CR>")
 vim.keymap.set("n", "g0", function() vim.lsp.stop_client(vim.lsp.get_active_clients()) end)
-vim.keymap.set("n", "gl", ":set rnu!<CR>") -- toggle relative line number
+vim.keymap.set("n", "gL", ":set rnu!<CR>") -- toggle relative line number
 vim.keymap.set("n", "g?", ":Dots<CR>")
 vim.keymap.set("n", "gi", ":tabnew ~/.config/nvim/init.lua<CR>")
 vim.keymap.set("n", "gp", ":call feedkeys(':tabnew<space>~/src/<tab>', 't')<CR>")
@@ -421,6 +421,14 @@ end
 
 vim.keymap.set("n", "gB", ":G blame<CR>")
 
--- TODO nvim-lint?
--- TODO maybe git fugitive too?
--- TODO lsp-zero can do eslint? have a look and see how!
+local trouble = maybe_require('trouble')
+if trouble then
+    if not vim.g.trouble_setup_done then
+        trouble.setup({
+            mode = "document_diagnostics", -- Default to document diagnostics
+        })
+        vim.g.trouble_setup_done = true
+    end
+
+    vim.keymap.set("n", "gl", ":Trouble diagnostics toggle<CR>")
+end
