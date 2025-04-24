@@ -432,3 +432,11 @@ if trouble then
 
     vim.keymap.set("n", "gl", ":Trouble diagnostics toggle<CR>")
 end
+
+local replica = maybe_require('replica')
+if replica then
+    replica.setup({
+        auto_connect = true,
+        debug = false
+      })
+end

@@ -144,6 +144,7 @@ setup_neovim() {
     ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-treesitter" "nvim-treesitter/nvim-treesitter"
     ensure_repo "$NEOVIM_PLUGIN_PATH/conform.nvim" "stevearc/conform.nvim"
     ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-lint" "mfussenegger/nvim-lint"
+    ensure_repo "$NEOVIM_PLUGIN_PATH/replica.nvim" "mikepjb/replica.nvim"
 }
 
 setup_golang() {
