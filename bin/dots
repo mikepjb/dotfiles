@@ -227,7 +227,8 @@ ensure_repo() {
 
 setup_node() {
     info "Installing web client development tools"
-    npm install -g typescript typescript-language-server eslint prettier n
+    npm install -g typescript typescript-language-server eslint prettier n npm-check-updates
+    # npm-check-updates => ncu cli
 }
 
 info() {
