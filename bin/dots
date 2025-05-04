@@ -60,13 +60,13 @@ main() {
     link_config
     setup_neovim
     setup_golang
-    setup_python
+    setup_node
     setup_containers
-    # setup_node
+    setup_python
 }
 
 setup_python() {
-    ln -s $(which python3) ~/.local/bin/python
+    ! command -v python 1>/dev/null && ln -s $(which python3) ~/.local/bin/python
 }
 
 setup_commands() {
@@ -127,6 +127,11 @@ setup_neovim() {
     info "Linking neovim config & installing packages"
     mkdir -p "$NEOVIM_PATH"
     ln -sfv $DOTFILES_PATH/init.lua "$NEOVIM_PATH/init.lua"
+
+    mkdir -p "$NEOVIM_PATH/queries/gotmpl"
+    echo '((text) @injection.content
+     (#set! injection.language "html")
+     (#set! injection.combined))' > "$NEOVIM_PATH/queries/gotmpl/injections.scm"
 
     mkdir -p "$NEOVIM_PLUGIN_PATH"
     ensure_repo "$NEOVIM_PLUGIN_PATH/telescope.nvim" "nvim-telescope/telescope.nvim"
@@ -227,7 +232,7 @@ ensure_repo() {
 
 setup_node() {
     info "Installing web client development tools"
-    npm install -g typescript typescript-language-server eslint prettier n npm-check-updates
+    npm install -g --prefer-offline typescript typescript-language-server eslint n npm-check-updates prettier
     # npm-check-updates => ncu cli
 }
 

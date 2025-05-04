@@ -73,6 +73,7 @@ vim.opt.inccommand = "split"
 
 vim.g.markdown_fenced_languages = { 'typescript', 'javascript', 'bash', 'go' }
 vim.g.omni_sql_no_default_maps = 1 -- don't use C-c for autocompletion in SQL.
+vim.filetype.add({ extension = { tmpl = "gotmpl" } })
 
 vim.opt.termguicolors = os.getenv("COLORTERM") == 'truecolor'
 
@@ -272,10 +273,13 @@ if lspconfig and mason and mason_lspconfig then
             "pyright",
             "ts_ls",
             "rust_analyzer",
+            "html",
+            "htmx",
+            "tailwindcss",
         },
     })
 
-    local on_attach = function(client, bufnr)
+    local on_attach = function(_, bufnr)
         -- Keymaps
         local opts = { noremap = true, silent = true, buffer = bufnr }
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -305,6 +309,7 @@ if lspconfig and mason and mason_lspconfig then
     lspconfig.gopls.setup({
         on_attach = on_attach,
         capabilities = capabilities,
+        filetypes = { "go", "gomod", "gowork" },
         settings = {
             gopls = {
                 analyses = {
@@ -328,6 +333,31 @@ if lspconfig and mason and mason_lspconfig then
         })
     end
 
+    lspconfig.html.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+        filetypes = { "html", "gotmpl" },
+    })
+
+    lspconfig.htmx.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+        filetypes = { "html", "gotmpl" },
+    })
+
+    lspconfig.tailwindcss.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+        filetypes = { "astro", "javascript", "typescript", "react", "gotmpl" },
+        settings = {
+            tailwindCSS = {
+                includeLanguages = {
+                    gotmpl = "html",
+                },
+            },
+        },
+    })
+
     vim.api.nvim_create_autocmd("BufWritePre", {
         pattern = { "*.go" },
         callback = function()
@@ -339,6 +369,13 @@ if lspconfig and mason and mason_lspconfig then
                 },
                 apply = true
             })
+        end
+    })
+
+    vim.api.nvim_create_autocmd("BufWritePre", {
+        pattern = { "*.html", "*.tmpl" },
+        callback = function()
+            vim.lsp.buf.format()
         end
     })
 end
@@ -358,7 +395,9 @@ if treesitter then
             "bash",
             "javascript",
             "typescript",
-            "tsx"
+            "tsx",
+            "html",
+            "gotmpl"
         },
 
         highlight = {
@@ -373,6 +412,8 @@ if treesitter then
             },
         }
     }
+
+    vim.treesitter.language.register('gotmpl', 'tmpl')
 end
 
 local lint = maybe_require('lint') -- nvim-lint
@@ -403,7 +444,7 @@ if conform then
                 typescriptreact = { "prettier" },
                 javascript = { "prettier" },
                 javascriptreact = { "prettier" },
-            }
+            },
         }
     )
 
