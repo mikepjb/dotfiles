@@ -128,7 +128,7 @@ vim.keymap.set("n", "<C-j>", "<C-w><C-j>")
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>")
 vim.keymap.set("n", "<C-l>", "<C-w><C-l>")
 vim.keymap.set("n", "<C-g>", ":noh<CR><C-g>")
-vim.keymap.set("n", "S", function() vim.diagnostic.open_float(0, { scope = "line" }) end)
+vim.keymap.set("n", "U", function() vim.diagnostic.open_float(0, { scope = "line" }) end)
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("i", "<C-l>", " => ")
 vim.keymap.set("i", "<C-u>", " -> ")
@@ -184,23 +184,22 @@ vim.api.nvim_create_autocmd("FileType", {
   end
 })
 
-local debounce_time = 300 -- milliseconds
-local last_j_time = 0
-local last_k_time = 0
+local debounce_time = 300 -- milliseconds, adjust as needed
 
-vim.keymap.set('n', 'j', function()
+local last_j_time = 0
+local function debounced_j()
   local current_time = vim.loop.now()
   if current_time - last_j_time < debounce_time then
-    -- Display a message or do nothing
     vim.api.nvim_echo({{'Try using different motions instead of repeated j', 'WarningMsg'}}, false, {})
     last_j_time = current_time
     return
   end
   last_j_time = current_time
   return 'j'
-end, { expr = true })
+end
 
-vim.keymap.set('n', 'k', function()
+local last_k_time = 0
+local function debounced_k()
   local current_time = vim.loop.now()
   if current_time - last_k_time < debounce_time then
     vim.api.nvim_echo({{'Try using different motions instead of repeated k', 'WarningMsg'}}, false, {})
@@ -209,7 +208,12 @@ vim.keymap.set('n', 'k', function()
   end
   last_k_time = current_time
   return 'k'
-end, { expr = true })
+end
+
+for _, mode in ipairs({'n', 'x'}) do
+  vim.keymap.set(mode, 'j', debounced_j, { expr = true })
+  vim.keymap.set(mode, 'k', debounced_k, { expr = true })
+end
 
 local css_reset = [[
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0;}
