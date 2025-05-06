@@ -128,19 +128,19 @@ vim.keymap.set("n", "<C-j>", "<C-w><C-j>")
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>")
 vim.keymap.set("n", "<C-l>", "<C-w><C-l>")
 vim.keymap.set("n", "<C-g>", ":noh<CR><C-g>")
-vim.keymap.set("n", "<Tab>", "<C-^>")
-vim.keymap.set("n", "L", function() vim.diagnostic.open_float(0, { scope = "line" }) end)
+vim.keymap.set("n", "S", function() vim.diagnostic.open_float(0, { scope = "line" }) end)
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("i", "<C-l>", " => ")
 vim.keymap.set("i", "<C-u>", " -> ")
 vim.keymap.set("t", "<C-g>", "<C-\\><C-n>")
 vim.keymap.set("n", "<C-t>", ":tabnew<CR>")
+vim.keymap.set("n", "S", "<C-^>")
 vim.keymap.set("n", "gh", ":Explore<CR>")
 vim.keymap.set("n", "gn", ":tabnew ~/.notes/index.md<CR>")
 vim.keymap.set("n", "go", ":tabnew ~/.notes/areas/ops.md<CR>")
 vim.keymap.set("n", "gw", ":tabnew ~/.notes/areas/work.md<CR>")
 vim.keymap.set("n", "gs", ":tabnew ~/.notes/areas/special-ops.md<CR>")
-vim.keymap.set("n", "g0", function() vim.lsp.stop_client(vim.lsp.get_active_clients()) end)
+vim.keymap.set("n", "g0", ":LspRestart<CR>")
 vim.keymap.set("n", "gL", ":set rnu!<CR>") -- toggle relative line number
 vim.keymap.set("n", "g?", ":Dots<CR>")
 vim.keymap.set("n", "gi", ":tabnew ~/.config/nvim/init.lua<CR>")
@@ -175,6 +175,41 @@ vim.keymap.set('n', 'ge', function()
 
     vim.api.nvim_feedkeys(input_cmd, 'n', true)
 end, { desc = 'Create/edit file relative to current buffer' })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "netrw",
+  callback = function()
+    vim.api.nvim_buf_set_keymap(0, "n", "S", "<C-^>", { noremap = true })
+    vim.api.nvim_buf_set_keymap(0, "n", "Q", ":b#<bar>bd #<CR>", { noremap = true, silent = true })
+  end
+})
+
+local debounce_time = 300 -- milliseconds
+local last_j_time = 0
+local last_k_time = 0
+
+vim.keymap.set('n', 'j', function()
+  local current_time = vim.loop.now()
+  if current_time - last_j_time < debounce_time then
+    -- Display a message or do nothing
+    vim.api.nvim_echo({{'Try using different motions instead of repeated j', 'WarningMsg'}}, false, {})
+    last_j_time = current_time
+    return
+  end
+  last_j_time = current_time
+  return 'j'
+end, { expr = true })
+
+vim.keymap.set('n', 'k', function()
+  local current_time = vim.loop.now()
+  if current_time - last_k_time < debounce_time then
+    vim.api.nvim_echo({{'Try using different motions instead of repeated k', 'WarningMsg'}}, false, {})
+    last_k_time = current_time
+    return
+  end
+  last_k_time = current_time
+  return 'k'
+end, { expr = true })
 
 local css_reset = [[
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0;}
@@ -232,7 +267,7 @@ if telescope then
             file_ignore_patterns = { "^.git/" }
         })
     end, {})
-    vim.keymap.set('n', 'gr', builtin.live_grep, {})
+    vim.keymap.set('n', 'gR', builtin.live_grep, {})
     vim.keymap.set('n', 'gb', builtin.buffers, {})
 end
 
@@ -282,11 +317,14 @@ if lspconfig and mason and mason_lspconfig then
     local on_attach = function(_, bufnr)
         -- Keymaps
         local opts = { noremap = true, silent = true, buffer = bufnr }
+        -- remove 'gr' prefix bindings to avoid conflict with my 'gr' switch buffer binding
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
         vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-        -- vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, opts)
         vim.keymap.set("n", "ga", vim.lsp.buf.code_action, opts)
-        -- vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+        vim.keymap.set("n", "gli", vim.lsp.buf.implementation)
+        vim.keymap.set("n", "glr", vim.lsp.buf.references)
+        vim.keymap.set("n", "gla", vim.lsp.buf.code_action)
+        vim.keymap.set("n", "gln", vim.lsp.buf.rename)
     end
 
     -- More minimal capabilities
@@ -471,7 +509,7 @@ if trouble then
         vim.g.trouble_setup_done = true
     end
 
-    vim.keymap.set("n", "gl", ":Trouble diagnostics toggle<CR>")
+    vim.keymap.set("n", "gk", ":Trouble diagnostics toggle<CR>")
 end
 
 local replica = maybe_require('replica')
