@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Minimal ANSI color codes
+BOLD='\033[1m'
+RESET='\033[0m'
+
+main() {
+    header "${PWD} statistics"
+    echo
+
+    code_stats
+    # install_missing_tools
+    # analyze_code
+    # analyze_go
+    # analyze_htmx
+    # analyze_git
+}
+
+code_stats() {
+    local exclude_pattern='! -path "*/node_modules/*'
+
+    echo '+-------------------------------------------------------------------------------'
+    echo "| Type | Files | Lines |"
+    echo '+-------------------------------------------------------------------------------'
+    go_files=$(find . -type f -name "*.go" $exclude_pattern | wc -l)
+    go_lines=$(find . -type f -name "*.go" $exclude_pattern -exec cat {} \; | wc -l)
+    echo "| go | $go_files | $go_lines |"
+
+    tmpl_files=$(find . -type f -name "*.tmpl" $exclude_pattern | wc -l)
+    tmpl_lines=$(find . -type f -name "*.tmpl" $exclude_pattern -exec cat {} \; | wc -l)
+    echo "| html/tmpl | $tmpl_files | $tmpl_lines |"
+    echo '+-------------------------------------------------------------------------------'
+}
+
+
+header() {
+    local text="$1"
+    echo -e "\033[33m-> \033[33m${text}\033[0m"
+    echo -e "\033[33m--------------------------------------------------------------------------------\033[0m"
+}
+
+info() {
+    local text="$1"
+    echo -e "\033[33m-> \033[32m${text}\033[0m"
+}
+
+warn() {
+    local text="$1"
+    echo -e "\033[33m-> \033[34m${text}\033[0m"
+}
+
+main "$@"
