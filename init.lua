@@ -74,12 +74,13 @@ vim.opt.inccommand = "split"
 vim.g.markdown_fenced_languages = { 'typescript', 'javascript', 'bash', 'go' }
 vim.g.omni_sql_no_default_maps = 1 -- don't use C-c for autocompletion in SQL.
 vim.filetype.add({ extension = { tmpl = "gotmpl" } })
+vim.filetype.add({ extension = { templ = "templ" } })
 
 vim.opt.termguicolors = os.getenv("COLORTERM") == 'truecolor'
 
 vim.api.nvim_create_autocmd("FileType", {
     group = base,
-    pattern = {"javascript", "typescript", "javascriptreact", "typescriptreact", "json"},
+    pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact", "json" },
     callback = function()
         vim.opt_local.shiftwidth = 2
         vim.opt_local.tabstop = 2
@@ -162,7 +163,7 @@ vim.keymap.set('n', 'ge', function()
     local input_cmd = ':e ' .. current_dir .. '/'
 
     -- Enable auto-creation of parent directories
-    vim.opt.backupskip:append('*')  -- Avoid backup file issues
+    vim.opt.backupskip:append('*') -- Avoid backup file issues
     vim.api.nvim_create_autocmd('BufWritePre', {
         pattern = '*',
         callback = function()
@@ -177,42 +178,42 @@ vim.keymap.set('n', 'ge', function()
 end, { desc = 'Create/edit file relative to current buffer' })
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = "netrw",
-  callback = function()
-    vim.api.nvim_buf_set_keymap(0, "n", "S", "<C-^>", { noremap = true })
-    vim.api.nvim_buf_set_keymap(0, "n", "Q", ":b#<bar>bd #<CR>", { noremap = true, silent = true })
-  end
+    pattern = "netrw",
+    callback = function()
+        vim.api.nvim_buf_set_keymap(0, "n", "S", "<C-^>", { noremap = true })
+        vim.api.nvim_buf_set_keymap(0, "n", "Q", ":b#<bar>bd #<CR>", { noremap = true, silent = true })
+    end
 })
 
 local debounce_time = 300 -- milliseconds, adjust as needed
 
 local last_j_time = 0
 local function debounced_j()
-  local current_time = vim.loop.now()
-  if current_time - last_j_time < debounce_time then
-    vim.api.nvim_echo({{'Try using different motions instead of repeated j', 'WarningMsg'}}, false, {})
+    local current_time = vim.loop.now()
+    if current_time - last_j_time < debounce_time then
+        vim.api.nvim_echo({ { 'Try using different motions instead of repeated j', 'WarningMsg' } }, false, {})
+        last_j_time = current_time
+        return
+    end
     last_j_time = current_time
-    return
-  end
-  last_j_time = current_time
-  return 'j'
+    return 'j'
 end
 
 local last_k_time = 0
 local function debounced_k()
-  local current_time = vim.loop.now()
-  if current_time - last_k_time < debounce_time then
-    vim.api.nvim_echo({{'Try using different motions instead of repeated k', 'WarningMsg'}}, false, {})
+    local current_time = vim.loop.now()
+    if current_time - last_k_time < debounce_time then
+        vim.api.nvim_echo({ { 'Try using different motions instead of repeated k', 'WarningMsg' } }, false, {})
+        last_k_time = current_time
+        return
+    end
     last_k_time = current_time
-    return
-  end
-  last_k_time = current_time
-  return 'k'
+    return 'k'
 end
 
-for _, mode in ipairs({'n', 'x'}) do
-  vim.keymap.set(mode, 'j', debounced_j, { expr = true })
-  vim.keymap.set(mode, 'k', debounced_k, { expr = true })
+for _, mode in ipairs({ 'n', 'x' }) do
+    vim.keymap.set(mode, 'j', debounced_j, { expr = true })
+    vim.keymap.set(mode, 'k', debounced_k, { expr = true })
 end
 
 local css_reset = [[
@@ -290,7 +291,7 @@ if cmp then
         sources = cmp.config.sources({
             { name = 'nvim_lsp' },
             { name = 'buffer' }, -- for buffer words
-            { name = 'path' }, -- for path
+            { name = 'path' },   -- for path
         }),
         window = {
             completion = cmp.config.window.bordered(),
@@ -378,19 +379,19 @@ if lspconfig and mason and mason_lspconfig then
     lspconfig.html.setup({
         on_attach = on_attach,
         capabilities = capabilities,
-        filetypes = { "html", "gotmpl" },
+        filetypes = { "html", "gotmpl", "templ" },
     })
 
     lspconfig.htmx.setup({
         on_attach = on_attach,
         capabilities = capabilities,
-        filetypes = { "html", "gotmpl" },
+        filetypes = { "html", "gotmpl", "templ" },
     })
 
     lspconfig.tailwindcss.setup({
         on_attach = on_attach,
         capabilities = capabilities,
-        filetypes = { "astro", "javascript", "typescript", "react", "gotmpl" },
+        filetypes = { "astro", "javascript", "typescript", "react", "gotmpl", "templ" },
         settings = {
             tailwindCSS = {
                 includeLanguages = {
@@ -415,9 +416,24 @@ if lspconfig and mason and mason_lspconfig then
     })
 
     vim.api.nvim_create_autocmd("BufWritePre", {
-        pattern = { "*.html", "*.tmpl" },
+        pattern = { "*.html", "*.tmpl", "*.templ", "*.lua" },
         callback = function()
-            vim.lsp.buf.format()
+            if vim.bo.filetype == "templ" then
+                local bufnr = vim.api.nvim_get_current_buf()
+                local filename = vim.api.nvim_buf_get_name(bufnr)
+                local cmd = "templ fmt " .. vim.fn.shellescape(filename)
+
+                vim.fn.jobstart(cmd, {
+                    on_exit = function()
+                        -- Reload the buffer only if it's still the current buffer
+                        if vim.api.nvim_get_current_buf() == bufnr then
+                            vim.cmd('e!')
+                        end
+                    end,
+                })
+            else
+                vim.lsp.buf.format()
+            end
         end
     })
 end
@@ -439,7 +455,8 @@ if treesitter then
             "typescript",
             "tsx",
             "html",
-            "gotmpl"
+            "gotmpl",
+            "templ",
         },
 
         highlight = {
@@ -521,5 +538,5 @@ if replica then
     replica.setup({
         auto_connect = true,
         debug = false
-      })
+    })
 end
