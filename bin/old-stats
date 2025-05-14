@@ -1,198 +1,50 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
-# Minimal ANSI color codes
-BOLD='\033[1m'
-RESET='\033[0m'
+# stats - A script to display file statistics in a table format
 
-# Define Go tools and their install paths
-declare -A GO_TOOLS=(
-    ["gocyclo"]="github.com/fzipp/gocyclo/cmd/gocyclo@latest"
-    ["golines"]="github.com/segmentio/golines@latest"
-)
-
-install_missing_tools() {
-    for tool in "${!GO_TOOLS[@]}"; do
-        if ! command -v "$tool" &> /dev/null; then
-            echo -e "${YELLOW}Installing $tool...${RESET}"
-            go install "${GO_TOOLS[$tool]}"
-        fi
-    done
+# Function to create a divider line
+create_divider() {
+  local width=$1
+  printf '+%s+%s+%s+%s+\n' "$(printf -- '-%.0s' $(seq 1 22))" "$(printf -- '-%.0s' $(seq 1 15))" "$(printf -- '-%.0s' $(seq 1 15))" "$(printf -- '-%.0s' $(seq 1 15))"
 }
 
-print_header() {
-    echo -e "\n${BOLD}=== $1 ===${RESET}"
+# Function to print a row with proper formatting
+print_row() {
+  printf "| %-20s | %13s | %13s | %13s |\n" "$1" "$2" "$3" "$4"
 }
 
-count_files() {
-    local pattern=$1
-    local exclude_pattern=$2
-    find . -type f -name "$pattern" ! -path "*/node_modules/*" $exclude_pattern | wc -l
-}
+# Print table header
+create_divider
+print_row "File Type" "Files" "Total Lines" "Lines/File"
+create_divider
 
-count_lines() {
-    local pattern=$1
-    local exclude_pattern=$2
-    find . -type f -name "$pattern" ! -path "*/node_modules/*" $exclude_pattern -exec cat {} \; | wc -l
-}
+# Loop through file extensions and gather stats
+for ext in go "html/tmpl" "js(x)/ts(x)" css; do
+  # Find files matching the extension pattern
+  if [[ "$ext" == "html/tmpl" ]]; then
+    # Special case for HTML and template files
+    files=$(find . -type f \( -name "*.html" -o -name "*.tmpl" \) | wc -l)
+    lines=$(find . -type f \( -name "*.html" -o -name "*.tmpl" \) -exec cat {} \; | wc -l)
+  elif [[ "$ext" == "js(x)/ts(x)" ]]; then
+    # Special case for JS/TS and JSX/TSX files
+    files=$(find . -type f \( -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" \) | wc -l)
+    lines=$(find . -type f \( -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" \) -exec cat {} \; | wc -l)
+  else
+    # Normal case for single extension
+    files=$(find . -type f -name "*.$ext" | wc -l)
+    lines=$(find . -type f -name "*.$ext" -exec cat {} \; | wc -l)
+  fi
+  
+  # Calculate average lines per file
+  if (( files > 0 )); then
+    avg=$(( lines / files ))
+  else
+    avg=0
+  fi
+  
+  # Print the row
+  print_row "$ext" "$files" "$lines" "$avg"
+done
 
-analyze_code() {
-    print_header "Code Statistics"
-    
-    # Get counts for display side by side
-    local go_count=$(count_files "*.go" "")
-    local go_lines=$(count_lines "*.go" "")
-    local html_count=$(count_files "*.html" "! -name \"coverage.html\"")
-    local html_lines=$(count_lines "*.html" "! -name \"coverage.html\"")
-    local tmpl_count=$(count_files "*.tmpl" "")
-    local tmpl_lines=$(count_lines "*.tmpl" "")
-    local js_count=$(count_files "*.js" "")
-    local js_lines=$(count_lines "*.js" "")
-    local css_count=$(count_files "*.css" "! -name \"*.gen.css\"")
-    local css_lines=$(count_lines "*.css" "! -name \"*.gen.css\"")
-    
-    # Calculate total lines and percentages
-    local total_lines=$((go_lines + html_lines + tmpl_lines + js_lines + css_lines))
-    local go_percent=$((go_lines * 100 / total_lines))
-    local html_percent=$((html_lines * 100 / total_lines))
-    local tmpl_percent=$((tmpl_lines * 100 / total_lines))
-    local js_percent=$((js_lines * 100 / total_lines))
-    local css_percent=$((css_lines * 100 / total_lines))
-    
-    # Display counts side by side
-    printf "${BOLD}%-12s${RESET} %-8s | " "Go:" "$go_count files"
-    printf "${BOLD}%-12s${RESET} %-8s\n" "HTML:" "$html_count files"
-    printf "${BOLD}%-12s${RESET} %-8s | " "Template:" "$tmpl_count files"
-    printf "${BOLD}%-12s${RESET} %-8s\n" "JS:" "$js_count files"
-    printf "${BOLD}%-12s${RESET} %-8s\n" "CSS:" "$css_count files"
-    
-    # Language Distribution Bar
-    echo -e "\n${BOLD}Language Distribution:${RESET}"
-    echo "Total Lines: $total_lines"
-    
-    # Create a simple bar representation
-    local bar_width=50
-    local go_width=$((go_percent * bar_width / 100))
-    local html_width=$((html_percent * bar_width / 100))
-    local tmpl_width=$((tmpl_percent * bar_width / 100))
-    local js_width=$((js_percent * bar_width / 100))
-    local css_width=$((css_percent * bar_width / 100))
-    
-    # Ensure at least 1 character width for non-zero percentages
-    [[ $go_percent -gt 0 && $go_width -eq 0 ]] && go_width=1
-    [[ $html_percent -gt 0 && $html_width -eq 0 ]] && html_width=1
-    [[ $tmpl_percent -gt 0 && $tmpl_width -eq 0 ]] && tmpl_width=1
-    [[ $js_percent -gt 0 && $js_width -eq 0 ]] && js_width=1
-    [[ $css_percent -gt 0 && $css_width -eq 0 ]] && css_width=1
-    
-    local bar=""
-    for ((i=0; i<go_width; i++)); do bar="${bar}G"; done
-    for ((i=0; i<html_width; i++)); do bar="${bar}H"; done
-    for ((i=0; i<tmpl_width; i++)); do bar="${bar}T"; done
-    for ((i=0; i<js_width; i++)); do bar="${bar}J"; done
-    for ((i=0; i<css_width; i++)); do bar="${bar}C"; done
-    
-    echo "$bar"
-    echo "G:Go($go_percent%) H:HTML($html_percent%) T:Templates($tmpl_percent%) J:JS($js_percent%) C:CSS($css_percent%)"
-    
-    # Function to display file lists side by side
-    display_file_lists() {
-        echo -e "\n${BOLD}Top Files (limited to 15 per type):${RESET}"
-        
-        # Create a function to format the file list
-        format_file_list() {
-            local name=$1
-            local pattern=$2
-            local exclude=$3
-            
-            echo -e "${BOLD}$name:${RESET}"
-            find . -type f -name "$pattern" ! -path "*/node_modules/*" $exclude -exec wc -l {} + | sort -nr | head -15
-        }
-        
-        # First row: Go and HTML
-        echo -e "\n${BOLD}Go Files:${RESET}"
-        find . -type f -name "*.go" ! -path "*/node_modules/*" -exec wc -l {} + | sort -nr | head -15
-        
-        echo -e "\n${BOLD}HTML Files:${RESET}"
-        find . -type f -name "*.html" ! -path "*/node_modules/*" ! -name "coverage.html" -exec wc -l {} + | sort -nr | head -15
-        
-        # Second row: Template and JS
-        echo -e "\n${BOLD}Template Files:${RESET}"
-        find . -type f -name "*.tmpl" ! -path "*/node_modules/*" -exec wc -l {} + | sort -nr | head -15
-        
-        echo -e "\n${BOLD}JS Files:${RESET}"
-        find . -type f -name "*.js" ! -path "*node_modules*" -exec wc -l {} + | sort -nr | head -15
-        
-        # CSS files
-        echo -e "\n${BOLD}CSS Files:${RESET} (excluding .gen.css)"
-        find . -type f -name "*.css" ! -path "*node_modules*" ! -name "*.gen.css" -exec wc -l {} + | sort -nr | head -15
-    }
-    
-    # Display the file lists side by side
-    display_file_lists
-}
-
-analyze_go() {
-    print_header "Go Analysis"
-    
-    echo -e "${BOLD}Cyclomatic complexity (top 10):${RESET}"
-    echo -e "1 - 10: Simple procedure, little risk."
-    echo -e "11 - 20: More complex, moderate risk."
-    echo -e "21+: Complex, high risk."
-    gocyclo -top 10 .
-    
-    echo -e "\n${BOLD}Files needing formatting:${RESET}"
-    gofmt_output=$(gofmt -l .)
-    if [ -n "$gofmt_output" ]; then
-        echo "$gofmt_output" | while read -r file; do
-            if [ -f "$file" ]; then
-                line_count=$(wc -l < "$file")
-                printf "%-80s %5d lines\n" "$file" "$line_count"
-            fi
-        done | sort -k3 -nr
-    else
-        echo -e "All Go files are properly formatted."
-    fi
-}
-
-analyze_htmx() {
-    print_header "HTMX Usage"
-    
-    local attrs=("hx-get" "hx-post" "hx-put" "hx-delete" "hx-patch" "hx-swap" "hx-trigger" "hx-target")
-    
-    # Simple table format
-    for attr in "${attrs[@]}"; do
-        local count=$(grep -r "$attr" . --include="*.html" --include="*.tmpl" --exclude="*coverage.html" 2>/dev/null | wc -l)
-        printf "%-12s %3d usages\n" "$attr:" "$count" 
-    done
-}
-
-analyze_git() {
-    print_header "Git Statistics (last 6 months)"
-    
-    echo -e "${BOLD}Top contributors:${RESET}"
-    git log --since="6 months ago" --pretty=format:"%an" | sort | uniq -c | sort -rn | 
-    while read -r count name; do
-        printf "%4s commits by %s\n" "$count" "$name"
-    done
-    
-    echo -e "\n${BOLD}Most changed files:${RESET}"
-    git log --since="6 months ago" --name-only --pretty=format: | sort | uniq -c | sort -rn | head -10 |
-    while read -r count file; do
-        # Skip empty lines
-        if [ -z "$file" ]; then
-            continue
-        fi
-        printf "%4s changes: %s\n" "$count" "$file"
-    done
-}
-
-main() {
-    install_missing_tools
-    analyze_code
-    analyze_go
-    analyze_htmx
-    analyze_git
-}
-
-main "$@"
+# Print table footer
+create_divider
