@@ -12,7 +12,7 @@ alias new-pass="head -c 16 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' && echo"
 alias t="ps aux | grep chromium | wc -l" # count number of tabs open
 alias p='head -c 18 /dev/urandom | base64 | tr -dc "A-Za-z0-9#@$%&*+-=" | head -c 24 && echo'
 alias nr='npm run' gd='cd $HOME/.dotfiles' gn='cd $HOME/.notes' k='kubectl'
-alias ve='python -m venv venv' va='source ./venv/bin/activate'
+alias ve='python -m venv venv' va='source ./venv/bin/activate' pk='lsof -ti' # :8080
 alias nm='neomutt' csvquery='function _csvquery() { sqlite3 --cmd ".import $1 data"; }; _csvquery'
 viw() { vi `which $1`; }; complete -c viw
 [[ -f $HOME/.bashrc.local ]] && . $HOME/.bashrc.local
