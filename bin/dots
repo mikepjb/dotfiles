@@ -33,6 +33,8 @@ ESSENTIAL_COMMANDS=(
     "postgresql"
     "gimp"
     "neomutt"
+    "clojure"
+    "rlwrap"
 )
 
 main() {
