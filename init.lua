@@ -143,6 +143,7 @@ vim.keymap.set("n", "gw", ":tabnew ~/.notes/areas/work.md<CR>")
 vim.keymap.set("n", "gs", ":tabnew ~/.notes/areas/special-ops.md<CR>")
 vim.keymap.set("n", "g0", ":LspRestart<CR>")
 vim.keymap.set("n", "gL", ":set rnu!<CR>") -- toggle relative line number
+vim.keymap.set("n", "gR", ":Grep ")
 vim.keymap.set("n", "g?", ":Dots<CR>")
 vim.keymap.set("n", "gi", ":tabnew ~/.config/nvim/init.lua<CR>")
 vim.keymap.set("n", "gp", ":call feedkeys(':tabnew<space>~/src/<tab>', 't')<CR>")
@@ -176,6 +177,26 @@ vim.keymap.set('n', 'ge', function()
 
     vim.api.nvim_feedkeys(input_cmd, 'n', true)
 end, { desc = 'Create/edit file relative to current buffer' })
+
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "qf",
+    callback = function()
+        vim.keymap.set("n", "j", "j<CR><C-w>p", { buffer = true })
+        vim.keymap.set("n", "k", "k<CR><C-w>p", { buffer = true })
+    end
+})
+
+vim.api.nvim_create_user_command('Grep', function(opts)
+    vim.cmd('silent grep! ' .. opts.args)
+    local qflist = vim.fn.getqflist()
+    if #qflist > 0 then
+        vim.cmd('copen')
+        vim.cmd('cfirst')
+        vim.cmd('wincmd j')
+    else
+        print("No matches found")
+    end
+end, { nargs = '+' })
 
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "netrw",
@@ -272,7 +293,6 @@ if telescope then
             file_ignore_patterns = { "^.git/" }
         })
     end, {})
-    vim.keymap.set('n', 'gR', builtin.live_grep, {})
     vim.keymap.set('n', 'gb', builtin.buffers, {})
 end
 
