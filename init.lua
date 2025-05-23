@@ -451,74 +451,77 @@ if lspconfig and mason and mason_lspconfig then
     local workspace_dir = vim.fn.expand('~/.cache/jdtls/workspace/') .. project_name
 
 
-    lspconfig.jdtls.setup({
-        on_attach = on_attach,
-        capabilities = capabilities,
-        filetypes = { "java" },
-        cmd = {
-            'java',
-            '-Declipse.application=org.eclipse.jdt.ls.core.id1',
-            '-Dosgi.bundles.defaultStartLevel=4',
-            '-Declipse.product=org.eclipse.jdt.ls.core.product',
-            '-Dlog.protocol=true',
-            '-Dlog.level=ALL',
-            '-Xmx1G',
-            '--add-modules=ALL-SYSTEM',
-            '--add-opens', 'java.base/java.util=ALL-UNNAMED',
-            '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-            '-jar', get_mason_launcher_jar(),
-            '-configuration', jdtls_path .. '/' .. os_config,
-            '-javaagent:' .. jdtls_path .. '/lombok.jar',  -- Important for Lombok and Spring Boot annotation processing
-            '--add-opens=java.base/java.lang=ALL-UNNAMED', -- This is critical for Spring Boot '@' annotations
-            '-data', workspace_dir,
-        },
-        settings = {
-            java = {
-                signatureHelp = { enabled = true },
-                contentProvider = { preferred = 'fernflower' },
-                completion = {
-                    importOrder = {
-                        "java",
-                        "javax",
-                        "com",
-                        "org",
-                        "io",
-                        ""
-                    },
-                },
-                maven = { downloadSources = true },
-                gradle = { downloadSources = true },
-                implementationsCodeLens = { enabled = true },
-                referencesCodeLens = { enabled = true },
-                references = { includeDecompiledSources = true },
-                inlayHints = { parameterNames = { enabled = "all" } },
-                sources = {
-                    organizeImports = {
-                        starThreshold = 9999,
-                        staticStarThreshold = 9999,
-                    },
-                },
-                codeGeneration = {
-                    toString = {
-                        template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}"
-                    },
-                    useBlocks = true,
-                },
-                configuration = {
-                    updateBuildConfiguration = "interactive",
-                    runtimes = {
-                        {
-                            name = "JavaSE-21",
-                            sources = jdk_source(),
-                            javaHome = os.getenv('JAVA_HOME'),
-                            path = os.getenv("HOME") .. "/.sdkman/candidates/java/current",
 
+    if os.getenv('JAVA_HOME') then
+        lspconfig.jdtls.setup({
+            on_attach = on_attach,
+            capabilities = capabilities,
+            filetypes = { "java" },
+            cmd = {
+                'java',
+                '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+                '-Dosgi.bundles.defaultStartLevel=4',
+                '-Declipse.product=org.eclipse.jdt.ls.core.product',
+                '-Dlog.protocol=true',
+                '-Dlog.level=ALL',
+                '-Xmx1G',
+                '--add-modules=ALL-SYSTEM',
+                '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+                '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+                '-jar', get_mason_launcher_jar(),
+                '-configuration', jdtls_path .. '/' .. os_config,
+                '-javaagent:' .. jdtls_path .. '/lombok.jar',  -- Important for Lombok and Spring Boot annotation processing
+                '--add-opens=java.base/java.lang=ALL-UNNAMED', -- This is critical for Spring Boot '@' annotations
+                '-data', workspace_dir,
+            },
+            settings = {
+                java = {
+                    signatureHelp = { enabled = true },
+                    contentProvider = { preferred = 'fernflower' },
+                    completion = {
+                        importOrder = {
+                            "java",
+                            "javax",
+                            "com",
+                            "org",
+                            "io",
+                            ""
                         },
                     },
-                },
-            }
-        },
-    })
+                    maven = { downloadSources = true },
+                    gradle = { downloadSources = true },
+                    implementationsCodeLens = { enabled = true },
+                    referencesCodeLens = { enabled = true },
+                    references = { includeDecompiledSources = true },
+                    inlayHints = { parameterNames = { enabled = "all" } },
+                    sources = {
+                        organizeImports = {
+                            starThreshold = 9999,
+                            staticStarThreshold = 9999,
+                        },
+                    },
+                    codeGeneration = {
+                        toString = {
+                            template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}"
+                        },
+                        useBlocks = true,
+                    },
+                    configuration = {
+                        updateBuildConfiguration = "interactive",
+                        runtimes = {
+                            {
+                                name = "JavaSE-21",
+                                sources = jdk_source(),
+                                javaHome = os.getenv('JAVA_HOME'),
+                                path = os.getenv("HOME") .. "/.sdkman/candidates/java/current",
+
+                            },
+                        },
+                    },
+                }
+            },
+        })
+    end
 
     lspconfig.html.setup({
         on_attach = on_attach,
