@@ -1,42 +1,38 @@
 -- Focused neovim configuration
+
+-- TODO make sure to add tcd/netrw changes!
+-- TODO can you center the buffer/add padding for an olivetti type writing mode
+-- for markdown files?
+
 if vim.fn.executable("rg") == 1 then
-    vim.opt.grepprg = "rg --vimgrep"
-    vim.opt.grepformat = "%f:%l:%c:%m"
+    vim.opt.grepprg, vim.opt.grepformat = "rg --vimgrep", "%f:%l:%c:%m"
 end
 
--- potential optimisation
 local settings = {
-    guicursor = "", textwidth = 80, nu = true,
+    guicursor = "", -- always use a block cursor
+    textwidth = 80, -- limit ourselves to human readable line lengths
+    nu = true,
+    swapfile = false, backup = false, undofile = true,
+    undodir = os.getenv("HOME") .. "/.config/nvim/undodir",
+    incsearch = true, inccommand = "split", -- show search/cmd results as typed
+    gdefault = true, -- search/replace by line > first instance
+    ignorecase = true, smartcase = true, -- ignore case for search unless input
+    wrap = false, -- don't wrap long lines to fit inside the buffer
+    tabstop = 4, -- <Tab> == 4 spaces
+    softtabstop = 4, -- same as above for editing operations
+    shiftwidth = 4, -- how far >>/<< shifts your text
+    termguicolors = os.getenv("COLORTERM") == 'truecolor',
+    spell = false, nu = true, scrolloff = 8,
 }
 
 for k, v in pairs(settings) do vim.opt[k] = v end
-
-vim.opt.guicursor = "" -- always use a block cursor
-vim.opt.textwidth = 80 -- limit ourselves to human readable line lengths
-vim.opt.spell = false -- not when editing, include during build if you must
-vim.opt.nu = true -- but not for writing? e.g not in markdown files?
-vim.opt.scrolloff = 8 -- keep a little text ahead of the cursor to read ahead
 vim.opt.clipboard:append({ "unnamedplus" }) -- integrate with system clipboard
+
 vim.opt.autoread = true -- update buffers when the file changes elsewhere
 vim.opt.lazyredraw = false
-vim.opt.swapfile = false
-vim.opt.backup = false
-vim.opt.undodir = os.getenv("HOME") .. "/.config/nvim/undodir"
-vim.opt.undofile = true -- keep undo history between nvim instances
 vim.opt.expandtab = true -- use spaces > tabs instead of inserting <Tab>
 vim.opt.smartindent = true -- autoindent when going onto newlines
-vim.opt.wrap = false -- don't wrap long lines to fit inside the buffer
-vim.opt.gdefault = true -- search/replace by line > first instance
-vim.opt.incsearch = true -- show search results as you type
-vim.opt.inccommand = "split" -- show substitute command results as you type
-vim.opt.ignorecase = true
-vim.opt.smartcase = true -- case sensitive search only when you use uppercase
 vim.opt.wildmode = "list:longest,list:full" -- completion mode in Ex
-
-vim.opt.tabstop = 4 -- <Tab> == 4 spaces
-vim.opt.softtabstop = 4 -- same as above for editing operations
-vim.opt.shiftwidth = 4 -- how far >>/<< shifts your text
-vim.opt.termguicolors = os.getenv("COLORTERM") == 'truecolor'
 
 vim.g.markdown_fenced_languages = { 'typescript', 'javascript', 'bash', 'go' }
 vim.g.omni_sql_no_default_maps = 1 -- don't use C-c for autocompletion in SQL.
@@ -47,6 +43,23 @@ local function au(event, pattern, callback) -- not used in lieu of table approac
     vim.api.nvim_create_autocmd(event, { group = base, pattern = pattern, callback = callback })
 end
 
+local function fmt(fn, args)
+    return function()
+        if vim.fn.executable(fn) == 1 then
+            local file = vim.fn.expand("%:p")
+            vim.system({fn, args, file}, {}, function()
+                vim.schedule(function()
+                    vim.cmd("e!")
+                end)
+            end)
+        else
+            -- TODO won't be seen because the write message comes after!,
+            -- verified it comes out with :messages to see history
+            print(fn .. " not found, cannot format the buffer")
+        end
+    end
+end
+
 local vol = vim.opt_local
 
 local condensed_langs = {
@@ -55,13 +68,26 @@ local condensed_langs = {
     "typescript",
     "javascriptreact",
     "typescriptreact",
-    "json" 
+    "json"
 }
 
 local autocmds = {
     {"FileType", condensed_langs, function()
         vol.shiftwidth, vol.tabstop, vol.softtabstop = 2, 2 ,2
     end},
+    {"FileType", "markdown", function()
+        vol.nu = false
+    end},
+    {"BufWritePre", "*.go", fmt("goimports", "-w")},
+    {"BufWritePre", "*.templ", fmt("templ", "fmt -w")},
+    {"FileType", "qf", function() -- jump to quickfix targets automatically
+        vim.keymap.set("n", "j", "j<CR><C-w>p", { buffer = true })
+        vim.keymap.set("n", "k", "k<CR><C-w>p", { buffer = true })
+    end},
+    {"FileType", "netrw", function()
+        vim.api.nvim_buf_set_keymap(0, "n", "S", "<C-^>", { noremap = true })
+        vim.api.nvim_buf_set_keymap(0, "n", "Q", ":b#<bar>bd #<CR>", { noremap = true, silent = true })
+    end}
 }
 
 for _, ac in ipairs(autocmds) do
@@ -74,10 +100,15 @@ vim.api.nvim_create_autocmd("QuickFixCmdPost", { -- open quickfix if there are r
     command = "cwindow"
 })
 
+local function map(mode, lhs, rhs, opts)
+    vim.keymap.set(mode, lhs, rhs, opts or {})
+end
+
 vim.keymap.set("n", "<C-h>", "<C-w><C-h>")
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>")
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>")
 vim.keymap.set("n", "<C-l>", "<C-w><C-l>")
+vim.keymap.set("n", "<C-q>", ":q<CR>")
 vim.keymap.set("n", "<C-g>", ":noh<CR><C-g>")
 vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("i", "<C-l>", " => ")
@@ -98,6 +129,7 @@ vim.keymap.set('n', 'ge', function()
 
     -- Enable auto-creation of parent directories
     vim.opt.backupskip:append('*') -- Avoid backup file issues
+    -- TODO maybe this should just be a general autocmd?
     vim.api.nvim_create_autocmd('BufWritePre', {
         pattern = '*',
         callback = function()
@@ -111,15 +143,6 @@ vim.keymap.set('n', 'ge', function()
     vim.api.nvim_feedkeys(input_cmd, 'n', true)
 end, { desc = 'Create/edit file relative to current buffer' })
 
--- jump to quickfix targets automatically
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "qf",
-    callback = function()
-        vim.keymap.set("n", "j", "j<CR><C-w>p", { buffer = true })
-        vim.keymap.set("n", "k", "k<CR><C-w>p", { buffer = true })
-    end
-})
-
 vim.api.nvim_create_user_command('Grep', function(opts)
     vim.cmd('silent! grep!' .. opts.args)
     vim.cmd('redraw!')  -- clear any lingering output
@@ -132,14 +155,6 @@ vim.api.nvim_create_user_command('Grep', function(opts)
         print("No matches found")
     end
 end, { nargs = '+' })
-
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "netrw",
-    callback = function()
-        vim.api.nvim_buf_set_keymap(0, "n", "S", "<C-^>", { noremap = true })
-        vim.api.nvim_buf_set_keymap(0, "n", "Q", ":b#<bar>bd #<CR>", { noremap = true, silent = true })
-    end
-})
 
 local css_reset = [[
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0;}
@@ -168,44 +183,24 @@ vim.api.nvim_create_user_command('TrimWhitespace', function()
 end, {})
 
 pcall(vim.cmd, 'colorscheme quiet') -- Try colorscheme, fallback to default
-vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-vim.api.nvim_set_hl(0, "NonText", { bg = "none" })
-vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
-vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = "none" })
-vim.api.nvim_set_hl(0, "StatusLine", { bg = "none" })
-vim.api.nvim_set_hl(0, "StatusFill", { fg = "#6c6c6c", bg = "none" })
-vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "none" })
-vim.api.nvim_set_hl(0, "VertSplit", { fg = "#6c6c6c", bg = "none" })
-vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#6c6c6c", bg = "none" })
+
+local highlights = {
+    Normal = { bg = "none"},
+    NonText = { bg = "none"},
+    SignColumn = { bg = "none"},
+    EndOfBuffer = { bg = "none"},
+    StatusLine = { bg = "none"},
+    StatusFill = { fg = "#6c6c6c", bg = "none" },
+    VertSplit = { fg = "#6c6c6c", bg = "none" },
+    WinSeparator = { fg = "#6c6c6c", bg = "none" }
+}
+
+for group, opts in pairs(highlights) do
+    vim.api.nvim_set_hl(0, group, opts)
+end
+
 vim.opt.statusline = " %f%m%r%h%w %#StatusFill#%=%#StatusLine# %l•%c :: %p%% "
 vim.opt.fillchars = { stl = '─', stlnc = '─' } -- Subtle separator for statusline
-
-vim.api.nvim_create_autocmd("BufWritePre", {
-    group = base,
-    pattern = "*.go",
-    callback = function()
-        if vim.fn.executable("goimports") == 1 then
-            local file = vim.fn.expand("%:p")
-            vim.system({"goimports", "-w", file}, {}, function()
-                vim.schedule(function()
-                    vim.cmd("e!")
-                end)
-            end)
-        end
-    end,
-})
-
--- Templ file formatting
-vim.api.nvim_create_autocmd("BufWritePre", {
-    group = base,
-    pattern = "*.templ",
-    callback = function()
-        if vim.fn.executable("templ") == 1 then
-            vim.cmd("silent !templ fmt %")
-            vim.cmd("edit!")
-        end
-    end,
-})
 
 local function maybe_require(module_name)
     local ok, module = pcall(require, module_name)
@@ -215,27 +210,12 @@ local function maybe_require(module_name)
     return nil
 end
 
-maybe_require('plenary') -- dep for telescope
-local telescope = maybe_require('telescope')
-if telescope then
-    telescope.setup({
-        defaults = {
-            path_display = { "truncate" }
-        }
-    })
+local ok, telescope = pcall(require, 'telescope')
+if ok then
+    telescope.setup({defaults = {path_display = {"truncate"}}})
     local builtin = require('telescope.builtin')
-    vim.keymap.set('n', '<space>', function()
-        builtin.find_files({
-            hidden = true,
-            file_ignore_patterns = { "^.git/" }
-        })
-    end, {})
-    vim.keymap.set('n', 'gb', builtin.buffers, {})
+    map('n', '<space>', function()
+        builtin.find_files({hidden = true, file_ignore_patterns = {"^.git/"}})
+    end)
+    map('n', 'gb', builtin.buffers)
 end
-
--- also, how do we align by chracters or generally for things like maps that we
--- want on multiple lines it would be nice to have a way to align by column
---
--- vim.keymap.set("n", "gp", ":call feedkeys(':tabnew<space>~/src/<tab>', 't')<CR>")
--- doesn't work for netrw.. want to sometimes set the pwd for fuzzy searching,
--- maybe overkill
