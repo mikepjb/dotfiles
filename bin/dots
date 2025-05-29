@@ -181,7 +181,7 @@ link_config() {
         else
             local filename=$(basename "$config")
             if [[ "${filename##*.}" != "$filename" ]]; then # if no ext it's a .file
-                if [ "$filename" ~= "dark.toml" || "$filename" ~= "light.toml"];
+                if [ "$filename" ~= "dark.toml" || "$filename" ~= "light.toml"]; then
                     return # skip color themes from being linked
                 fi
 
