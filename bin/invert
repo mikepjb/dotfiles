@@ -1,23 +1,15 @@
 #!/bin/sh
 # invert swaps between dark and light themes for my setup (alacritty and neovim)
 
-# File paths
 alacritty="$HOME/.dotfiles/config/alacritty.toml"
 neovim="$HOME/.dotfiles/init.lua"
 
-sed_inplace() {
-    if [ "$(uname)" = "Darwin" ]; then
-        sed -i '' "$@"
-    else
-        sed -i "$@"
-    fi
-}
+sed_inplace() { [ `uname` = "Darwin" ] && sed -i '' "$@" || sed -i "$@"; }
 
 if grep -q 'dark\.toml' "$alacritty"; then
     echo "Switching to light theme..."
     sed_inplace 's/dark\.toml/light.toml/' "$alacritty"
     sed_inplace 's/vim\.opt\.background = "dark"/vim.opt.background = "light"/' "$neovim"
-
 else
     echo "Switching to dark theme..."
     sed_inplace 's/light\.toml/dark.toml/' "$alacritty"
