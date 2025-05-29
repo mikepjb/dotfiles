@@ -174,6 +174,7 @@ setup_golang() {
 
     ! command -v air > /dev/null && go install github.com/air-verse/air@latest || true
     ! command -v golangci-lint > /dev/null && go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest || true
+    ! command -v goimports > /dev/null && go install golang.org/x/tools/cmd/goimports@latest
 }
 
 link_scripts() {
