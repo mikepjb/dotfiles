@@ -4,7 +4,12 @@ if vim.fn.executable("rg") == 1 then
     vim.opt.grepformat = "%f:%l:%c:%m"
 end
 
-local base = vim.api.nvim_create_augroup('Base', { clear = true })
+-- potential optimisation
+local settings = {
+    guicursor = "", textwidth = 80, nu = true,
+}
+
+for k, v in pairs(settings) do vim.opt[k] = v end
 
 vim.opt.guicursor = "" -- always use a block cursor
 vim.opt.textwidth = 80 -- limit ourselves to human readable line lengths
@@ -31,24 +36,39 @@ vim.opt.wildmode = "list:longest,list:full" -- completion mode in Ex
 vim.opt.tabstop = 4 -- <Tab> == 4 spaces
 vim.opt.softtabstop = 4 -- same as above for editing operations
 vim.opt.shiftwidth = 4 -- how far >>/<< shifts your text
-
-vim.api.nvim_create_autocmd("FileType", {
-    group = base,
-    pattern = { "clojure", "javascript", "typescript", "javascriptreact", "typescriptreact", "json" },
-    callback = function()
-        vim.opt_local.shiftwidth = 2
-        vim.opt_local.tabstop = 2
-        vim.opt_local.softtabstop = 2
-    end,
-})
+vim.opt.termguicolors = os.getenv("COLORTERM") == 'truecolor'
 
 vim.g.markdown_fenced_languages = { 'typescript', 'javascript', 'bash', 'go' }
 vim.g.omni_sql_no_default_maps = 1 -- don't use C-c for autocompletion in SQL.
-vim.opt.termguicolors = os.getenv("COLORTERM") == 'truecolor'
 
--- always open quickfix window automatically.
--- this uses cwindows which will open it only if there are entries.
-vim.api.nvim_create_autocmd("QuickFixCmdPost", {
+local base = vim.api.nvim_create_augroup('Base', { clear = true })
+
+local function au(event, pattern, callback) -- not used in lieu of table approach currently
+    vim.api.nvim_create_autocmd(event, { group = base, pattern = pattern, callback = callback })
+end
+
+local vol = vim.opt_local
+
+local condensed_langs = {
+    "clojure",
+    "javascript",
+    "typescript",
+    "javascriptreact",
+    "typescriptreact",
+    "json" 
+}
+
+local autocmds = {
+    {"FileType", condensed_langs, function()
+        vol.shiftwidth, vol.tabstop, vol.softtabstop = 2, 2 ,2
+    end},
+}
+
+for _, ac in ipairs(autocmds) do
+    vim.api.nvim_create_autocmd(ac[1], {group = base, pattern = ac[2], callback = ac[3]})
+end
+
+vim.api.nvim_create_autocmd("QuickFixCmdPost", { -- open quickfix if there are results
     group = vim.api.nvim_create_augroup("AutoOpenQuickfix", { clear = true }),
     pattern = { "[^l]*" },
     command = "cwindow"
@@ -212,3 +232,10 @@ if telescope then
     end, {})
     vim.keymap.set('n', 'gb', builtin.buffers, {})
 end
+
+-- also, how do we align by chracters or generally for things like maps that we
+-- want on multiple lines it would be nice to have a way to align by column
+--
+-- vim.keymap.set("n", "gp", ":call feedkeys(':tabnew<space>~/src/<tab>', 't')<CR>")
+-- doesn't work for netrw.. want to sometimes set the pwd for fuzzy searching,
+-- maybe overkill
