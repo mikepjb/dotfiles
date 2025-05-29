@@ -2,6 +2,7 @@
 
 local settings = {
     guicursor = "", -- always use a block cursor
+    cursorline = true,
     textwidth = 80, -- limit ourselves to human readable line lengths
     nu = true,
     swapfile = false, backup = false, undofile = true,
@@ -10,19 +11,18 @@ local settings = {
     gdefault = true, -- search/replace by line > first instance
     ignorecase = true, smartcase = true, -- ignore case for search unless input
     wrap = false, -- don't wrap long lines to fit inside the buffer
-    tabstop = 4, -- <Tab> == 4 spaces
-    softtabstop = 4, -- same as above for editing operations
+    tabstop = 4, softtabstop = 4, -- <Tab> == 4 spaces
+    expandtab = true, -- use spaces > tabs instead of inserting <Tab>
     shiftwidth = 4, -- how far >>/<< shifts your text
-    termguicolors = os.getenv("COLORTERM") == 'truecolor',
     autoread = true, -- update buffers when the file changes elsewhere
     spell = false, nu = true, scrolloff = 8,
     lazyredraw = false, wildmode = "list:longest,list:full",
-    expandtab = true, -- use spaces > tabs instead of inserting <Tab>
     smartindent = true, -- autoindent when going onto newlines
-
+    termguicolors = os.getenv("COLORTERM") == 'truecolor',
 } for k, v in pairs(settings) do vim.opt[k] = v end
 
 vim.opt.clipboard:append({ "unnamedplus" }) -- integrate with system clipboard
+vim.opt.shortmess:append("I") -- disable splash screen
 vim.g.markdown_fenced_languages = { 'typescript', 'javascript', 'bash', 'go' }
 vim.g.omni_sql_no_default_maps = 1 -- don't use C-c for autocompletion in SQL.
 
@@ -35,9 +35,7 @@ local function fmt(fn, args)
         if vim.fn.executable(fn) == 1 then
             local file = vim.fn.expand("%:p")
             vim.system({fn, args, file}, {}, function()
-                vim.schedule(function()
-                    vim.cmd("e!")
-                end)
+                vim.schedule(function() vim.cmd("e!") end)
             end)
         else
             vim.notify(fn .. " not found, cannot format the buffer")
@@ -62,6 +60,7 @@ local autocmds = {
         -- there must be some other way to set padding (both horizontally and
         -- vertically.
         -- vim.cmd("setlocal foldcolumn=" .. math.min(padding, 12))
+        -- also signcolumn=yes:9
     end},
     {"BufWritePre", "*.go", fmt("goimports", "-w")},
     {"BufWritePre", "*.templ", fmt("templ", "fmt -w")},
@@ -149,6 +148,7 @@ end, {})
 
 pcall(vim.cmd, 'colorscheme quiet') -- Try colorscheme, fallback to default
 
+vim.opt.background = "dark"
 local hls = {
     Normal = { bg = "none"},     NonText = { bg = "none"},
     SignColumn = { bg = "none"}, EndOfBuffer = { bg = "none"},

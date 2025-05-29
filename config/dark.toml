@@ -1,0 +1,26 @@
+[colors.primary]
+# Quiet theme - dark background with light text (classic terminal feel)
+background = "#1c1c1c"  # Very dark gray, softer than pure black
+foreground = "#e4e4e4"  # Light gray foreground for readability
+
+[colors.normal]
+# Monochrome approach with subtle grays
+black = "#262626"       # Dark gray instead of pure black
+red = "#d70000"         # Subtle red for errors
+green = "#5f8700"       # Muted green
+yellow = "#af8700"      # Understated yellow/amber
+blue = "#0087af"        # Calm blue
+magenta = "#af5faf"     # Soft magenta
+cyan = "#00afaf"        # Gentle cyan
+white = "#e4e4e4"       # Light gray (yasogrey from quiet.vim)
+
+[colors.bright]
+# Slightly brighter versions while maintaining the quiet aesthetic
+black = "#a8a8a8"       # Invisible gray (from quiet.vim)
+red = "#ff005f"         # Error red (from quiet.vim)
+green = "#87d787"       # Bright green (from quiet.vim)
+yellow = "#ffaf00"      # UI amber (from quiet.vim)
+blue = "#00afff"        # UI blue (from quiet.vim)
+magenta = "#ff5fff"     # UI cur search (from quiet.vim)
+cyan = "#00ffaf"        # UI teal (from quiet.vim)
+white = "#ffffff"       # Pure white

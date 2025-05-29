@@ -1,0 +1,23 @@
+[colors.primary] # Quiet theme - light background with dark text (from quiet.vim)
+background = "#d7d7d7"  # Light gray background (quiet.vim light)
+foreground = "#000000"  # Black foreground (quiet.vim light)
+
+[colors.normal] # Actual quiet.vim light terminal colors
+black = "#000000"       # light0
+red = "#af0000"         # light1
+green = "#005f00"       # light2
+yellow = "#af5f00"      # light3
+blue = "#005faf"        # light4
+magenta = "#870087"     # light5
+cyan = "#008787"        # light6
+white = "#d7d7d7"       # light7
+
+[colors.bright] # Actual quiet.vim light bright colors
+black = "#626262"       # light8
+red = "#d70000"         # light9
+green = "#008700"       # light10
+yellow = "#d78700"      # light11
+blue = "#0087d7"        # light12
+magenta = "#af00af"     # light13
+cyan = "#00afaf"        # light14
+white = "#ffffff"       # light15

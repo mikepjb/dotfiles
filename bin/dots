@@ -138,19 +138,6 @@ setup_neovim() {
     mkdir -p "$NEOVIM_PLUGIN_PATH"
     ensure_repo "$NEOVIM_PLUGIN_PATH/telescope.nvim" "nvim-telescope/telescope.nvim"
     ensure_repo "$NEOVIM_PLUGIN_PATH/plenary.nvim" "nvim-lua/plenary.nvim"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-cmp" "hrsh7th/nvim-cmp"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/cmp-nvim-lsp" "hrsh7th/cmp-nvim-lsp"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/cmp-buffer" "hrsh7th/cmp-buffer"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/cmp-path" "hrsh7th/cmp-path"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/tokyonight.nvim" "folke/tokyonight.nvim"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/trouble.nvim" "folke/trouble.nvim"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-lspconfig" "neovim/nvim-lspconfig"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/mason.nvim" "williamboman/mason.nvim"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/mason-lspconfig.nvim" "williamboman/mason-lspconfig.nvim"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/vim-fugitive" "tpope/vim-fugitive"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-treesitter" "nvim-treesitter/nvim-treesitter"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/conform.nvim" "stevearc/conform.nvim"
-    ensure_repo "$NEOVIM_PLUGIN_PATH/nvim-lint" "mfussenegger/nvim-lint"
     ensure_repo "$NEOVIM_PLUGIN_PATH/replica.nvim" "mikepjb/replica.nvim"
 }
 
@@ -194,6 +181,10 @@ link_config() {
         else
             local filename=$(basename "$config")
             if [[ "${filename##*.}" != "$filename" ]]; then # if no ext it's a .file
+                if [ "$filename" ~= "dark.toml" || "$filename" ~= "light.toml"];
+                    return # skip color themes from being linked
+                fi
+
                 mkdir -p "$HOME/.config/$name"
                 ln -sfv "$config" "$HOME/.config/$name/$(basename $config)"
             else
