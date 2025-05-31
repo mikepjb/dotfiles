@@ -34,11 +34,16 @@ local function fmt(fn, args)
     return function()
         if vim.fn.executable(fn) == 1 then
             local file = vim.fn.expand("%:p")
-            vim.system({fn, args, file}, {}, function()
+            vim.system({fn, args, file}, { text = true }, function(obj)
                 vim.schedule(function() -- reload but save view position
-                    local view = vim.fn.winsaveview()
-                    vim.cmd('edit!')
-                    vim.fn.winrestview(view)
+                    if obj.code == 0 then
+                        local view = vim.fn.winsaveview()
+                        vim.cmd('edit!')
+                        vim.fn.winrestview(view)
+                    else
+                        local error_msg = obj.stdout .. obj.stderr
+                        vim.notify(error_msg, vim.log.levels.INFO)
+                    end
                 end)
             end)
         else
