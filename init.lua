@@ -52,6 +52,37 @@ local function fmt(fn, args)
     end
 end
 
+local last_cmd = ""
+
+local function async_cmd(cmd)
+    last_cmd = cmd
+    vim.fn.setqflist({}) -- clear the quickfix list
+    local cmd_table = vim.split(cmd, "%s+")
+    vim.notify("[started] " .. cmd)
+    vim.fn.jobstart(cmd_table, {
+        stdout_buffered = true,
+        stderr_buffered = true,
+        on_exit = function(_, code)
+            if code == 0 then
+                vim.notify("[complete]" .. cmd)
+            else
+                vim.notify("[failed]" .. cmd .. " (" .. code .. ")")
+            end
+            vim.cmd("copen")
+        end,
+        on_stdout = function(_, data)
+            if data then
+                vim.fn.setqflist({}, 'a', {lines = data})
+            end
+        end,
+        on_stderr = function(_, data)
+            if data then
+                vim.fn.setqflist({}, 'a', {lines = data})
+            end
+        end,
+    })
+end
+
 local base = vim.api.nvim_create_augroup('Base', { clear = true })
 local vol = vim.opt_local
 
@@ -109,6 +140,11 @@ local keymaps = {
     {"i", "<C-l>", " => "},       {"i", "<C-u>", " -> "},
     {"i", "<C-c>", "<Esc>"},      {"n", "S", "<C-^>"},
     {"n", "gE", ":Explore<CR>"},  {"n", "gs", ":Grep "},
+    {"n", "<C-t>", function()
+        vim.ui.input({prompt = "$ ", default = last_cmd}, function(input)
+            if input then async_cmd(input) end
+        end)
+    end, { desc = 'Make with input' }},
     {"n", "gn", ":tabnew ~/.notes/index.md<CR>"},
     {"n", "gi", ":tabnew ~/.config/nvim/init.lua<CR>"},
     {"n", "gp", ":call feedkeys(':tabnew<space>~/src/<tab>', 't')<CR>"},
