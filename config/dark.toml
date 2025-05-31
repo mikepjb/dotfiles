@@ -1,6 +1,6 @@
 [colors.primary]
 # Quiet theme - dark background with light text (classic terminal feel)
-background = "#1c1c1c"  # Very dark gray, softer than pure black
+background = "#0c0c0c"  # Very dark gray, softer than pure black
 foreground = "#e4e4e4"  # Light gray foreground for readability
 
 [colors.normal]
