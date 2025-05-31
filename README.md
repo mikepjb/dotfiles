@@ -24,6 +24,15 @@ _A barebones, productive working environment._
 6. Make sure all 4 Rec Mono Linear font styles are installed (Regular/Italic/Bold/Bold Italic).
 7. Set keyboard to US/Macintosh (for ISO layouts you get `~` and `\`` left of Z.
 
+### Viewing Documentation
+
+- For `go`, `go doc -all http`.
+- For `clojure`, `(doc fn)` and `(source fn)` are your friends.
+    - also `(apropos "search term")` to find functions by name.
+    - `(dir ns)` to list all public vars in a namespace.
+    - `(find-doc "search term")` too.
+    - `clj -M -e "(doc clojure.core/map)"`
+
 ### Development environment inside Docker.
 
 This project also has a small docker image ready to go, again for working environments (e.g

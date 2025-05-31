@@ -35,7 +35,11 @@ local function fmt(fn, args)
         if vim.fn.executable(fn) == 1 then
             local file = vim.fn.expand("%:p")
             vim.system({fn, args, file}, {}, function()
-                vim.schedule(function() vim.cmd("e!") end)
+                vim.schedule(function() -- reload but save view position
+                    local view = vim.fn.winsaveview()
+                    vim.cmd('edit!')
+                    vim.fn.winrestview(view)
+                end)
             end)
         else
             vim.notify(fn .. " not found, cannot format the buffer")
@@ -99,11 +103,11 @@ local keymaps = {
     {"n", "<C-q>", ":q<CR>"},     {"n", "<C-g>", ":noh<CR><C-g>"},
     {"i", "<C-l>", " => "},       {"i", "<C-u>", " -> "},
     {"i", "<C-c>", "<Esc>"},      {"n", "S", "<C-^>"},
-    {"n", "gh", ":Explore<CR>"},  {"n", "gr", ":Grep "},
+    {"n", "gE", ":Explore<CR>"},  {"n", "gs", ":Grep "},
     {"n", "gn", ":tabnew ~/.notes/index.md<CR>"},
     {"n", "gi", ":tabnew ~/.config/nvim/init.lua<CR>"},
     {"n", "gp", ":call feedkeys(':tabnew<space>~/src/<tab>', 't')<CR>"},
-    {"n", "gs", function() vim.cmd(":Grep -w " .. vim.fn.expand("<cword>")) end},
+    {"n", "gS", function() vim.cmd(":Grep -w " .. vim.fn.expand("<cword>")) end},
     {'n', 'ge', function()
         local current_dir = vim.fn.expand('%:p:h')
         local input_cmd = ':e ' .. current_dir .. '/'
