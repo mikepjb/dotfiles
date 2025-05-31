@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set +e
+
+echo 'Project Statistics'
+
+# We want
+#
+# cyclomatic complexity
+# line of code
+# lines of code, by prod/test
+# % code between languages
+# hx/htmx commands used/number of times
+# hotspots/commit analysis on file change frequency?
+
+all_files=`git ls-files`
+
+# Counting total line count in repo
+# for f in $all_files; do cat $f; done | wc -l
+
+# Getting all distinct filename extentions
+# includes filenames that don't have an extention
+# find . -type f -not -path "./.git/*" -not -path "*/tmp/*" | awk -F. '!a[$NF]++{print $NF}'
+# exts=`find . -type f -not -path "./.git/*" -not -path "*/tmp/*" | awk -F. 'NF>1 && $NF !~ /\// && !a[$NF]++{print $NF}'`
+exts=`git ls-files | awk -F. 'NF>1 && $NF !~ /\// && !a[$NF]++{print $NF}'`
+
+# Test Files
+echo '+--------------+------------+------------+'
+echo '| ext          | prod-lines | test-lines |'
+echo '|--------------|------------|------------|'
+for x in $exts; do
+    test_lines=`git ls-files | grep "test" | grep "$x\$" | xargs cat | wc -l`
+    prod_lines=`git ls-files | grep -v "mock" | grep -v "test" | grep "$x\$" | xargs cat | wc -l`
+    echo $x $prod_lines $test_lines
+done | sort -k2,2nr | awk '{printf "| %-12s | %10s | %10s |\n", $1, $2, $3}'
+
+echo '+--------------+------------+------------+'
