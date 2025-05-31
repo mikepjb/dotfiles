@@ -63,7 +63,7 @@ local autocmds = {
         -- also signcolumn=yes:9
     end},
     {"BufWritePre", "*.go", fmt("goimports", "-w")},
-    {"BufWritePre", "*.templ", fmt("templ", "fmt -w")},
+    {"BufWritePre", "*.templ", fmt("templ", "fmt", "-w")},
     {"FileType", "qf", function() -- jump to quickfix targets automatically
         vim.keymap.set("n", "j", "j<CR><C-w>p", { buffer = true })
         vim.keymap.set("n", "k", "k<CR><C-w>p", { buffer = true })
