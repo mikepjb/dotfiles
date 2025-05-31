@@ -52,10 +52,7 @@ local function fmt(fn, args)
     end
 end
 
-local last_cmd = ""
-
 local function async_cmd(cmd)
-    last_cmd = cmd
     vim.fn.setqflist({}) -- clear the quickfix list
     local cmd_table = vim.split(cmd, "%s+")
     vim.notify("[started] " .. cmd)
@@ -141,7 +138,7 @@ local keymaps = {
     {"i", "<C-c>", "<Esc>"},      {"n", "S", "<C-^>"},
     {"n", "gE", ":Explore<CR>"},  {"n", "gs", ":Grep "},
     {"n", "<C-t>", function()
-        vim.ui.input({prompt = "$ ", default = last_cmd}, function(input)
+        vim.ui.input({prompt = "$ "}, function(input)
             if input then async_cmd(input) end
         end)
     end, { desc = 'Make with input' }},
