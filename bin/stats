@@ -15,23 +15,35 @@ echo 'Project Statistics'
 
 all_files=`git ls-files`
 
-# Counting total line count in repo
-# for f in $all_files; do cat $f; done | wc -l
-
-# Getting all distinct filename extentions
-# includes filenames that don't have an extention
-# find . -type f -not -path "./.git/*" -not -path "*/tmp/*" | awk -F. '!a[$NF]++{print $NF}'
-# exts=`find . -type f -not -path "./.git/*" -not -path "*/tmp/*" | awk -F. 'NF>1 && $NF !~ /\// && !a[$NF]++{print $NF}'`
+# total_lines will include files without an extension but later we show lines by
+# extension
+total_lines=`git ls-files | xargs cat | wc -l`
 exts=`git ls-files | awk -F. 'NF>1 && $NF !~ /\// && !a[$NF]++{print $NF}'`
+exts="$exts no-ext"
 
-# Test Files
-echo '+--------------+------------+------------+'
-echo '| ext          | prod-lines | test-lines |'
-echo '|--------------|------------|------------|'
+echo '+--------------+------------+------------+------------+'
+echo '| ext          | prod-lines | test-lines | %-share    |'
+echo '|--------------|------------|------------|------------|'
 for x in $exts; do
-    test_lines=`git ls-files | grep "test" | grep "$x\$" | xargs cat | wc -l`
-    prod_lines=`git ls-files | grep -v "mock" | grep -v "test" | grep "$x\$" | xargs cat | wc -l`
+    if [ "$x" = "no-ext" ]; then
+        test_lines=`git ls-files | grep "test" | awk -F. 'NF==1 || $NF ~ /\//' | xargs cat 2>/dev/null | wc -l`
+        prod_lines=`git ls-files | grep -v "mock" | grep -v "test" | awk -F. 'NF==1 || $NF ~ /\//' | xargs cat 2>/dev/null | wc -l`
+    else
+        test_lines=`git ls-files | grep "test" | grep "$x\$" | xargs cat 2>/dev/null | wc -l`
+        prod_lines=`git ls-files | grep -v "mock" | grep -v "test" | grep "$x\$" | xargs cat 2>/dev/null | wc -l`
+    fi
     echo $x $prod_lines $test_lines
-done | sort -k2,2nr | awk '{printf "| %-12s | %10s | %10s |\n", $1, $2, $3}'
+done | sort -k2,2nr | awk -v total="$total_lines" '{
+    ext_total = $2 + $3
+    if (total > 0) {
+        percentage = (ext_total / total) * 100
+    } else {
+        percentage = 0
+    }
+    printf "| %-12s | %10s | %10s | %9.2f%% |\n", $1, $2, $3, percentage
+}'
+echo '+--------------+------------+------------+------------+'
 
-echo '+--------------+------------+------------+'
+echo 'General'
+echo $total_lines
+
