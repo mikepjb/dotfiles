@@ -52,8 +52,11 @@ local function fmt(fn, args)
     end
 end
 
+last_cmd = nil
+
 local function async_cmd(cmd)
-    vim.fn.setqflist({}) -- clear the quickfix list
+    last_cmd = cmd
+    vim.fn.setqflist({}, 'a', {title = cmd}) -- clear the quickfix list
     local cmd_table = vim.split(cmd, "%s+")
     vim.notify("[started] " .. cmd)
     vim.fn.jobstart(cmd_table, {
@@ -130,6 +133,16 @@ vim.api.nvim_create_autocmd("QuickFixCmdPost", { -- open quickfix if there are r
     group = base, pattern = { "[^l]*" }, command = "cwindow"
 })
 
+local function async_interactive()
+    if last_cmd then
+        async_cmd(last_cmd)
+        return
+    end
+    vim.ui.input({prompt = "$ "}, function(input)
+        if input then async_cmd(input) end
+    end)
+end
+
 local keymaps = {
     {"n", "<C-h>", "<C-w><C-h>"}, {"n", "<C-j>", "<C-w><C-j>"},
     {"n", "<C-k>", "<C-w><C-k>"}, {"n", "<C-l>", "<C-w><C-l>"},
@@ -137,11 +150,11 @@ local keymaps = {
     {"i", "<C-l>", " => "},       {"i", "<C-u>", " -> "},
     {"i", "<C-c>", "<Esc>"},      {"n", "S", "<C-^>"},
     {"n", "gE", ":Explore<CR>"},  {"n", "gs", ":Grep "},
-    {"n", "<C-t>", function()
-        vim.ui.input({prompt = "$ "}, function(input)
-            if input then async_cmd(input) end
-        end)
-    end, { desc = 'Make with input' }},
+    {"n", "<C-t>", async_interactive, { desc = 'Make with input' }},
+    {"n", "gT", function()
+        last_cmd = nil
+        async_interactive()
+    end},
     {"n", "gn", ":tabnew ~/.notes/index.md<CR>"},
     {"n", "gi", ":tabnew ~/.config/nvim/init.lua<CR>"},
     {"n", "gp", ":call feedkeys(':tabnew<space>~/src/<tab>', 't')<CR>"},
