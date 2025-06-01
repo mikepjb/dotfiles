@@ -52,42 +52,32 @@ local function fmt(fn, args)
     end
 end
 
-last_cmd = nil
+local last_async_cmd = nil
 
-local function async_cmd(cmd)
-    last_cmd = cmd
-    local buf, terminal_win = nil, nil
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
-        if vim.bo[vim.api.nvim_win_get_buf(win)].buftype == 'terminal' then
-            terminal_win = win
-            break
+local function clear_term_buffers() -- also will kill the window
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_get_option(buf, 'buftype') == 'terminal' then
+            vim.api.nvim_buf_delete(buf, {force = true})
         end
     end
-    
-    if terminal_win then
-        vim.api.nvim_set_current_win(terminal_win)
-        local old_buf = vim.api.nvim_get_current_buf()
-        vim.cmd('enew')
-        vim.api.nvim_buf_delete(old_buf, {force = true})
-        buf = vim.api.nvim_get_current_buf()
-    else
-        vim.cmd('botright new')
-        vim.cmd('resize 15')
-        buf = vim.api.nvim_get_current_buf()
-    end
+end
+
+local function async_cmd(cmd)
+    last_async_cmd = cmd
+    clear_term_buffers()
+
+    vim.cmd('botright new | resize 15')
+    local buf = vim.api.nvim_get_current_buf()
+    vim.cmd("enew")
     
     local chan = vim.fn.termopen(cmd, {
         on_exit = function(_, code)
-            if code == 0 then
-                vim.notify("[complete] " .. cmd)
-            else
-                vim.notify("[failed] " .. cmd .. " (" .. code .. ")", vim.log.levels.ERROR)
-            end
+            local status = code == 0 and "[complete]" or "[failed (" .. code .. ")]" 
+            vim.notify(status .. " " .. cmd)
         end
     })
     
     vim.api.nvim_buf_set_keymap(buf, 'n', 'q', ':bd!<CR>', { noremap = true, silent = true })
-    vim.api.nvim_buf_set_name(buf, "cmd: " .. cmd)
     vim.notify("[started] " .. cmd)
 end
 
@@ -142,8 +132,8 @@ vim.api.nvim_create_autocmd("QuickFixCmdPost", { -- open quickfix if there are r
 })
 
 local function async_interactive()
-    if last_cmd then
-        async_cmd(last_cmd)
+    if last_async_cmd then
+        async_cmd(last_async_cmd)
         return
     end
     vim.ui.input({prompt = "$ "}, function(input)
@@ -161,7 +151,7 @@ local keymaps = {
     {"n", "<C-t>", async_interactive, { desc = 'Make with input' }},
     {"t", "q", ":bd!<CR>"},
     {"n", "gT", function()
-        last_cmd = nil
+        last_async_cmd = nil
         async_interactive()
     end},
     {"n", "gn", ":tabnew ~/.notes/index.md<CR>"},
