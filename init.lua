@@ -52,35 +52,6 @@ local function fmt(fn, args)
     end
 end
 
-local last_async_cmd = nil
-
-local function clear_term_buffers() -- also will kill the window
-    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-        if vim.api.nvim_buf_get_option(buf, 'buftype') == 'terminal' then
-            vim.api.nvim_buf_delete(buf, {force = true})
-        end
-    end
-end
-
-local function async_cmd(cmd)
-    last_async_cmd = cmd
-    clear_term_buffers()
-
-    vim.cmd('botright new | resize 15')
-    local buf = vim.api.nvim_get_current_buf()
-    vim.cmd("enew")
-    
-    local chan = vim.fn.termopen(cmd, {
-        on_exit = function(_, code)
-            local status = code == 0 and "[complete]" or "[failed (" .. code .. ")]" 
-            vim.notify(status .. " " .. cmd)
-        end
-    })
-    
-    vim.api.nvim_buf_set_keymap(buf, 'n', 'q', ':bd!<CR>', { noremap = true, silent = true })
-    vim.notify("[started] " .. cmd)
-end
-
 local base = vim.api.nvim_create_augroup('Base', { clear = true })
 local vol = vim.opt_local
 
@@ -131,16 +102,6 @@ vim.api.nvim_create_autocmd("QuickFixCmdPost", { -- open quickfix if there are r
     group = base, pattern = { "[^l]*" }, command = "cwindow"
 })
 
-local function async_interactive()
-    if last_async_cmd then
-        async_cmd(last_async_cmd)
-        return
-    end
-    vim.ui.input({prompt = "$ "}, function(input)
-        if input then async_cmd(input) end
-    end)
-end
-
 local keymaps = {
     {"n", "<C-h>", "<C-w><C-h>"}, {"n", "<C-j>", "<C-w><C-j>"},
     {"n", "<C-k>", "<C-w><C-k>"}, {"n", "<C-l>", "<C-w><C-l>"},
@@ -148,12 +109,6 @@ local keymaps = {
     {"i", "<C-l>", " => "},       {"i", "<C-u>", " -> "},
     {"i", "<C-c>", "<Esc>"},      {"n", "S", "<C-^>"},
     {"n", "gE", ":Explore<CR>"},  {"n", "gs", ":Grep "},
-    {"n", "<C-t>", async_interactive, { desc = 'Make with input' }},
-    {"t", "q", ":bd!<CR>"},
-    {"n", "gT", function()
-        last_async_cmd = nil
-        async_interactive()
-    end},
     {"n", "gn", ":tabnew ~/.notes/index.md<CR>"},
     {"n", "gi", ":tabnew ~/.config/nvim/init.lua<CR>"},
     {"n", "gp", ":call feedkeys(':tabnew<space>~/src/<tab>', 't')<CR>"},
