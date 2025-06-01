@@ -44,6 +44,15 @@ done | sort -k2,2nr | awk -v total="$total_lines" '{
 }'
 echo '+--------------+------------+------------+------------+'
 
+# Longer than 80 we want to know about, more than 3000 it's probably
+# minified/generated.
+long_files=$(git ls-files | xargs wc -L --total=never | awk '$1 > 80 && $1 < 3000' | sort -rn | head -10)
+if [[ -n "$long_files" ]]; then
+    echo
+    echo 'Files with long line lengths:'
+    echo "$long_files"
+fi
+
 echo 'General'
 echo $total_lines
 
