@@ -56,31 +56,39 @@ last_cmd = nil
 
 local function async_cmd(cmd)
     last_cmd = cmd
-    vim.fn.setqflist({}, 'a', {title = cmd}) -- clear the quickfix list
-    local cmd_table = vim.split(cmd, "%s+")
-    vim.notify("[started] " .. cmd)
-    vim.fn.jobstart(cmd_table, {
-        stdout_buffered = true,
-        stderr_buffered = true,
+    local buf, terminal_win = nil, nil
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+        if vim.bo[vim.api.nvim_win_get_buf(win)].buftype == 'terminal' then
+            terminal_win = win
+            break
+        end
+    end
+    
+    if terminal_win then
+        vim.api.nvim_set_current_win(terminal_win)
+        local old_buf = vim.api.nvim_get_current_buf()
+        vim.cmd('enew')
+        vim.api.nvim_buf_delete(old_buf, {force = true})
+        buf = vim.api.nvim_get_current_buf()
+    else
+        vim.cmd('botright new')
+        vim.cmd('resize 15')
+        buf = vim.api.nvim_get_current_buf()
+    end
+    
+    local chan = vim.fn.termopen(cmd, {
         on_exit = function(_, code)
             if code == 0 then
-                vim.notify("[complete]" .. cmd)
+                vim.notify("[complete] " .. cmd)
             else
-                vim.notify("[failed]" .. cmd .. " (" .. code .. ")")
+                vim.notify("[failed] " .. cmd .. " (" .. code .. ")", vim.log.levels.ERROR)
             end
-            vim.cmd("copen")
-        end,
-        on_stdout = function(_, data)
-            if data then
-                vim.fn.setqflist({}, 'a', {lines = data})
-            end
-        end,
-        on_stderr = function(_, data)
-            if data then
-                vim.fn.setqflist({}, 'a', {lines = data})
-            end
-        end,
+        end
     })
+    
+    vim.api.nvim_buf_set_keymap(buf, 'n', 'q', ':bd!<CR>', { noremap = true, silent = true })
+    vim.api.nvim_buf_set_name(buf, "cmd: " .. cmd)
+    vim.notify("[started] " .. cmd)
 end
 
 local base = vim.api.nvim_create_augroup('Base', { clear = true })
@@ -151,6 +159,7 @@ local keymaps = {
     {"i", "<C-c>", "<Esc>"},      {"n", "S", "<C-^>"},
     {"n", "gE", ":Explore<CR>"},  {"n", "gs", ":Grep "},
     {"n", "<C-t>", async_interactive, { desc = 'Make with input' }},
+    {"t", "q", ":bd!<CR>"},
     {"n", "gT", function()
         last_cmd = nil
         async_interactive()
