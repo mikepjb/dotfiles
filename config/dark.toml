@@ -7,7 +7,7 @@ foreground = "#e4e4e4"  # Light gray foreground for readability
 # Monochrome approach with subtle grays
 black = "#262626"       # Dark gray instead of pure black
 red = "#d70000"         # Subtle red for errors
-green = "#5f8700"       # Muted green
+green = "#7ccf00"       # Muted green
 yellow = "#af8700"      # Understated yellow/amber
 blue = "#0087af"        # Calm blue
 magenta = "#af5faf"     # Soft magenta
