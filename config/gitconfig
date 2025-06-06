@@ -28,6 +28,8 @@
 	defaultBranch = main
 [pull]
 	rebase = true
+[push]
+	autoSetupRemote = true
 
 # Use alternative email for work projects
 [includeIf "hasconfig:remote.*.url:git@github.com:loveholidays/*"]
